@@ -13,8 +13,6 @@ spec:
     targetRevision: 6.21.0
     helm:
       values: |
-        fullnameOverride: platform-loki
-
         deploymentMode: SingleBinary
 
         loki:
@@ -29,15 +27,27 @@ spec:
           persistence:
             enabled: true
             size: 10Gi
-            
+
         read:
           replicas: 0
+          persistence:
+            enabled: false
         write:
           replicas: 0
+          persistence:
+            enabled: false
         backend:
           replicas: 0
+          persistence:
+            enabled: false
 
         gateway:
+          enabled: false
+
+        loki-canary:
+          enabled: false
+          
+        test:
           enabled: false
   destination:
     server: https://kubernetes.default.svc

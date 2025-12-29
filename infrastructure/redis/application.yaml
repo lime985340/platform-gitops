@@ -15,6 +15,11 @@ spec:
       values: |
         architecture: standalone
 
+        image:
+          registry: docker.io
+          repository: bitnamilegacy/redis
+          tag: 7.4.2-debian-12-r6
+
         auth:
           enabled: false
 

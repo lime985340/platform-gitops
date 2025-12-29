@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: applications
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: https://gitlab.com/lime985340/gitops.git
+        revision: main
+        directories:
+          # apps/<product>/<service>/overlays/<env>
+          - path: apps/*/*/overlays/*
+  template:
+    metadata:
+      name: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'
+    spec:
+      project: applications
+      source:
+        repoURL: https://gitlab.com/lime985340/gitops.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+      {{- if eq (index .path.segments 4) "dev" }}
+      annotations:
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
+        {{- if and (eq (index .path.segments 1) "game-platform") (eq (index .path.segments 2) "gameplatform-api") }}
+        argocd-image-updater.argoproj.io/image-list: gameplatform-api=registry.gitlab.com/lime985340/gameplatform-app/gameplatform-api:~dev
+        argocd-image-updater.argoproj.io/gameplatform-api.update-strategy: latest
+        {{- end }}
+        {{- if and (eq (index .path.segments 1) "mimir") (eq (index .path.segments 2) "mimir-api") }}
+        argocd-image-updater.argoproj.io/image-list: mimir-api=registry.gitlab.com/lime985340/mimir-app/mimir-api:~dev
+        argocd-image-updater.argoproj.io/mimir-api.update-strategy: latest
+        {{- end }}
+      {{- end }}

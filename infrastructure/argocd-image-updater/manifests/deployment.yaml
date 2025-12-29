@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-image-updater
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argocd-image-updater
+  template:
+    metadata:
+      labels:
+        app: argocd-image-updater
+    spec:
+      serviceAccountName: argocd-image-updater
+      containers:
+        - name: argocd-image-updater
+          image: quay.io/argoprojlabs/argocd-image-updater:v0.15.2
+          env:
+            - name: ARGOCD_SERVER
+              value: "argocd-server.argocd.svc.cluster.local"
+            - name: ARGOCD_INSECURE
+              value: "true"
+            - name: GIT_WRITEBACK_ENABLED
+              value: "true"
+            - name: GIT_WRITEBACK_MODE
+              value: "git"
+            - name: GIT_WRITEBACK_SECRET
+              value: "argocd-image-updater-git"

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimir-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mimir-api
+  template:
+    metadata:
+      labels:
+        app: mimir-api
+    spec:
+      containers:
+        - name: mimir-api
+          image: registry.gitlab.com/lime985340/mimir-app/mimir-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: mimir-db-secret

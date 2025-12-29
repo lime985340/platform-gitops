@@ -17,8 +17,19 @@ spec:
 
         loki:
           auth_enabled: false
+          schemaConfig:
+            configs:
+              - from: "2025-01-01" 
+                store: tsdb
+                object_store: filesystem
+                schema: v13
+                index:
+                  prefix: index_
+                  period: 24h
+          
           commonConfig:
             replication_factor: 1
+          
           storage:
             type: filesystem
 
@@ -30,25 +41,25 @@ spec:
 
         read:
           replicas: 0
-          persistence:
-            enabled: false
         write:
           replicas: 0
-          persistence:
-            enabled: false
         backend:
           replicas: 0
-          persistence:
-            enabled: false
 
         gateway:
           enabled: false
-
         loki-canary:
           enabled: false
-          
         test:
           enabled: false
+
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

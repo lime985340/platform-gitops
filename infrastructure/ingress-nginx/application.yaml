@@ -23,8 +23,8 @@ spec:
               cpu: "300m"
               memory: "256Mi"
           service:
-            type: LoadBalancer
-            externalTrafficPolicy: Local
+            type: NodePort
+            externalTrafficPolicy: Cluster
         defaultBackend:
           enabled: false
   destination:

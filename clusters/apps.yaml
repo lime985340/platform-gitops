@@ -34,7 +34,9 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-      {{- if eq (index .path.segments 4) "dev" }}
+  templatePatch: |
+    {{- if eq (index .path.segments 4) "dev" }}
+    metadata:
       annotations:
         argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
         {{- if and (eq (index .path.segments 1) "game-platform") (eq (index .path.segments 2) "gameplatform-api") }}
@@ -45,4 +47,4 @@ spec:
         argocd-image-updater.argoproj.io/image-list: mimir-api=registry.gitlab.com/lime985340/mimir-app/mimir-api:~dev
         argocd-image-updater.argoproj.io/mimir-api.update-strategy: latest
         {{- end }}
-      {{- end }}
+    {{- end }}

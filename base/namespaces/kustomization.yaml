@@ -8,3 +8,4 @@ resources:
   - monitoring.yaml
   - redis.yaml
   - shared-secrets.yaml
+  - metallb-system.yaml

@@ -11,6 +11,7 @@ resources:
   - ../../infrastructure/prometheus
   - ../../infrastructure/loki
   - ../../infrastructure/promtail
+  - ../../infrastructure/metallb
 
   # Shared Resources
   - ../../infrastructure/redis

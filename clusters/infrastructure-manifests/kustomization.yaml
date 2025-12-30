@@ -12,6 +12,7 @@ resources:
   - ../../infrastructure/loki
   - ../../infrastructure/promtail
   - ../../infrastructure/metallb
+  - ../../infrastructure/metallb-config
 
   # Shared Resources
   - ../../infrastructure/redis

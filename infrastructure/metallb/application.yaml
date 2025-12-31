@@ -7,6 +7,17 @@ metadata:
     argocd.argoproj.io/sync-wave: "4"
 spec:
   project: infrastructure
+
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions:
+        - '.webhooks[]?.clientConfig.caBundle'
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jqPathExpressions:
+        - '.webhooks[]?.clientConfig.caBundle'
+
   source:
     chart: metallb
     repoURL: https://metallb.github.io/metallb
@@ -18,3 +29,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true

@@ -16,11 +16,20 @@ spec:
       containers:
         - name: argocd-image-updater
           image: quay.io/argoprojlabs/argocd-image-updater:v0.15.2
+          args:
+            - run
           env:
             - name: ARGOCD_SERVER
               value: "argocd-server.argocd.svc.cluster.local"
             - name: ARGOCD_INSECURE
               value: "true"
+            - name: APPLICATIONS_API
+              value: "argocd"
+            - name: ARGOCD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: argocd-image-updater-secret
+                  key: argocd.token
             - name: GIT_WRITEBACK_ENABLED
               value: "true"
             - name: GIT_WRITEBACK_MODE

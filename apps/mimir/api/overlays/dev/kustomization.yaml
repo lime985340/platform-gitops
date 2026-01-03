@@ -5,6 +5,9 @@ resources:
   - namespace.yaml
   - externalsecret-db.yaml
   - ../../base
+images:
+  - name: registry.gitlab.com/lime985340/mimir-app/mimir-api
+    newTag: dev-0000000
 patches:
   - target:
       kind: Ingress

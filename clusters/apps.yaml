@@ -27,7 +27,7 @@ spec:
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'
+        namespace: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'
       syncPolicy:
         automated:
           prune: true
@@ -35,16 +35,38 @@ spec:
         syncOptions:
           - CreateNamespace=true
   templatePatch: |
-    {{- if eq (index .path.segments 4) "dev" }}
+    {{- $product := index .path.segments 1 -}}
+    {{- $service := index .path.segments 2 -}}
+    {{- $env := index .path.segments 4 -}}
+
+    {{- if and (eq $product "gameplatform") (eq $service "api") }}
     metadata:
       annotations:
         argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
-        {{- if and (eq (index .path.segments 1) "game-platform") (eq (index .path.segments 2) "gameplatform-api") }}
-        argocd-image-updater.argoproj.io/image-list: gameplatform-api=registry.gitlab.com/lime985340/gameplatform-app/gameplatform-api:~dev
-        argocd-image-updater.argoproj.io/gameplatform-api.update-strategy: latest
+        argocd-image-updater.argoproj.io/write-back-target: kustomization
+        argocd-image-updater.argoproj.io/image-list: gameplatform-api=registry.gitlab.com/lime985340/gameplatform-app/gameplatform-api
+        argocd-image-updater.argoproj.io/gameplatform-api.kustomize.image-name: registry.gitlab.com/lime985340/gameplatform-app/gameplatform-api
+        {{- if eq $env "dev" }}
+        argocd-image-updater.argoproj.io/gameplatform-api.update-strategy: newest-build
+        argocd-image-updater.argoproj.io/gameplatform-api.allow-tags: regexp:^dev-[0-9a-f]{7,}$
+        {{- else if eq $env "prod" }}
+        argocd-image-updater.argoproj.io/gameplatform-api.update-strategy: semver
+        argocd-image-updater.argoproj.io/gameplatform-api.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
         {{- end }}
-        {{- if and (eq (index .path.segments 1) "mimir") (eq (index .path.segments 2) "mimir-api") }}
-        argocd-image-updater.argoproj.io/image-list: mimir-api=registry.gitlab.com/lime985340/mimir-app/mimir-api:~dev
-        argocd-image-updater.argoproj.io/mimir-api.update-strategy: latest
+    {{- end }}
+
+    {{- if and (eq $product "mimir") (eq $service "api") }}
+    metadata:
+      annotations:
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
+        argocd-image-updater.argoproj.io/write-back-target: kustomization
+        argocd-image-updater.argoproj.io/image-list: mimir-api=registry.gitlab.com/lime985340/mimir-app/mimir-api
+        argocd-image-updater.argoproj.io/mimir-api.kustomize.image-name: registry.gitlab.com/lime985340/mimir-app/mimir-api
+        {{- if eq $env "dev" }}
+        argocd-image-updater.argoproj.io/mimir-api.update-strategy: newest-build
+        argocd-image-updater.argoproj.io/mimir-api.allow-tags: regexp:^dev-[0-9a-f]{7,}$
+        {{- else if eq $env "prod" }}
+        argocd-image-updater.argoproj.io/mimir-api.update-strategy: semver
+        argocd-image-updater.argoproj.io/mimir-api.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
         {{- end }}
     {{- end }}

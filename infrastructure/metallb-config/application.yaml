@@ -8,7 +8,7 @@ metadata:
 spec:
   project: infrastructure
   source:
-    repoURL: https://github.com/siri2677/portone-llm-gitops
+    repoURL: https://gitlab.com/lime985340/gitops.git
     targetRevision: main
     path: infrastructure/metallb-config/manifests
     directory:

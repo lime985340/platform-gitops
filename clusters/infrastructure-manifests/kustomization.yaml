@@ -21,6 +21,7 @@ resources:
   - ../../infrastructure/redis
   - ../../infrastructure/external-secrets
   - ../../infrastructure/external-secrets-config
+  - ../../infrastructure/argocd-ghcr-oci-creds
 
   # Base Configurations
   - ../../base/namespaces

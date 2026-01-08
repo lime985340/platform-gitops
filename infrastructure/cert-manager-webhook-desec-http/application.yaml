@@ -10,10 +10,9 @@ metadata:
 spec:
   project: default
   source:
-    # Helm OCI chart (DNS-01 webhook for deSEC)
-    repoURL: oci://ghcr.io/irreleph4nt/charts
-    chart: cert-manager-webhook-desec-http
+    repoURL: oci://ghcr.io/irreleph4nt/charts/cert-manager-webhook-desec-http
     targetRevision: "1.0.1"
+    path: .
     helm:
       values: |
         groupName: acme.lime.dedyn.io
@@ -33,7 +32,6 @@ spec:
           type: ClusterIP
           port: 443
         
-        # ExternalSecret이 생성하는 Secret 이름
         secretName:
           - desec-api-token
         

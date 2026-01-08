@@ -4,13 +4,15 @@ metadata:
   name: platform-metallb-config
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   project: infrastructure
   source:
-    repoURL: https://gitlab.com/lime985340/gitops.git
+    repoURL: https://github.com/siri2677/portone-llm-gitops
     targetRevision: main
     path: infrastructure/metallb-config/manifests
+    directory:
+      recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: metallb-system
@@ -18,11 +20,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    retry:
-      limit: 20
-      backoff:
-        duration: 10s
-        factor: 2
-        maxDuration: 5m
     syncOptions:
-      - SkipDryRunOnMissingResource=true
+      - CreateNamespace=true

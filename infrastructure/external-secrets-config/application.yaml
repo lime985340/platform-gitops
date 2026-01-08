@@ -1,10 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: external-secrets-config
+  name: platform-external-secrets-config
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   project: infrastructure
   source:
@@ -13,8 +15,10 @@ spec:
     path: infrastructure/external-secrets-config/manifests
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: external-secrets
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

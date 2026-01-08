@@ -1,21 +1,35 @@
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: main-static-ips
+  name: public-pool
   namespace: metallb-system
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   addresses:
-  - 192.168.226.100-192.168.226.110
+    - 192.168.45.246-192.168.45.246
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: private-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.45.251-192.168.45.251
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
-  name: l2-adv
+  name: public-adv
   namespace: metallb-system
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   ipAddressPools:
-  - main-static-ips
+    - public-pool
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: private-adv
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - private-pool

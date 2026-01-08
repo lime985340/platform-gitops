@@ -7,3 +7,4 @@ metadata:
   labels:
     managed-by: gitops
     tier: infrastructure
+    secrets.lime.io/enabled: "true"

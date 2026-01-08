@@ -15,10 +15,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: lime-game.duckdns.org
+        value: game.lime.dedyn.io
       - op: replace
         path: /spec/tls/0/hosts/0
-        value: lime-game.duckdns.org
+        value: game.lime.dedyn.io
       - op: replace
         path: /spec/tls/0/secretName
         value: game-prod-tls

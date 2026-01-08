@@ -17,16 +17,16 @@ spec:
 
         ingress:
           enabled: true
-          ingressClassName: nginx
+          ingressClassName: nginx-private
           annotations:
-            cert-manager.io/cluster-issuer: letsencrypt-prod
+            cert-manager.io/cluster-issuer: letsencrypt-staging
             nginx.ingress.kubernetes.io/ssl-redirect: "true"
           hosts:
-            - grafana-lime.kro.kr
+            - grafana.lime.dedyn.io
           tls:
             - secretName: grafana-lime-tls
               hosts:
-                - grafana-lime.kro.kr
+                - grafana.lime.dedyn.io
 
         persistence:
           enabled: false

@@ -2,8 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   # Core Infrastructure (Helm Charts)
-  - ../../infrastructure/ingress-nginx
+  - ../../infrastructure/ingress-nginx-public
+  - ../../infrastructure/ingress-nginx-private
+  - ../../infrastructure/argocd-ingress
   - ../../infrastructure/cert-manager
+  - ../../infrastructure/cert-manager-config
   - ../../infrastructure/argocd-image-updater
 
   # Monitoring Stack (Helm Charts)
@@ -21,3 +24,5 @@ resources:
 
   # Base Configurations
   - ../../base/namespaces
+  - ../../base/shared-secrets-access
+  - ../../infrastructure/cert-manager-webhook-desec-http

@@ -15,10 +15,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: lime-mimir.duckdns.org
+        value: mimir.lime.dedyn.io
       - op: replace
         path: /spec/tls/0/hosts/0
-        value: lime-mimir.duckdns.org
+        value: mimir.lime.dedyn.io
       - op: replace
         path: /spec/tls/0/secretName
         value: mimir-prod-tls

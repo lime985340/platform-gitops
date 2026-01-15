@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openbao-unsealer
+  namespace: argocd
+  annotations:
+    # Must be installed first. You will init+unseal this cluster once, then it provides Transit for the main OpenBao.
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://openbao.github.io/openbao-helm
+    chart: openbao
+    targetRevision: 0.4.0
+    helm:
+      releaseName: openbao-unsealer
+      values: |
+        # Unsealer OpenBao: small standalone instance (file storage).
+        # You init+unseal this *once* and keep it running.
+        server:
+          standalone:
+            enabled: true
+            config: |
+              ui = true
+              listener "tcp" {
+                tls_disable = 1
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+              }
+              storage "file" {
+                path = "/openbao/data"
+              }
+
+          service:
+            enabled: true
+
+          dataStorage:
+            enabled: true
+            size: 5Gi
+            storageClass: null
+            accessMode: ReadWriteOnce
+
+        ui:
+          enabled: true
+
+        injector:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openbao
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

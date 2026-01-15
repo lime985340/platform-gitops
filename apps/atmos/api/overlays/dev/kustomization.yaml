@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: atmos-api-dev
+resources:
+  - namespace.yaml
+  - externalsecret-db.yaml
+  - ../../base
+images:
+  - name: registry.gitlab.com/lime985340/atmos-api/atmos-api
+    newTag: dev-0000000
+patches:
+  - target:
+      kind: Ingress
+      name: atmos-api
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: atmos-dev.lime.dedyn.io
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: atmos-dev.lime.dedyn.io
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: atmos-dev-tls
+
+  - target:
+      kind: Deployment
+      name: atmos-api
+    patch: |-
+      - op: add
+        path: /spec/template/metadata/annotations
+        value:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "8000"
+          prometheus.io/path: "/metrics"

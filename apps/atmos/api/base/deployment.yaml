@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atmos-api
+  namespace: atmos-api-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atmos-api
+  template:
+    metadata:
+      labels:
+        app: atmos-api
+    spec:
+      containers:
+        - name: atmos-api
+          image: registry.gitlab.com/lime985340/atmos-api/atmos-api
+          ports:
+            - containerPort: 8000
+          env:
+            - name: SPRING_CONFIG_IMPORT
+              value: "optional:configtree:/etc/secrets/"
+          volumeMounts:
+            - name: app-secrets
+              mountPath: /etc/secrets
+              readOnly: true
+      volumes:
+        - name: app-secrets
+          secret:
+            secretName: atmos-api-secret
+            items:
+              - key: SPRING_DATASOURCE_URL
+                path: spring/datasource/url
+              - key: SPRING_DATASOURCE_USERNAME
+                path: spring/datasource/username
+              - key: SPRING_DATASOURCE_PASSWORD
+                path: spring/datasource/password
+              - key: JWT_ACCESS_SECRET
+                path: jwt/access/secret
+              - key: JWT_REFRESH_SECRET
+                path: jwt/refresh/secret
+              - key: EXTERNAL_PARTNER_APIKEY
+                path: external/partner/api-key

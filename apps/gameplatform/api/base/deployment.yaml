@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: gameplatform-api
-          image: registry.gitlab.com/lime985340/gameplatform-app/gameplatform-api:latest
+          image: registry.gitlab.com/lime985340/gameplatform-app/gameplatform-api
           ports:
             - containerPort: 8000
           envFrom:

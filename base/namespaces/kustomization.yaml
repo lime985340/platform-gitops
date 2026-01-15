@@ -5,7 +5,7 @@ resources:
   - ingress-nginx.yaml
   - cert-manager.yaml
   - external-secrets.yaml
+  - openbao.yaml
   - monitoring.yaml
   - redis.yaml
-  - shared-secrets.yaml
   - metallb-system.yaml

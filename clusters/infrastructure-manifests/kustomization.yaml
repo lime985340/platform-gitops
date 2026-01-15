@@ -20,10 +20,11 @@ resources:
   # Shared Resources
   - ../../infrastructure/redis
   - ../../infrastructure/external-secrets
+  - ../../infrastructure/openbao-unsealer
+  - ../../infrastructure/openbao
   - ../../infrastructure/external-secrets-config
   - ../../infrastructure/argocd-ghcr-oci-creds
 
   # Base Configurations
   - ../../base/namespaces
-  - ../../base/shared-secrets-access
   - ../../infrastructure/cert-manager-webhook-desec-http

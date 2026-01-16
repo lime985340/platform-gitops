@@ -30,7 +30,7 @@ spec:
           # Longhorn 기반(노드 비종속) PV 사용
           dataStorage:
             enabled: true
-            size: 10Gi
+            size: 5Gi
             storageClass: longhorn-2
             accessMode: ReadWriteOnce
           ha:

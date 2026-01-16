@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-longhorn
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: infrastructure
+  source:
+    chart: longhorn
+    repoURL: https://charts.longhorn.io
+    targetRevision: v1.10.1
+    helm:
+      values: |
+        # GitOps/ArgoCD 환경에서 업그레이드 체크 Job이 불필요하게 방해되는 경우가 있어 끕니다.
+        preUpgradeChecker:
+          jobEnabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -37,7 +37,7 @@ spec:
           dataStorage:
             enabled: true
             size: 5Gi
-            storageClass: null
+            storageClass: longhorn-2
             accessMode: ReadWriteOnce
 
         ui:

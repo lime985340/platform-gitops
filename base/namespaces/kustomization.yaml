@@ -9,3 +9,4 @@ resources:
   - monitoring.yaml
   - redis.yaml
   - metallb-system.yaml
+  - longhorn-system.yaml

@@ -17,8 +17,6 @@ spec:
     targetRevision: 0.4.0
     helm:
       values: |
-        # "실무 감성" 기본값: HA + Raft(integrated storage)
-        # (노드 수가 1개면 파드가 한 노드에 몰릴 수 있어요)
         server:
           # Transit auto-unseal token is injected via a Kubernetes Secret created *once* out-of-band.
           # Key: VAULT_TOKEN (scoped to transit/encrypt + transit/decrypt only)
@@ -27,8 +25,17 @@ spec:
               secretName: openbao-transit-token
               secretKey: VAULT_TOKEN
 
+
+
+          # Longhorn 기반(노드 비종속) PV 사용
+          dataStorage:
+            enabled: true
+            size: 10Gi
+            storageClass: longhorn-2
+            accessMode: ReadWriteOnce
           ha:
             enabled: true
+            replicas: 2
             raft:
               enabled: true
             # OpenBao helm chart auto-generates the storage stanza for raft.

@@ -17,6 +17,10 @@ resources:
   - ../../infrastructure/metallb
   - ../../infrastructure/metallb-config
 
+  # Storage (Longhorn)
+  - ../../infrastructure/longhorn
+  - ../../infrastructure/longhorn-config
+
   # Shared Resources
   - ../../infrastructure/redis
   - ../../infrastructure/external-secrets

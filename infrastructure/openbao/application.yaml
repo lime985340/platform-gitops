@@ -13,15 +13,17 @@ spec:
     targetRevision: 0.4.0
     helm:
       values: |
+        global:
+          enabled: true
+
         server:
-          # Transit 토큰은 K8s Secret에서 env로 주입
           extraSecretEnvironmentVars:
             - envName: VAULT_TOKEN
               secretName: openbao-transit-token
               secretKey: VAULT_TOKEN
 
-          extraArgs:
-            - "-config=/vault/config/extraconfig-from-values.hcl"
+          extraEnvironmentVars:
+            VAULT_SEAL_TYPE: "transit"
 
           dataStorage:
             enabled: true
@@ -34,31 +36,36 @@ spec:
             replicas: 2
             raft:
               enabled: true
-              # (있으면 권장) 노드ID 고정
               setNodeId: true
 
-              config: |
-                ui = true
-                listener "tcp" {
-                  tls_disable = 1
-                  address = "[::]:8200"
-                  cluster_address = "[::]:8201"
-                }
+            config: |
+              ui = true
 
-                seal "transit" {
-                  address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
-                  key_name = "autounseal"
-                  mount_path = "transit/"
-                  disable_renewal = "false"
-                }
+              listener "tcp" {
+                tls_disable = 1
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+              }
+
+              service_registration "kubernetes" {}
+
+              seal "transit" {
+                address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
+                key_name = "autounseal"
+                mount_path = "transit/"
+                disable_renewal = "false"
+              }
 
         ui:
           enabled: true
+
         injector:
           enabled: false
+
   destination:
     server: https://kubernetes.default.svc
     namespace: openbao
+
   syncPolicy:
     automated:
       prune: true

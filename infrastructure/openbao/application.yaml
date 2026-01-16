@@ -14,11 +14,14 @@ spec:
     helm:
       values: |
         server:
-          # Transit token injected via Kubernetes Secret (out-of-band)
+          # Transit 토큰은 K8s Secret에서 env로 주입
           extraSecretEnvironmentVars:
             - envName: VAULT_TOKEN
               secretName: openbao-transit-token
               secretKey: VAULT_TOKEN
+
+          extraArgs:
+            - "-config=/vault/config"
 
           dataStorage:
             enabled: true
@@ -29,44 +32,33 @@ spec:
           ha:
             enabled: true
             replicas: 2
-
             raft:
               enabled: true
+              # (있으면 권장) 노드ID 고정
+              setNodeId: true
 
-            # Main server config (HCL)
-            config: |
-              ui = true
+              config: |
+                ui = true
+                listener "tcp" {
+                  tls_disable = 1
+                  address = "[::]:8200"
+                  cluster_address = "[::]:8201"
+                }
 
-              listener "tcp" {
-                tls_disable = 1
-                address = "[::]:8200"
-                cluster_address = "[::]:8201"
-              }
-
-              # Raft join stabilization (IMPORTANT when replicas=2 from day-0)
-              # Use headless service + pod DNS
-              retry_join {
-                leader_api_addr = "http://openbao-0.openbao-internal.openbao.svc.cluster.local:8200"
-              }
-
-              # Transit auto-unseal
-              seal "transit" {
-                address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
-                key_name = "autounseal"
-                mount_path = "transit/"
-                disable_renewal = "false"
-              }
+                seal "transit" {
+                  address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
+                  key_name = "autounseal"
+                  mount_path = "transit/"
+                  disable_renewal = "false"
+                }
 
         ui:
           enabled: true
-
         injector:
           enabled: false
-
   destination:
     server: https://kubernetes.default.svc
     namespace: openbao
-
   syncPolicy:
     automated:
       prune: true

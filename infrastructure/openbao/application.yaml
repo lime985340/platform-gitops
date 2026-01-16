@@ -4,7 +4,6 @@ metadata:
   name: openbao
   namespace: argocd
   annotations:
-    # Main OpenBao (KV v2) - Transit auto-unseal
     argocd.argoproj.io/sync-wave: "2"
 spec:
   project: infrastructure
@@ -15,50 +14,48 @@ spec:
     helm:
       values: |
         server:
-          # Transit auto-unseal token is injected via a Kubernetes Secret created once.
-          # Secret: openbao/openbao-transit-token
-          # Key: VAULT_TOKEN
+          # Transit token injected via Kubernetes Secret (out-of-band)
           extraSecretEnvironmentVars:
             - envName: VAULT_TOKEN
               secretName: openbao-transit-token
               secretKey: VAULT_TOKEN
 
-          # Longhorn PV
           dataStorage:
             enabled: true
             size: 5Gi
             storageClass: longhorn-2
             accessMode: ReadWriteOnce
 
-          # HA + Raft
           ha:
             enabled: true
             replicas: 2
+
             raft:
               enabled: true
-              setNodeId: true
-              config: |
-                ui = true
 
-                listener "tcp" {
-                  tls_disable = 1
-                  address = "[::]:8200"
-                  cluster_address = "[::]:8201"
-                }
+            # Main server config (HCL)
+            config: |
+              ui = true
 
-                storage "raft" {
-                  path = "/openbao/data"
-                }
+              listener "tcp" {
+                tls_disable = 1
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+              }
 
-                service_registration "kubernetes" {}
+              # Raft join stabilization (IMPORTANT when replicas=2 from day-0)
+              # Use headless service + pod DNS
+              retry_join {
+                leader_api_addr = "http://openbao-0.openbao-internal.openbao.svc.cluster.local:8200"
+              }
 
-                # Transit auto-unseal (token comes from VAULT_TOKEN env)
-                seal "transit" {
-                  address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
-                  key_name = "autounseal"
-                  mount_path = "transit/"
-                  disable_renewal = "false"
-                }
+              # Transit auto-unseal
+              seal "transit" {
+                address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
+                key_name = "autounseal"
+                mount_path = "transit/"
+                disable_renewal = "false"
+              }
 
         ui:
           enabled: true

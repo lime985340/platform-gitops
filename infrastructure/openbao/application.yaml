@@ -21,7 +21,7 @@ spec:
               secretKey: VAULT_TOKEN
 
           extraArgs:
-            - "-config=/vault/config"
+            - "-config=/vault/config/extraconfig-from-values.hcl"
 
           dataStorage:
             enabled: true

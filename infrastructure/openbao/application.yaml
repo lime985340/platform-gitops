@@ -5,64 +5,71 @@ metadata:
   namespace: argocd
   annotations:
     # Main OpenBao (KV v2) - Transit auto-unseal
-    # Install before external-secrets-config so ClusterSecretStore can reach the server early.
-    # NOTE: requires the unsealer cluster + the transit token Secret to exist.
     argocd.argoproj.io/sync-wave: "2"
 spec:
   project: infrastructure
   source:
     repoURL: https://openbao.github.io/openbao-helm
     chart: openbao
-    # Pinned chart version for repeatable installs.
     targetRevision: 0.4.0
     helm:
       values: |
         server:
-          # Transit auto-unseal token is injected via a Kubernetes Secret created *once* out-of-band.
-          # Key: VAULT_TOKEN (scoped to transit/encrypt + transit/decrypt only)
+          # Transit auto-unseal token is injected via a Kubernetes Secret created once.
+          # Secret: openbao/openbao-transit-token
+          # Key: VAULT_TOKEN
           extraSecretEnvironmentVars:
             - envName: VAULT_TOKEN
               secretName: openbao-transit-token
               secretKey: VAULT_TOKEN
 
-
-
-          # Longhorn 기반(노드 비종속) PV 사용
+          # Longhorn PV
           dataStorage:
             enabled: true
             size: 5Gi
             storageClass: longhorn-2
             accessMode: ReadWriteOnce
+
+          # HA + Raft
           ha:
             enabled: true
             replicas: 2
             raft:
               enabled: true
-            # OpenBao helm chart auto-generates the storage stanza for raft.
-            # We only add the seal + listener bits here.
-            config: |
-              ui = true
-              listener "tcp" {
-                tls_disable = 1
-                address = "[::]:8200"
-                cluster_address = "[::]:8201"
-              }
+              setNodeId: true
+              config: |
+                ui = true
 
-              # Transit auto-unseal (free KMS-like experience)
-              # Token is provided via VAULT_TOKEN env var.
-              seal "transit" {
-                address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
-                key_name = "autounseal"
-                mount_path = "transit/"
-                disable_renewal = "false"
-              }
+                listener "tcp" {
+                  tls_disable = 1
+                  address = "[::]:8200"
+                  cluster_address = "[::]:8201"
+                }
+
+                storage "raft" {
+                  path = "/openbao/data"
+                }
+
+                service_registration "kubernetes" {}
+
+                # Transit auto-unseal (token comes from VAULT_TOKEN env)
+                seal "transit" {
+                  address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
+                  key_name = "autounseal"
+                  mount_path = "transit/"
+                  disable_renewal = "false"
+                }
+
         ui:
           enabled: true
+
         injector:
           enabled: false
+
   destination:
     server: https://kubernetes.default.svc
     namespace: openbao
+
   syncPolicy:
     automated:
       prune: true

@@ -17,13 +17,15 @@ spec:
           enabled: true
 
         server:
+          # Pin the OpenBao server image explicitly (matches chart 0.4.0 appVersion).
+          image:
+            repository: openbao
+            tag: v2.0.0-alpha20240329
+
           extraSecretEnvironmentVars:
             - envName: VAULT_TOKEN
               secretName: openbao-transit-token
               secretKey: VAULT_TOKEN
-
-          extraEnvironmentVars:
-            VAULT_SEAL_TYPE: "transit"
 
           dataStorage:
             enabled: true
@@ -38,23 +40,38 @@ spec:
               enabled: true
               setNodeId: true
 
-            config: |
-              ui = true
+              # IMPORTANT: In HA+raft mode, the chart uses server.ha.raft.config (NOT server.ha.config).
+              config: |
+                ui = true
 
-              listener "tcp" {
-                tls_disable = 1
-                address = "[::]:8200"
-                cluster_address = "[::]:8201"
-              }
+                listener "tcp" {
+                  tls_disable = 1
+                  address = "[::]:8200"
+                  cluster_address = "[::]:8201"
+                }
 
-              service_registration "kubernetes" {}
+                storage "raft" {
+                  path = "/openbao/data"
 
-              seal "transit" {
-                address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
-                key_name = "autounseal"
-                mount_path = "transit/"
-                disable_renewal = "false"
-              }
+                  # With 2 replicas, both pods must know how to re-join the same raft cluster.
+                  retry_join {
+                    leader_api_addr = "http://openbao-0.openbao-internal:8200"
+                  }
+                  retry_join {
+                    leader_api_addr = "http://openbao-1.openbao-internal:8200"
+                  }
+                }
+
+                service_registration "kubernetes" {}
+
+                # Transit auto-unseal (KMS-like)
+                # Token is injected via VAULT_TOKEN env var from K8s Secret openbao-transit-token.
+                seal "transit" {
+                  address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
+                  key_name = "autounseal"
+                  mount_path = "transit/"
+                  disable_renewal = "false"
+                }
 
         ui:
           enabled: true

@@ -18,6 +18,10 @@ spec:
         # Unsealer OpenBao: small standalone instance (file storage).
         # You init+unseal this *once* and keep it running.
         server:
+          image:
+            repository: openbao
+            tag: v2.0.0-alpha20240329
+
           standalone:
             enabled: true
             config: |

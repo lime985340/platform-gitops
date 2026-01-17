@@ -17,11 +17,6 @@ spec:
           enabled: true
 
         server:
-          # Pin the OpenBao server image explicitly (matches chart 0.4.0 appVersion).
-          image:
-            repository: openbao
-            tag: v2.0.0-alpha20240329
-
           extraSecretEnvironmentVars:
             - envName: VAULT_TOKEN
               secretName: openbao-transit-token

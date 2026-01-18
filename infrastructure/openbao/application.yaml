@@ -63,7 +63,6 @@ spec:
                 # Token is injected via VAULT_TOKEN env var from K8s Secret openbao-transit-token.
                 seal "transit" {
                   address = "http://openbao-unsealer.openbao.svc.cluster.local:8200"
-                  token = "${VAULT_TOKEN}"
                   key_name = "autounseal"
                   mount_path = "transit/"
                   disable_renewal = "false"

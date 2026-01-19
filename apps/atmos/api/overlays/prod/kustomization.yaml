@@ -6,7 +6,7 @@ resources:
   - externalsecret-gitlab-regcred.yaml
   - ../../base
 images:
-  - name: registry.gitlab.com/lime985340/atmos-api/atmos-api
+  - name: registry.gitlab.com/lime985340/atmos-api
     newTag: v0.0.0
 patches:
   - target:

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: atmos-api
-          image: registry.gitlab.com/lime985340/atmos-api/atmos-api
+          image: registry.gitlab.com/lime985340/atmos-api
           ports:
             - containerPort: 8000
           env:

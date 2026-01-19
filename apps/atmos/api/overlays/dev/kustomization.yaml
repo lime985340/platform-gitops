@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: atmos-api-dev
 resources:
   - externalsecret-db.yaml
+  - externalsecret-gitlab-regcred.yaml
   - ../../base
 images:
   - name: registry.gitlab.com/lime985340/atmos-api/atmos-api
@@ -32,3 +33,12 @@ patches:
           prometheus.io/scrape: "true"
           prometheus.io/port: "8000"
           prometheus.io/path: "/metrics"
+          
+  - target:
+      kind: Deployment
+      name: atmos-api
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value:
+          - name: gitlab-regcred

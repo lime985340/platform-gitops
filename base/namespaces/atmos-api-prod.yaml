@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: atmos-api-prod
+  annotations:
+    argocd.argoproj.io/sync-wave: "-30"
+  labels:
+    managed-by: gitops
+    tier: application
+    env: prod
+    service: atmos-api
+    secrets.lime.io/enabled: "true"

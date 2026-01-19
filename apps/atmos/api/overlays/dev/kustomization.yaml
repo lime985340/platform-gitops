@@ -7,7 +7,7 @@ resources:
   - ../../base
 images:
   - name: registry.gitlab.com/lime985340/atmos-api/atmos-api
-    newTag: dev-0000000
+    newTag: dev-3d2ca73
 patches:
   - target:
       kind: Ingress
@@ -33,7 +33,7 @@ patches:
           prometheus.io/scrape: "true"
           prometheus.io/port: "8000"
           prometheus.io/path: "/metrics"
-          
+
   - target:
       kind: Deployment
       name: atmos-api

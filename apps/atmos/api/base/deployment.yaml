@@ -28,7 +28,7 @@ spec:
       volumes:
         - name: app-secrets
           secret:
-            secretName: atmos-api-secret
+            secretName: atmos-db-secret
             items:
               - key: SPRING_DATASOURCE_URL
                 path: spring/datasource/url

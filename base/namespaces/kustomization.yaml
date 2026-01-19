@@ -1,15 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - infra/argocd.yaml
-  - infra/ingress-nginx.yaml
-  - infra/cert-manager.yaml
-  - infra/external-secrets.yaml
-  - infra/openbao.yaml
-  - infra/monitoring.yaml
-  - infra/redis.yaml
-  - infra/metallb-system.yaml
-  - infra/longhorn-system.yaml
+  - infrastructure/argocd.yaml
+  - infrastructure/ingress-nginx.yaml
+  - infrastructure/cert-manager.yaml
+  - infrastructure/external-secrets.yaml
+  - infrastructure/openbao.yaml
+  - infrastructure/monitoring.yaml
+  - infrastructure/redis.yaml
+  - infrastructure/metallb-system.yaml
+  - infrastructure/longhorn-system.yaml
 
   - apps/atmos-api-dev.yaml
   - apps/atmos-api-prod.yaml

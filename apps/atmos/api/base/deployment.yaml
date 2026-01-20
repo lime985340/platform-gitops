@@ -37,8 +37,8 @@ spec:
               - key: SPRING_DATASOURCE_PASSWORD
                 path: spring/datasource/password
               - key: JWT_ACCESS_SECRET
-                path: jwt/access/secret
+                path: app/jwt/access-secret
               - key: JWT_REFRESH_SECRET
-                path: jwt/refresh/secret
+                path: app/jwt/refresh-secret
               - key: EXTERNAL_PARTNER_APIKEY
                 path: external/partner/api-key

@@ -1,3 +1,4 @@
+---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -13,13 +14,12 @@ spec:
     solvers:
       - dns01:
           webhook:
-            groupName: acme.lime.dedyn.io
-            solverName: desec-http
+            groupName: de.su541.acme
+            solverName: desec
             config:
-              apiUrl: https://desec.io/api/v1
-              domainName: lime.dedyn.io
-              secretName: desec-api-token
-              secretKeyName: desec-token
+              apiKeySecretRef:
+                key: token
+                name: desec-api-token
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -36,10 +36,9 @@ spec:
     solvers:
       - dns01:
           webhook:
-            groupName: acme.lime.dedyn.io
-            solverName: desec-http
+            groupName: de.su541.acme
+            solverName: desec
             config:
-              apiUrl: https://desec.io/api/v1
-              domainName: lime.dedyn.io
-              secretName: desec-api-token
-              secretKeyName: desec-token
+              apiKeySecretRef:
+                key: token
+                name: desec-api-token

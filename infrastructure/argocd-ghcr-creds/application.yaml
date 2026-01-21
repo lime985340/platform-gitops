@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: platform-argocd-ghcr-oci-creds
+  name: platform-argocd-ghcr-creds
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "5"
@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://gitlab.com/lime985340/gitops.git
     targetRevision: main
-    path: infrastructure/argocd-ghcr-oci-creds/manifests
+    path: infrastructure/argocd-ghcr-creds/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -21,4 +21,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=false

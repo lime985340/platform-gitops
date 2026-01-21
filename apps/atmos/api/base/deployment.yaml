@@ -17,7 +17,7 @@ spec:
         - name: atmos-api
           image: registry.gitlab.com/lime985340/atmos-api
           ports:
-            - containerPort: 8000
+            - containerPort: 8080
           env:
             - name: SPRING_CONFIG_IMPORT
               value: "optional:configtree:/etc/secrets/"

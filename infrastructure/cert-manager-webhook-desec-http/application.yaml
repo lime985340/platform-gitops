@@ -10,9 +10,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://ghcr.io/irreleph4nt/charts/cert-manager-webhook-desec-http
+    chart: cert-manager-webhook-desec-http
+    repoURL: oci://ghcr.io/irreleph4nt/charts
     targetRevision: "1.0.1"
-    path: .
     helm:
       values: |
         groupName: acme.lime.dedyn.io
@@ -20,11 +20,6 @@ spec:
         certManager:
           serviceAccountName: cert-manager
           namespace: cert-manager
-        
-        image:
-          repository: ghcr.io/irreleph4nt/cert-manager-webhook-desec-http
-          tag: "v1.0.1"
-          pullPolicy: IfNotPresent
         
         replicaCount: 1
         
@@ -62,4 +57,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=false

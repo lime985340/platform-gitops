@@ -13,11 +13,9 @@ spec:
     repoURL: https://gitlab.com/lime985340/gitops.git
     targetRevision: main
     path: infrastructure/cert-manager-webhook-desec/manifests
-  
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
-  
   syncPolicy:
     automated:
       prune: true

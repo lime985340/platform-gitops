@@ -34,7 +34,7 @@ patches:
         path: /spec/template/metadata/annotations
         value:
           prometheus.io/scrape: "true"
-          prometheus.io/port: "8000"
+          prometheus.io/port: "8080"
           prometheus.io/path: "/metrics"
 
   - target:

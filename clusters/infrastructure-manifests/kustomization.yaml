@@ -27,8 +27,8 @@ resources:
   - ../../infrastructure/openbao-unsealer
   - ../../infrastructure/openbao
   - ../../infrastructure/external-secrets-config
-  - ../../infrastructure/argocd-ghcr-oci-creds
+  - ../../infrastructure/argocd-ghcr-creds
 
   # Base Configurations
   - ../../base/namespaces
-  - ../../infrastructure/cert-manager-webhook-desec-http
+  - ../../infrastructure/cert-manager-webhook-desec

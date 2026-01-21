@@ -4,6 +4,7 @@ kind: ServiceAccount
 metadata:
   name: desec-webhook
   namespace: cert-manager
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -18,6 +19,7 @@ rules:
     verbs:
       - list
       - watch
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -28,10 +30,10 @@ roleRef:
   kind: ClusterRole
   name: desec-webhook:flowcontrol-solver
 subjects:
-  - apiGroup: ""
-    kind: ServiceAccount
+  - kind: ServiceAccount
     name: desec-webhook
     namespace: cert-manager
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -39,14 +41,10 @@ metadata:
   name: desec-webhook:secret-reader
   namespace: cert-manager
 rules:
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-    verbs:
-      - get
-      - list
-      - watch
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -58,10 +56,21 @@ roleRef:
   kind: Role
   name: desec-webhook:secret-reader
 subjects:
-  - apiGroup: ""
-    kind: ServiceAccount
+  - kind: ServiceAccount
     name: desec-webhook
     namespace: cert-manager
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: desec-webhook:extension-apiserver-authentication-reader
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["extension-apiserver-authentication"]
+    verbs: ["get"]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -71,11 +80,12 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: extension-apiserver-authentication-reader
+  name: desec-webhook:extension-apiserver-authentication-reader
 subjects:
   - kind: ServiceAccount
     name: desec-webhook
     namespace: cert-manager
+
 ---
 apiVersion: v1
 kind: Service
@@ -91,6 +101,7 @@ spec:
       name: https
   selector:
     app: desec-webhook
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -158,6 +169,7 @@ spec:
         - name: certs
           secret:
             secretName: desec-webhook-certs
+
 ---
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -166,6 +178,7 @@ metadata:
   namespace: cert-manager
 spec:
   selfSigned: {}
+
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -174,13 +187,14 @@ metadata:
   namespace: cert-manager
 spec:
   secretName: desec-webhook-certs
-  duration: 43800h # 5년
+  duration: 43800h
   issuerRef:
     name: desec-webhook-selfsign
   dnsNames:
     - desec-webhook
     - desec-webhook.cert-manager
     - desec-webhook.cert-manager.svc
+
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService

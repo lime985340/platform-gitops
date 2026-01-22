@@ -30,5 +30,6 @@ resources:
   - ../../infrastructure/argocd-ghcr-creds
 
   # Base Configurations
-  - ../../base/namespaces
+  - ../../base
   - ../../infrastructure/cert-manager-webhook-desec
+  - ../../infrastructure/node-iptables-fix

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: node-iptables-fix
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://gitlab.com/lime985340/gitops.git
+    targetRevision: main
+    path: infrastructure/node-iptables-fix/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

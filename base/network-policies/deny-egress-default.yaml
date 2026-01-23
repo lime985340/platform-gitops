@@ -1,0 +1,12 @@
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: gnp-deny-egress-default
+spec:
+  order: 1000
+  selector: all()
+  namespaceSelector: 'kubernetes.io/metadata.name != "kube-system"'
+  types:
+    - Egress
+  egress:
+    - action: Deny

@@ -1,0 +1,17 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: gnp-allow-node-subnet-egress
+spec:
+  order: 120
+  selector: all()
+  namespaceSelector: 'kubernetes.io/metadata.name != "kube-system"'
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 192.168.226.0/24   # <- 네 노드 대역으로 교체
+        ports: [6443, 10250]

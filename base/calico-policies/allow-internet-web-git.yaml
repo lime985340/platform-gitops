@@ -3,7 +3,7 @@ kind: GlobalNetworkPolicy
 metadata:
   name: gnp-allow-internet-web-git-egress
 spec:
-  order: 120
+  order: 130
   selector: all()
   namespaceSelector: 'kubernetes.io/metadata.name != "kube-system"'
   types:

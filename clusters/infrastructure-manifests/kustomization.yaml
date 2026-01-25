@@ -32,4 +32,3 @@ resources:
   # Base Configurations
   - ../../base
   - ../../infrastructure/cert-manager-webhook-desec
-  - ../../infrastructure/node-iptables-fix

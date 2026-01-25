@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - allow-dns-egress.yaml
   - allow-cluster-cidrs.yaml
+  - allow-node-subnet-egress.yaml
   - allow-internet-web-git.yaml
   - deny-egress-default.yaml

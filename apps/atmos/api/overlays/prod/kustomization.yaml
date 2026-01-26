@@ -4,7 +4,6 @@ namespace: atmos-api-prod
 resources:
   - externalsecret-db.yaml
   - externalsecret-gitlab-regcred.yaml
-  - allow-atmos-api-prod-egress.yaml
   - ../../base
 images:
   - name: registry.gitlab.com/lime985340/atmos-api

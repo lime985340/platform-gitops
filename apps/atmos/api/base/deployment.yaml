@@ -21,6 +21,11 @@ spec:
           env:
             - name: SPRING_CONFIG_IMPORT
               value: "optional:configtree:/etc/secrets/"
+
+            # IPv4 우선(IPv6 우선 시도로 인한 NoRouteToHost 방지)
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
+
           volumeMounts:
             - name: app-secrets
               mountPath: /etc/secrets

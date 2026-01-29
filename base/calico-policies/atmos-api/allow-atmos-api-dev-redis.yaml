@@ -14,4 +14,4 @@ spec:
       destination:
         namespaceSelector: 'kubernetes.io/metadata.name == "platform-redis"'
         selector: app.kubernetes.io/instance == "platform-redis"
-      ports: [6379]
+        ports: [6379]

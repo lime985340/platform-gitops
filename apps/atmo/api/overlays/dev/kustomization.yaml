@@ -9,6 +9,15 @@ resources:
   - externalsecret-gitlab-regcred.yaml
   - ../common
   - ../../base
+patches:
+  - path: ../common/patch-deployment-metrics.yaml
+    target:
+      kind: Deployment
+      name: atmo-api
+  - path: ../common/patch-deployment-imagepullsecret.yaml
+    target:
+      kind: Deployment
+      name: atmo-api
 images:
   - name: registry.gitlab.com/lime985340/atmo-api
     newTag: dev-3d2ca73

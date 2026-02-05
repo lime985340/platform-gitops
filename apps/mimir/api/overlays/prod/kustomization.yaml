@@ -3,32 +3,15 @@ kind: Kustomization
 namespace: mimir-api-prod
 resources:
   - externalsecret-db.yaml
+  - ../common
   - ../../base
 images:
   - name: registry.gitlab.com/lime985340/mimir-app/mimir-api
     newTag: v0.0.0
-patches:
-  - target:
-      kind: Ingress
-      name: mimir-api
-    patch: |-
-      - op: replace
-        path: /spec/rules/0/host
-        value: mimir.lime.dedyn.io
-      - op: replace
-        path: /spec/tls/0/hosts/0
-        value: mimir.lime.dedyn.io
-      - op: replace
-        path: /spec/tls/0/secretName
-        value: mimir-prod-tls
-
-  - target:
-      kind: Deployment
-      name: mimir-api
-    patch: |-
-      - op: add
-        path: /spec/template/metadata/annotations
-        value:
-          prometheus.io/scrape: "true"
-          prometheus.io/port: "8000"
-          prometheus.io/path: "/metrics"
+configMapGenerator:
+  - name: ingress-env
+    literals:
+      - host=mimir.lime.dedyn.io
+      - tlsSecret=mimir-prod-tls
+generatorOptions:
+  disableNameSuffixHash: true

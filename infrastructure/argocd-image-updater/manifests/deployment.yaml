@@ -18,6 +18,9 @@ spec:
           image: quay.io/argoprojlabs/argocd-image-updater:v0.15.2
           args:
             - run
+          volumeMounts:
+            - name: image-updater-config
+              mountPath: /app/config
           env:
             - name: ARGOCD_SERVER
               value: "argocd-server.argocd.svc.cluster.local"
@@ -36,3 +39,7 @@ spec:
               value: "git"
             - name: GIT_WRITEBACK_SECRET
               value: "argocd-image-updater-git"
+      volumes:
+        - name: image-updater-config
+          configMap:
+            name: argocd-image-updater-config

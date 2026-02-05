@@ -9,35 +9,3 @@ patches:
     target:
       kind: Deployment
       name: atmo-api
-replacements:
-  - source:
-      kind: ConfigMap
-      name: ingress-env
-      fieldPath: data.ingressClass
-    targets:
-      - select:
-          kind: Ingress
-          name: atmo-api
-        fieldPaths:
-          - spec.ingressClassName
-  - source:
-      kind: ConfigMap
-      name: ingress-env
-      fieldPath: data.host
-    targets:
-      - select:
-          kind: Ingress
-          name: atmo-api
-        fieldPaths:
-          - spec.rules.0.host
-          - spec.tls.0.hosts.0
-  - source:
-      kind: ConfigMap
-      name: ingress-env
-      fieldPath: data.tlsSecret
-    targets:
-      - select:
-          kind: Ingress
-          name: atmo-api
-        fieldPaths:
-          - spec.tls.0.secretName

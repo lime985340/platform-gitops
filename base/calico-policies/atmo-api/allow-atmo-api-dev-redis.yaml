@@ -1,0 +1,17 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: gnp-allow-atmo-api-dev-redis-egress
+spec:
+  order: 89
+  selector: app == "atmo-api"
+  namespaceSelector: 'kubernetes.io/metadata.name == "atmo-api-dev"'
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "platform-redis"'
+        selector: app.kubernetes.io/instance == "platform-redis"
+        ports: [6379]

@@ -6,7 +6,7 @@ resources:
   - ../common
   - ../../base
 patches:
-  - path: ../common/patch-deployment-imagepullsecret.yaml
+  - path: patch-deployment-imagepullsecret.yaml
     target:
       kind: Deployment
       name: atmo-web

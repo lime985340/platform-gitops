@@ -5,6 +5,11 @@ resources:
   - externalsecret-gitlab-regcred.yaml
   - ../common
   - ../../base
+patches:
+  - path: ../common/patch-deployment-imagepullsecret.yaml
+    target:
+      kind: Deployment
+      name: atmo-web
 images:
   - name: registry.gitlab.com/lime985340/atmo-web
     newTag: v0.0.1

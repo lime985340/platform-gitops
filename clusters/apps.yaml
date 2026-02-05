@@ -71,18 +71,34 @@ spec:
     #     {{- end }}
     # {{- end }}
 
-    {{- if and (eq $product "atmos") (eq $service "api") }}
+    {{- if and (eq $product "atmo") (eq $service "api") }}
     metadata:
       annotations:
         argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
         argocd-image-updater.argoproj.io/write-back-target: kustomization
-        argocd-image-updater.argoproj.io/image-list: atmos-api=registry.gitlab.com/lime985340/atmos-api
-        argocd-image-updater.argoproj.io/atmos-api.kustomize.image-name: registry.gitlab.com/lime985340/atmos-api
+        argocd-image-updater.argoproj.io/image-list: atmo-api=registry.gitlab.com/lime985340/atmo-api
+        argocd-image-updater.argoproj.io/atmo-api.kustomize.image-name: registry.gitlab.com/lime985340/atmo-api
         {{- if eq $env "dev" }}
-        argocd-image-updater.argoproj.io/atmos-api.update-strategy: newest-build
-        argocd-image-updater.argoproj.io/atmos-api.allow-tags: regexp:^dev-[0-9a-f]{7,}$
-        # {{- else if eq $env "prod" }}
-        # argocd-image-updater.argoproj.io/atmos-api.update-strategy: semver
-        # argocd-image-updater.argoproj.io/atmos-api.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+        argocd-image-updater.argoproj.io/atmo-api.update-strategy: newest-build
+        argocd-image-updater.argoproj.io/atmo-api.allow-tags: regexp:^dev-[0-9a-f]{7,}$
+        {{- else if eq $env "prod" }}
+        argocd-image-updater.argoproj.io/atmo-api.update-strategy: semver
+        argocd-image-updater.argoproj.io/atmo-api.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+        {{- end }}
+    {{- end }}
+
+    {{- if and (eq $product "atmo") (eq $service "web") }}
+    metadata:
+      annotations:
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
+        argocd-image-updater.argoproj.io/write-back-target: kustomization
+        argocd-image-updater.argoproj.io/image-list: atmo-web=registry.gitlab.com/lime985340/atmo-web
+        argocd-image-updater.argoproj.io/atmo-web.kustomize.image-name: registry.gitlab.com/lime985340/atmo-web
+        {{- if eq $env "dev" }}
+        argocd-image-updater.argoproj.io/atmo-web.update-strategy: newest-build
+        argocd-image-updater.argoproj.io/atmo-web.allow-tags: regexp:^dev-[0-9a-f]{7,}$
+        {{- else if eq $env "prod" }}
+        argocd-image-updater.argoproj.io/atmo-web.update-strategy: semver
+        argocd-image-updater.argoproj.io/atmo-web.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
         {{- end }}
     {{- end }}

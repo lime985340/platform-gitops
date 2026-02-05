@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: atmo-api-dev
+resources:
+  - externalsecret-db.yaml
+  - externalsecret-jwt.yaml
+  - externalsecret-oauth.yaml
+  - externalsecret-publicdata.yaml
+  - externalsecret-gitlab-regcred.yaml
+  - ../common
+  - ../../base
+images:
+  - name: registry.gitlab.com/lime985340/atmo-api
+    newTag: dev-3d2ca73
+configMapGenerator:
+  - name: ingress-env
+    literals:
+      - ingressClass=nginx-private
+      - host=atmo-dev.lime.dedyn.io
+      - tlsSecret=atmo-dev-tls
+generatorOptions:
+  disableNameSuffixHash: true

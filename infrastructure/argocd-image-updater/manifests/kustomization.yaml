@@ -6,3 +6,5 @@ resources:
   - deployment.yaml
   - externalsecret-git.yaml
   - externalsecret-argocd-token.yaml
+  - externalsecret-registry.yaml
+  - configmap.yaml

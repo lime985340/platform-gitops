@@ -7,7 +7,7 @@ resources:
   - ../../base
 images:
   - name: registry.gitlab.com/lime985340/atmo-web
-    newTag: dev-e88146d
+    newTag: v0.0.1
 configMapGenerator:
   - name: ingress-env
     literals:

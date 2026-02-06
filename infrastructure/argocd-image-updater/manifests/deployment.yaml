@@ -18,6 +18,7 @@ spec:
           image: quay.io/argoprojlabs/argocd-image-updater:v0.15.2
           args:
             - run
+            - --loglevel=debug
           volumeMounts:
             - name: image-updater-config
               mountPath: /app/config

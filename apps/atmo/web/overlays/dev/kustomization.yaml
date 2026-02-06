@@ -12,7 +12,7 @@ patches:
       name: atmo-web
 images:
   - name: registry.gitlab.com/lime985340/atmo-web
-    newTag: dev-e88146d
+    newTag: dev-3975611
 configMapGenerator:
   - name: ingress-env
     literals:

@@ -5,7 +5,6 @@ metadata:
 spec:
   order: 90
   selector: app == "atmo-api"
-  namespaceSelector: 'kubernetes.io/metadata.name == "atmo-api-dev"'
   types:
     - Egress
   egress:

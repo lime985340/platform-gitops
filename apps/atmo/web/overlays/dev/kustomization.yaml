@@ -4,54 +4,55 @@ namespace: atmo-web-dev
 commonLabels:
   app.kubernetes.io/instance: atmo-web-dev
 resources:
-  - externalsecret-gitlab-regcred.yaml
-  - ../common
-  - ../../base
+- externalsecret-gitlab-regcred.yaml
+- ../common
+- ../../base
 patches:
-  - path: patch-deployment-imagepullsecret.yaml
-    target:
-      kind: Deployment
-      name: atmo-web
+- path: patch-deployment-imagepullsecret.yaml
+  target:
+    kind: Deployment
+    name: atmo-web
 images:
-  - name: registry.gitlab.com/lime985340/atmo-web
-    newTag: dev-3975611
+- name: registry.gitlab.com/lime985340/atmo-web
+  newTag: dev-0ab2b17
+  newName: registry.gitlab.com/lime985340/atmo-web
 configMapGenerator:
-  - name: ingress-env
-    literals:
-      - ingressClass=nginx-private
-      - host=atmo-dev.lime.dedyn.io
-      - tlsSecret=atmo-dev-tls
+- name: ingress-env
+  literals:
+  - ingressClass=nginx-private
+  - host=atmo-dev.lime.dedyn.io
+  - tlsSecret=atmo-dev-tls
 replacements:
-  - source:
-      kind: ConfigMap
-      name: ingress-env
-      fieldPath: data.ingressClass
-    targets:
-      - select:
-          kind: Ingress
-          name: atmo-web
-        fieldPaths:
-          - spec.ingressClassName
-  - source:
-      kind: ConfigMap
-      name: ingress-env
-      fieldPath: data.host
-    targets:
-      - select:
-          kind: Ingress
-          name: atmo-web
-        fieldPaths:
-          - spec.rules.0.host
-          - spec.tls.0.hosts.0
-  - source:
-      kind: ConfigMap
-      name: ingress-env
-      fieldPath: data.tlsSecret
-    targets:
-      - select:
-          kind: Ingress
-          name: atmo-web
-        fieldPaths:
-          - spec.tls.0.secretName
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.ingressClass
+  targets:
+  - select:
+      kind: Ingress
+      name: atmo-web
+    fieldPaths:
+    - spec.ingressClassName
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.host
+  targets:
+  - select:
+      kind: Ingress
+      name: atmo-web
+    fieldPaths:
+    - spec.rules.0.host
+    - spec.tls.0.hosts.0
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.tlsSecret
+  targets:
+  - select:
+      kind: Ingress
+      name: atmo-web
+    fieldPaths:
+    - spec.tls.0.secretName
 generatorOptions:
   disableNameSuffixHash: true

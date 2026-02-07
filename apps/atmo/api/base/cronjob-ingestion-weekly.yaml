@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: atmo-ingestion-weekly
 spec:
-  schedule: "10 3 * * 1"
+  schedule: "10 0 * * 1"
   timeZone: "Asia/Seoul"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 7200

@@ -9,4 +9,4 @@ data:
       - name: gitlab
         api_url: https://registry.gitlab.com
         prefix: registry.gitlab.com
-        credentials: secret:argocd/argocd-image-updater-regcred
+        credentials: pullsecret:argocd/argocd-image-updater-regcred

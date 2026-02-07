@@ -75,6 +75,14 @@ spec:
                       path: app/oauth/providers/kakao/client-secret
                     - key: KAKAO_REDIRECT_URI
                       path: app/oauth/providers/kakao/redirect-uri
+                    - key: KAKAO_AUTH_URI
+                      path: app/oauth/providers/kakao/auth-uri
+                    - key: KAKAO_TOKEN_URI
+                      path: app/oauth/providers/kakao/token-uri
+                    - key: KAKAO_USERINFO_URI
+                      path: app/oauth/providers/kakao/userinfo-uri
+                    - key: KAKAO_SCOPE
+                      path: app/oauth/providers/kakao/scope
 
                     - key: GOOGLE_CLIENT_ID
                       path: app/oauth/providers/google/client-id
@@ -82,6 +90,14 @@ spec:
                       path: app/oauth/providers/google/client-secret
                     - key: GOOGLE_REDIRECT_URI
                       path: app/oauth/providers/google/redirect-uri
+                    - key: GOOGLE_AUTH_URI
+                      path: app/oauth/providers/google/auth-uri
+                    - key: GOOGLE_TOKEN_URI
+                      path: app/oauth/providers/google/token-uri
+                    - key: GOOGLE_USERINFO_URI
+                      path: app/oauth/providers/google/userinfo-uri
+                    - key: GOOGLE_SCOPE
+                      path: app/oauth/providers/google/scope
 
                     - key: NAVER_CLIENT_ID
                       path: app/oauth/providers/naver/client-id
@@ -89,6 +105,14 @@ spec:
                       path: app/oauth/providers/naver/client-secret
                     - key: NAVER_REDIRECT_URI
                       path: app/oauth/providers/naver/redirect-uri
+                    - key: NAVER_AUTH_URI
+                      path: app/oauth/providers/naver/auth-uri
+                    - key: NAVER_TOKEN_URI
+                      path: app/oauth/providers/naver/token-uri
+                    - key: NAVER_USERINFO_URI
+                      path: app/oauth/providers/naver/userinfo-uri
+                    - key: NAVER_SCOPE
+                      path: app/oauth/providers/naver/scope
 
               # Public Data (공공데이터 서비스키)
               - secret:

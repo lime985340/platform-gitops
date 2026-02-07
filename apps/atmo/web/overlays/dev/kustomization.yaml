@@ -1,6 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: atmo-web-dev
+commonLabels:
+  app.kubernetes.io/instance: atmo-web-dev
 resources:
   - externalsecret-gitlab-regcred.yaml
   - ../common

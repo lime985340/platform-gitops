@@ -16,6 +16,8 @@ spec:
         directories:
           # apps/<product>/<service>/overlays/<env>
           - path: apps/*/*/overlays/*
+          - path: apps/*/*/overlays/common
+            exclude: true
   template:
     metadata:
       name: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'

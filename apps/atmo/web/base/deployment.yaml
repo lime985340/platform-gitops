@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         app: atmo-web
+        app.kubernetes.io/name: atmo-web
+        app.kubernetes.io/component: web
     spec:
       containers:
         - name: atmo-web

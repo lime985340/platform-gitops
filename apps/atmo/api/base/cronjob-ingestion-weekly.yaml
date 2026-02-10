@@ -4,6 +4,8 @@ metadata:
   name: atmo-ingestion-weekly
   labels:
     app: atmo-api
+    app.kubernetes.io/name: atmo-api
+    app.kubernetes.io/component: ingestion
 spec:
   schedule: "10 0 * * 1"
   timeZone: "Asia/Seoul"
@@ -19,6 +21,8 @@ spec:
         metadata:
           labels:
             app: atmo-api
+            app.kubernetes.io/name: atmo-api
+            app.kubernetes.io/component: ingestion
         spec:
           restartPolicy: OnFailure
           imagePullSecrets:

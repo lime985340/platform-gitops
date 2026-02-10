@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         app: atmo-api
+        app.kubernetes.io/name: atmo-api
+        app.kubernetes.io/component: api
     spec:
       containers:
         - name: atmo-api

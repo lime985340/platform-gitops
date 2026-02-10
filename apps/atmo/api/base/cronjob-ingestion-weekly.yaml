@@ -25,6 +25,8 @@ spec:
               env:
                 - name: SPRING_PROFILES_ACTIVE
                   value: ingestion
+                - name: SPRING_FLYWAY_ENABLED
+                  value: "false"
                 - name: INGESTION_JOB
                   value: seed
                 - name: SPRING_CONFIG_IMPORT

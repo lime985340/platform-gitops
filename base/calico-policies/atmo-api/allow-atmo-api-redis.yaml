@@ -4,7 +4,7 @@ metadata:
   name: gnp-allow-atmo-api-redis-egress
 spec:
   order: 89
-  selector: app == "atmo-api"
+  selector: app.kubernetes.io/name == "atmo-api"
   types:
     - Egress
   egress:

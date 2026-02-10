@@ -5,7 +5,7 @@ labels:
 - pairs:
     app.kubernetes.io/instance: atmo-api-prod
     app.kubernetes.io/name: atmo-api
-  includeSelectors: true
+  includeSelectors: false
   includeTemplates: true
 resources:
 - externalsecret-db.yaml

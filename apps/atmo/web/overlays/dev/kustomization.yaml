@@ -5,7 +5,7 @@ labels:
 - pairs:
     app.kubernetes.io/instance: atmo-web-dev
     app.kubernetes.io/name: atmo-web
-  includeSelectors: true
+  includeSelectors: false
   includeTemplates: true
 resources:
 - externalsecret-gitlab-regcred.yaml

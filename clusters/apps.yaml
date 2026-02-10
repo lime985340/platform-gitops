@@ -83,10 +83,10 @@ spec:
         {{- if eq $env "dev" }}
         argocd-image-updater.argoproj.io/atmo-api.update-strategy: newest-build
         argocd-image-updater.argoproj.io/atmo-api.allow-tags: regexp:^dev-[0-9a-f]{7,}$
-        argocd-image-updater.argoproj.io/atmo-api.force-update: "true"
         {{- else if eq $env "prod" }}
         argocd-image-updater.argoproj.io/atmo-api.update-strategy: semver
         argocd-image-updater.argoproj.io/atmo-api.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+        argocd-image-updater.argoproj.io/atmo-api.force-update: "true"
         {{- end }}
     {{- end }}
 
@@ -100,9 +100,9 @@ spec:
         {{- if eq $env "dev" }}
         argocd-image-updater.argoproj.io/atmo-web.update-strategy: newest-build
         argocd-image-updater.argoproj.io/atmo-web.allow-tags: regexp:^dev-[0-9a-f]{7,}$
-        argocd-image-updater.argoproj.io/atmo-web.force-update: "true"
         {{- else if eq $env "prod" }}
         argocd-image-updater.argoproj.io/atmo-web.update-strategy: semver
         argocd-image-updater.argoproj.io/atmo-web.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+        argocd-image-updater.argoproj.io/atmo-web.force-update: "true"
         {{- end }}
     {{- end }}

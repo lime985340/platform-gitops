@@ -4,6 +4,7 @@ namespace: atmo-api-dev
 labels:
 - pairs:
     app.kubernetes.io/instance: atmo-api-dev
+    app.kubernetes.io/name: atmo-api
   includeSelectors: true
   includeTemplates: true
 resources:

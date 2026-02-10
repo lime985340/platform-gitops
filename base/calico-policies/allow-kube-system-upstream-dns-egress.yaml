@@ -1,0 +1,30 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: gnp-allow-kube-system-upstream-dns-egress
+spec:
+  order: 80
+  selector: all()
+  namespaceSelector: 'kubernetes.io/metadata.name == "kube-system"'
+  types:
+    - Egress
+  egress:
+    # Allow kube-system pods (CoreDNS) to reach upstream resolvers.
+    - action: Allow
+      protocol: UDP
+      destination:
+        nets:
+          - 8.8.8.8/32
+          - 8.8.4.4/32
+          - 1.1.1.1/32
+          - 1.0.0.1/32
+        ports: [53]
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 8.8.8.8/32
+          - 8.8.4.4/32
+          - 1.1.1.1/32
+          - 1.0.0.1/32
+        ports: [53]

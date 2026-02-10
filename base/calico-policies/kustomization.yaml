@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - atmo-api/
+  - allow-kube-system-upstream-dns-egress.yaml
   - allow-dns-egress.yaml
   - allow-cluster-cidrs.yaml
   - allow-node-subnet-egress.yaml

@@ -4,7 +4,7 @@ metadata:
   name: gnp-allow-atmo-api-db-egress
 spec:
   order: 90
-  selector: app == "atmo-api"
+  selector: app == "atmo-api" || app.kubernetes.io/instance == "atmo-api-dev" || app.kubernetes.io/instance == "atmo-api-prod"
   types:
     - Egress
   egress:

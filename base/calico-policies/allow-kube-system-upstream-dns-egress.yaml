@@ -4,16 +4,31 @@ metadata:
   name: gnp-allow-kube-system-upstream-dns-egress
 spec:
   order: 80
-  selector: all()
+  selector: k8s-app == "kube-dns"
   namespaceSelector: 'kubernetes.io/metadata.name == "kube-system"'
   types:
     - Egress
   egress:
-    # Allow kube-system pods (CoreDNS) to reach upstream resolvers.
+    # Allow CoreDNS to watch Kubernetes API
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.43.0.1/32
+        ports: [443]
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 192.168.226.131/32
+        ports: [6443]
+
+    # Allow CoreDNS to reach upstream resolvers.
     - action: Allow
       protocol: UDP
       destination:
         nets:
+          - 192.168.226.2/32
           - 8.8.8.8/32
           - 8.8.4.4/32
           - 1.1.1.1/32
@@ -23,6 +38,7 @@ spec:
       protocol: TCP
       destination:
         nets:
+          - 192.168.226.2/32
           - 8.8.8.8/32
           - 8.8.4.4/32
           - 1.1.1.1/32

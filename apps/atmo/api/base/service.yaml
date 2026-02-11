@@ -5,6 +5,7 @@ metadata:
 spec:
   selector:
     app: atmo-api
+    app.kubernetes.io/component: api
   ports:
     - port: 80
       targetPort: 8080

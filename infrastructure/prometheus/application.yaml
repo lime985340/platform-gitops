@@ -21,7 +21,7 @@ spec:
           enabled: false
 
         server:
-          retention: "6h"
+          retention: "3h"
           persistentVolume:
             enabled: true
             size: 4Gi
@@ -29,6 +29,9 @@ spec:
             requests:
               cpu: 100m
               memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
 
         kubeStateMetrics:
           enabled: true

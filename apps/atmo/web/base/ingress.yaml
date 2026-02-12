@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: atmo-web
   namespace: atmo-web-dev
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx-private
   rules:

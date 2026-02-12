@@ -15,3 +15,25 @@ configMapGenerator:
       - tlsSecret=game-prod-tls
 generatorOptions:
   disableNameSuffixHash: true
+replacements:
+  - source:
+      kind: ConfigMap
+      name: ingress-env
+      fieldPath: data.host
+    targets:
+      - select:
+          kind: Ingress
+          name: gameplatform-api
+        fieldPaths:
+          - spec.rules.0.host
+          - spec.tls.0.hosts.0
+  - source:
+      kind: ConfigMap
+      name: ingress-env
+      fieldPath: data.tlsSecret
+    targets:
+      - select:
+          kind: Ingress
+          name: gameplatform-api
+        fieldPaths:
+          - spec.tls.0.secretName

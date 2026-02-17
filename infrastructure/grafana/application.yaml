@@ -29,16 +29,26 @@ spec:
                 - grafana.lime.dedyn.io
 
         persistence:
-          enabled: true
-          size: 5Gi
+          # Keep Grafana lightweight for this small k3s environment.
+          # If you need durable state (users/settings), re-enable and increase size.
+          enabled: false
+          size: 1Gi
 
         resources:
           limits:
-            cpu: 500m
-            memory: 512Mi
-          requests:
-            cpu: 100m
+            cpu: 200m
             memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+
+        # Reduce background work and feature surface for dev/small clusters.
+        env:
+          GF_ANALYTICS_REPORTING_ENABLED: "false"
+          GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+          GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+          GF_UNIFIED_ALERTING_ENABLED: "false"
+          GF_ALERTING_ENABLED: "false"
 
         sidecar:
           dashboards:

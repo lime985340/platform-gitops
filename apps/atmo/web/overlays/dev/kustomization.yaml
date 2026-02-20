@@ -21,7 +21,7 @@ patches:
     name: atmo-web
 images:
 - name: registry.gitlab.com/lime985340/atmo-web
-  newTag: dev-5eb93a9
+  newTag: dev-d22ccdd
   newName: registry.gitlab.com/lime985340/atmo-web
 configMapGenerator:
 - name: ingress-env

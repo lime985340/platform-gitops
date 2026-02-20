@@ -29,7 +29,7 @@ spec:
           service:
             type: LoadBalancer
             externalTrafficPolicy: Local
-            loadBalancerIP: 218.52.183.210
+            loadBalancerIP: 192.168.226.110
             annotations:
               metallb.universe.tf/address-pool: public-pool
             ports:

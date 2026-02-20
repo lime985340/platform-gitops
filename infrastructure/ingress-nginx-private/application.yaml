@@ -28,13 +28,10 @@ spec:
 
           service:
             type: LoadBalancer
-            externalTrafficPolicy: Local
+            externalTrafficPolicy: Cluster
             loadBalancerIP: 192.168.226.100
             annotations:
               metallb.universe.tf/address-pool: private-pool
-            ports:
-              http: 80
-              https: 443
             nodePorts:
               http: 30081
               https: 30444

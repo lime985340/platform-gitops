@@ -29,7 +29,7 @@ patches:
     name: atmo-api
 images:
 - name: registry.gitlab.com/lime985340/atmo-api
-  newTag: v0.2.1
+  newTag: v0.2.2
   newName: registry.gitlab.com/lime985340/atmo-api
 configMapGenerator:
 - name: ingress-env

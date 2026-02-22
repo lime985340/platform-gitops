@@ -12,7 +12,7 @@ resources:
   # Monitoring Stack (Helm Charts)
   - ../../infrastructure/grafana
   - ../../infrastructure/prometheus
-  # - ../../infrastructure/loki  # Disabled for resource optimization
+  - ../../infrastructure/loki
   - ../../infrastructure/promtail
   - ../../infrastructure/metallb
   - ../../infrastructure/metallb-config

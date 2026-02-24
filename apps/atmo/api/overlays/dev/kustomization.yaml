@@ -23,6 +23,10 @@ patches:
   target:
     kind: Deployment
     name: atmo-api
+- path: patch-deployment-rollout-readiness.yaml
+  target:
+    kind: Deployment
+    name: atmo-api
 - path: patch-deployment-imagepullsecret.yaml
   target:
     kind: Deployment

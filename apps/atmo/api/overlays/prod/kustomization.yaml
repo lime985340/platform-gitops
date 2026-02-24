@@ -18,19 +18,6 @@ resources:
 - externalsecret-gitlab-regcred.yaml
 - ../common
 - ../../base
-patches:
-- path: patch-deployment-metrics.yaml
-  target:
-    kind: Deployment
-    name: atmo-api
-- path: patch-deployment-rollout-readiness.yaml
-  target:
-    kind: Deployment
-    name: atmo-api
-- path: patch-deployment-imagepullsecret.yaml
-  target:
-    kind: Deployment
-    name: atmo-api
 images:
 - name: registry.gitlab.com/lime985340/atmo-api
   newTag: v0.2.3

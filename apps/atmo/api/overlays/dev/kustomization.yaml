@@ -11,11 +11,6 @@ labels:
   includeSelectors: false
   includeTemplates: true
 resources:
-- externalsecret-db.yaml
-- externalsecret-jwt.yaml
-- externalsecret-oauth.yaml
-- externalsecret-publicdata.yaml
-- externalsecret-gitlab-regcred.yaml
 - ../common
 images:
 - name: registry.gitlab.com/lime985340/atmo-api
@@ -27,6 +22,10 @@ configMapGenerator:
   - ingressClass=nginx-private
   - host=atmo-dev.lime.dedyn.io
   - tlsSecret=atmo-dev-tls
+  - dbSecretKey=seed-atmo-db-dev
+  - jwtSecretKey=seed-atmo-jwt-dev
+  - oauthSecretKey=seed-atmo-oauth-dev
+  - publicdataSecretKey=seed-atmo-publicdata-dev
 replacements:
 - source:
     kind: ConfigMap
@@ -59,5 +58,45 @@ replacements:
       name: atmo-api
     fieldPaths:
     - spec.tls.0.secretName
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.dbSecretKey
+  targets:
+  - select:
+      kind: ExternalSecret
+      name: atmo-db-secret
+    fieldPaths:
+    - spec.dataFrom.0.extract.key
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.jwtSecretKey
+  targets:
+  - select:
+      kind: ExternalSecret
+      name: atmo-jwt-secret
+    fieldPaths:
+    - spec.dataFrom.0.extract.key
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.oauthSecretKey
+  targets:
+  - select:
+      kind: ExternalSecret
+      name: atmo-oauth-secret
+    fieldPaths:
+    - spec.dataFrom.0.extract.key
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.publicdataSecretKey
+  targets:
+  - select:
+      kind: ExternalSecret
+      name: atmo-publicdata-secret
+    fieldPaths:
+    - spec.dataFrom.0.extract.key
 generatorOptions:
   disableNameSuffixHash: true

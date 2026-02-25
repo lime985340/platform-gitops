@@ -4,6 +4,6 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
-  - cronjob-ingestion-hourly.yaml
-  - cronjob-ingestion-daily.yaml
-  - cronjob-ingestion-weekly.yaml
+  - cronjobs/cronjob-ingestion-hourly.yaml
+  - cronjobs/cronjob-ingestion-daily.yaml
+  - cronjobs/cronjob-ingestion-weekly.yaml

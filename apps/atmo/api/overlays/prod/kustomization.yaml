@@ -17,7 +17,6 @@ resources:
 - externalsecret-publicdata.yaml
 - externalsecret-gitlab-regcred.yaml
 - ../common
-- ../../base
 images:
 - name: registry.gitlab.com/lime985340/atmo-api
   newTag: v0.2.3

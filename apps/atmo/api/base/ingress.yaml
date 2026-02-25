@@ -13,13 +13,9 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "2"
     nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "15"
 spec:
-  ingressClassName: nginx-public
-  tls:
-    - hosts:
-        - "<ATMO_DOMAIN>"
-      secretName: atmo-domain-tls
+  ingressClassName: nginx-private
   rules:
-    - host: "<ATMO_DOMAIN>"
+    - host: atmo-domain
       http:
         paths:
           - path: /api
@@ -29,3 +25,7 @@ spec:
                 name: atmo-api
                 port:
                   number: 80
+  tls:
+  - hosts:
+      - atmo-domain
+    secretName: atmo-domain-tls

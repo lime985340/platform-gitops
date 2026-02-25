@@ -2,13 +2,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: atmo-web
-  namespace: atmo-web-dev
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx-private
   rules:
-    - host: atmo-web.local
+    - host: atmo-domain
       http:
         paths:
           - path: /
@@ -20,5 +19,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - atmo-web.local
-      secretName: atmo-web-dev-tls
+        - atmo-domain
+      secretName: atmo-domain-tls

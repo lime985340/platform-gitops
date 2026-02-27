@@ -14,7 +14,7 @@ resources:
 - ../common
 images:
 - name: registry.gitlab.com/lime985340/atmo-web
-  newTag: v0.1.5
+  newTag: v0.1.6
   newName: registry.gitlab.com/lime985340/atmo-web
 configMapGenerator:
 - name: ingress-env

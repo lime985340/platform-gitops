@@ -9,7 +9,7 @@ spec:
   project: platform
   source:
     repoURL: https://gitlab.com/lime985340/gitops.git
-    targetRevision: main
+    targetRevision: feature/clean-gitops-layout
     path: platform/networking/metallb/resources
     directory:
       recurse: true

@@ -1,0 +1,80 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-grafana
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  project: platform
+  source:
+    chart: grafana
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 9.4.5
+    helm:
+      values: |
+        fullnameOverride: platform-grafana
+
+        ingress:
+          enabled: true
+          ingressClassName: nginx-private
+          annotations:
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+            nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          hosts:
+            - grafana.lime.dedyn.io
+          tls:
+            - secretName: grafana-lime-tls
+              hosts:
+                - grafana.lime.dedyn.io
+
+        persistence:
+          # Keep Grafana lightweight for this small k3s environment.
+          # If you need durable state (users/settings), re-enable and increase size.
+          enabled: false
+          size: 1Gi
+
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+
+        # Reduce background work and feature surface for dev/small clusters.
+        env:
+          GF_ANALYTICS_REPORTING_ENABLED: "false"
+          GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+          GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+          GF_UNIFIED_ALERTING_ENABLED: "false"
+          GF_ALERTING_ENABLED: "false"
+
+        sidecar:
+          dashboards:
+            enabled: true
+            label: grafana_dashboard
+            labelValue: "1"
+            folderAnnotation: grafana_folder
+            searchNamespace: monitoring
+            provider:
+              foldersFromFilesStructure: true
+              disableDelete: true
+              allowUiUpdates: false
+
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: Prometheus
+                type: prometheus
+                access: proxy
+                url: http://platform-prometheus-server.monitoring.svc.cluster.local
+                isDefault: true
+              - name: Loki
+                type: loki
+                access: proxy
+                url: http://platform-loki.monitoring.svc.cluster.local:3100
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring

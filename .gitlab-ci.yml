@@ -1,0 +1,16 @@
+stages:
+  - validate
+
+validate:kustomize:
+  image: bitnami/kubectl:1.31.4
+  stage: validate
+  script:
+    - |
+      set -eu
+      find workloads platform -name kustomization.yaml -exec sh -c '
+        for file do
+          directory="$(dirname "$file")"
+          echo "Rendering $directory"
+          kubectl kustomize "$directory" > /dev/null
+        done
+      ' sh {} +

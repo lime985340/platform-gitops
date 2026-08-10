@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-25'
+spec:
+  description: 'Platform infrastructure components (ingress, cert-manager, monitoring, etc.)'
+  sourceRepos:
+    - https://gitlab.com/lime985340/gitops.git
+    - https://kubernetes.github.io/ingress-nginx
+    - https://charts.jetstack.io
+    - https://argoproj.github.io/argo-helm
+    - https://charts.bitnami.com/bitnami
+    - https://grafana.github.io/helm-charts
+    - https://prometheus-community.github.io/helm-charts
+    - https://charts.external-secrets.io
+    - https://openbao.github.io/openbao-helm
+    - https://metallb.github.io/metallb
+    - https://charts.longhorn.io
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

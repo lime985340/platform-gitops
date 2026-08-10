@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-longhorn
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: platform
+  source:
+    chart: longhorn
+    repoURL: https://charts.longhorn.io
+    targetRevision: v1.10.1
+    helm:
+      values: |
+        # GitOps/ArgoCD 환경에서 업그레이드 체크 Job이 불필요하게 방해되는 경우가 있어 끕니다.
+        preUpgradeChecker:
+          jobEnabled: false
+        
+        # 디스크 정책 설정
+        defaultSettings:
+          storageMinimalAvailablePercentage: 10
+          storageReservedPercentageForDefaultDisk: 10
+          defaultReplicaCount: 2
+          guaranteedEngineManagerCPU: 12
+          guaranteedReplicaManagerCPU: 12
+          
+          # 추가 유용한 설정들
+          orphanAutoDeletion: true
+          # backupTarget: "s3://backup-bucket@region/"  # S3 백업 설정 시
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

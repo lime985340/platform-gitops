@@ -1,0 +1,58 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: atmo-web-prod
+labels:
+- pairs:
+    app.kubernetes.io/instance: atmo-web-prod
+  includeSelectors: true
+  includeTemplates: true
+- pairs:
+    app.kubernetes.io/name: atmo-web
+  includeSelectors: false
+  includeTemplates: true
+resources:
+- ../../common
+images:
+- name: registry.gitlab.com/lime985340/atmo-web
+  newTag: v0.1.7
+  newName: registry.gitlab.com/lime985340/atmo-web
+configMapGenerator:
+- name: ingress-env
+  literals:
+  - ingressClass=nginx-public
+  - host=atmo.lime.dedyn.io
+  - tlsSecret=atmo-prod-tls
+replacements:
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.ingressClass
+  targets:
+  - select:
+      kind: Ingress
+      name: atmo-web
+    fieldPaths:
+    - spec.ingressClassName
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.host
+  targets:
+  - select:
+      kind: Ingress
+      name: atmo-web
+    fieldPaths:
+    - spec.rules.0.host
+    - spec.tls.0.hosts.0
+- source:
+    kind: ConfigMap
+    name: ingress-env
+    fieldPath: data.tlsSecret
+  targets:
+  - select:
+      kind: Ingress
+      name: atmo-web
+    fieldPaths:
+    - spec.tls.0.secretName
+generatorOptions:
+  disableNameSuffixHash: true

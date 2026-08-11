@@ -4,19 +4,16 @@ metadata:
   name: platform
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: '-25'
+    argocd.argoproj.io/sync-wave: '-20'
 spec:
-  description: 'Platform infrastructure components (ingress, cert-manager, monitoring, etc.)'
+  description: 'Platform infrastructure components (ingress, monitoring, etc.)'
   sourceRepos:
     - https://gitlab.com/lime985340/gitops.git
     - https://traefik.github.io/charts
-    - https://charts.jetstack.io
     - https://argoproj.github.io/argo-helm
     - https://charts.bitnami.com/bitnami
-    - registry-1.docker.io/bitnamicharts
     - https://grafana.github.io/helm-charts
     - https://prometheus-community.github.io/helm-charts
-    - https://charts.longhorn.io
   destinations:
     - namespace: '*'
       server: https://kubernetes.default.svc

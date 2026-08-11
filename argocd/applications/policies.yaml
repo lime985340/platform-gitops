@@ -4,13 +4,15 @@ metadata:
   name: cluster-policies
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-30"
+    argocd.argoproj.io/sync-wave: "-10"
 spec:
   project: platform
   source:
     repoURL: https://gitlab.com/lime985340/gitops.git
     targetRevision: feature/clean-gitops-layout
     path: platform/policies
+    directory:
+      recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -19,4 +21,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=false

@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - service.yaml
-  - ingress.yaml
   - cronjobs/cronjob-ingestion-hourly.yaml
   - cronjobs/cronjob-ingestion-daily.yaml
   - cronjobs/cronjob-ingestion-weekly.yaml

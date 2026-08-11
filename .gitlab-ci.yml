@@ -1,8 +1,9 @@
 stages:
   - validate
+  - secrets
 
 validate:kustomize:
-  image: bitnami/kubectl:1.31.4
+  image: alpine/k8s:1.31.4
   stage: validate
   script:
     - |
@@ -14,3 +15,26 @@ validate:kustomize:
           kubectl kustomize "$directory" > /dev/null
         done
       ' sh {} +
+
+.sync-secrets:
+  image: alpine/k8s:1.31.4
+  stage: secrets
+  when: manual
+  allow_failure: true
+  resource_group: cluster-secrets
+  script:
+    - set -eu
+    - test -n "${KUBECONFIG:-}" || (echo "KUBECONFIG must be configured as a GitLab File variable" >&2; exit 1)
+    - test -f "$KUBECONFIG" || (echo "KUBECONFIG does not point to a file" >&2; exit 1)
+    - kubectl cluster-info
+    - sh ci/sync-secrets.sh
+
+sync:platform-secrets:
+  extends: .sync-secrets
+  variables:
+    SECRET_SCOPE: platform
+
+sync:workload-secrets:
+  extends: .sync-secrets
+  variables:
+    SECRET_SCOPE: workloads

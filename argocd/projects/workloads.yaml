@@ -4,7 +4,7 @@ metadata:
   name: workloads
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: '-15'
+    argocd.argoproj.io/sync-wave: '-20'
 spec:
   description: 'Business workloads (all environments: dev, staging, prod)'
   sourceRepos:
@@ -36,5 +36,3 @@ spec:
       kind: CronJob
     - group: networking.k8s.io
       kind: Ingress
-    - group: bitnami.com
-      kind: SealedSecret

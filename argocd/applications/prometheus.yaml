@@ -4,7 +4,7 @@ metadata:
   name: platform-prometheus
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: platform
   source:
@@ -25,6 +25,7 @@ spec:
           persistentVolume:
             enabled: true
             size: 4Gi
+            storageClass: standard
           resources:
             requests:
               cpu: 100m
@@ -40,3 +41,6 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

@@ -12,52 +12,7 @@ labels:
   includeTemplates: true
 resources:
 - ../../common
-- sealedsecret-db.yaml
-- sealedsecret-jwt.yaml
-- sealedsecret-oauth.yaml
-- sealedsecret-publicdata.yaml
-- sealedsecret-gitlab-regcred.yaml
 images:
 - name: registry.gitlab.com/lime985340/atmo-api
   newTag: dev-0dcc950
   newName: registry.gitlab.com/lime985340/atmo-api
-configMapGenerator:
-- name: ingress-env
-  literals:
-  - ingressClass=traefik
-  - host=atmo-dev.lime.dedyn.io
-  - tlsSecret=atmo-dev-tls
-replacements:
-- source:
-    kind: ConfigMap
-    name: ingress-env
-    fieldPath: data.ingressClass
-  targets:
-  - select:
-      kind: Ingress
-      name: atmo-api
-    fieldPaths:
-    - spec.ingressClassName
-- source:
-    kind: ConfigMap
-    name: ingress-env
-    fieldPath: data.host
-  targets:
-  - select:
-      kind: Ingress
-      name: atmo-api
-    fieldPaths:
-    - spec.rules.0.host
-    - spec.tls.0.hosts.0
-- source:
-    kind: ConfigMap
-    name: ingress-env
-    fieldPath: data.tlsSecret
-  targets:
-  - select:
-      kind: Ingress
-      name: atmo-api
-    fieldPaths:
-    - spec.tls.0.secretName
-generatorOptions:
-  disableNameSuffixHash: true

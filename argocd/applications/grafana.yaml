@@ -4,7 +4,7 @@ metadata:
   name: platform-grafana
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "15"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: platform
   source:
@@ -16,16 +16,7 @@ spec:
         fullnameOverride: platform-grafana
 
         ingress:
-          enabled: true
-          ingressClassName: traefik
-          annotations:
-            cert-manager.io/cluster-issuer: letsencrypt-prod
-          hosts:
-            - grafana.lime.dedyn.io
-          tls:
-            - secretName: grafana-lime-tls
-              hosts:
-                - grafana.lime.dedyn.io
+          enabled: false
 
         persistence:
           # Keep Grafana lightweight for this small k3s environment.
@@ -77,3 +68,6 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

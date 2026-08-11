@@ -4,7 +4,7 @@ metadata:
   name: platform-promtail
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: platform
   source:
@@ -24,3 +24,6 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

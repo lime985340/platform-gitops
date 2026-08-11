@@ -2,4 +2,4 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: argocd
 resources:
-  - externalsecret-ghcr-repo-creds.yaml
+  - sealedsecret-ghcr-repo-creds.yaml

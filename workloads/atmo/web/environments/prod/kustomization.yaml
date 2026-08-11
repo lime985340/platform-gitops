@@ -12,6 +12,7 @@ labels:
   includeTemplates: true
 resources:
 - ../../common
+- sealedsecret-gitlab-regcred.yaml
 images:
 - name: registry.gitlab.com/lime985340/atmo-web
   newTag: v0.1.7
@@ -19,7 +20,7 @@ images:
 configMapGenerator:
 - name: ingress-env
   literals:
-  - ingressClass=nginx-public
+  - ingressClass=traefik
   - host=atmo.lime.dedyn.io
   - tlsSecret=atmo-prod-tls
 replacements:

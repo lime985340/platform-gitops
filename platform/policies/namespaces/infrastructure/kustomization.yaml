@@ -3,10 +3,9 @@ kind: Kustomization
 resources:
   - argocd.yaml
   - cert-manager.yaml
-  - external-secrets.yaml
-  - ingress-nginx.yaml
+  - traefik.yaml
   - longhorn-system.yaml
-  - metallb-system.yaml
+  - cloudflared.yaml
   - monitoring.yaml
-  - openbao.yaml
+  - sealed-secrets.yaml
   - platform-redis.yaml

@@ -17,10 +17,9 @@ spec:
 
         ingress:
           enabled: true
-          ingressClassName: nginx-private
+          ingressClassName: traefik
           annotations:
             cert-manager.io/cluster-issuer: letsencrypt-prod
-            nginx.ingress.kubernetes.io/ssl-redirect: "true"
           hosts:
             - grafana.lime.dedyn.io
           tls:

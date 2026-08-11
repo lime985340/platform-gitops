@@ -36,7 +36,5 @@ spec:
       kind: CronJob
     - group: networking.k8s.io
       kind: Ingress
-    - group: external-secrets.io
-      kind: ExternalSecret
-    - group: external-secrets.io
-      kind: SecretStore
+    - group: bitnami.com
+      kind: SealedSecret

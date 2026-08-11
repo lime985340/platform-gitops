@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-traefik
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  project: platform
+  source:
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: 41.2.0
+    helm:
+      releaseName: traefik
+      values: |
+        deployment:
+          replicas: 1
+
+        ingressClass:
+          enabled: true
+          isDefaultClass: true
+          name: traefik
+
+        service:
+          enabled: true
+          spec:
+            type: ClusterIP
+
+        providers:
+          kubernetesIngress:
+            enabled: true
+            publishedService:
+              enabled: false
+          kubernetesCRD:
+            enabled: false
+
+        ingressRoute:
+          dashboard:
+            enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

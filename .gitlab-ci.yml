@@ -15,8 +15,14 @@ validate:manifests:
           kubectl kustomize "$directory" > /dev/null
         done
       ' sh {} +
-    - echo "Validating raw platform manifests"
-    - kubectl apply --dry-run=client --validate=false --filename platform --recursive > /dev/null
+
+validate:platform:
+  image:
+    name: ghcr.io/yannh/kubeconform:v0.7.0-alpine
+    entrypoint: [""]
+  stage: validate
+  script:
+    - /kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.31.0 -summary platform
 
 seal:workload-secrets:
   image: alpine/k8s:1.31.4

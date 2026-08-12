@@ -2,7 +2,6 @@
 
 set -eu
 
-scope="${SECRET_SCOPE:-all}"
 tmp_dir="$(mktemp -d)"
 
 cleanup() {
@@ -53,25 +52,6 @@ apply_registry_secret() {
   echo "Updated Secret ${namespace}/gitlab-regcred"
 }
 
-apply_platform_secrets() {
-  ghcr_username="${PLATFORM_GHCR_USERNAME:-}"
-  ghcr_token="${PLATFORM_GHCR_TOKEN:-}"
-
-  if [ -z "$ghcr_username" ] || [ -z "$ghcr_token" ]; then
-    echo "Missing GitLab variables: PLATFORM_GHCR_USERNAME and PLATFORM_GHCR_TOKEN" >&2
-    exit 1
-  fi
-
-  ghcr_env="$tmp_dir/ghcr-repo-creds.env"
-  printf 'url=https://ghcr.io\ntype=helm\nusername=%s\npassword=%s\nenableOCI=true\n' \
-    "$ghcr_username" "$ghcr_token" > "$ghcr_env"
-  apply_env_secret argocd ghcr-repo-creds "$ghcr_env"
-  kubectl label secret ghcr-repo-creds \
-    --namespace argocd \
-    argocd.argoproj.io/secret-type=repo-creds \
-    --overwrite > /dev/null
-}
-
 apply_workload_secrets() {
   apply_env_secret atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB_ENV:-}"
   apply_env_secret atmo-api-dev atmo-jwt-secret "${ATMO_API_DEV_JWT_ENV:-}"
@@ -89,19 +69,4 @@ apply_workload_secrets() {
   apply_registry_secret atmo-web-prod
 }
 
-case "$scope" in
-  platform)
-    apply_platform_secrets
-    ;;
-  workloads)
-    apply_workload_secrets
-    ;;
-  all)
-    apply_platform_secrets
-    apply_workload_secrets
-    ;;
-  *)
-    echo "SECRET_SCOPE must be platform, workloads, or all" >&2
-    exit 1
-    ;;
-esac
+apply_workload_secrets

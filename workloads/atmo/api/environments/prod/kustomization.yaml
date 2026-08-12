@@ -11,8 +11,8 @@ labels:
   includeSelectors: false
   includeTemplates: true
 resources:
-- ../../common
+- ../../resources
+- ingress.yaml
 images:
 - name: registry.gitlab.com/lime985340/atmo-api
   newTag: v0.2.4
-  newName: registry.gitlab.com/lime985340/atmo-api

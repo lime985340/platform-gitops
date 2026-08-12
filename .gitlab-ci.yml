@@ -2,25 +2,27 @@ stages:
   - validate
   - secrets
 
-validate:kustomize:
+validate:manifests:
   image: alpine/k8s:1.31.4
   stage: validate
   script:
     - |
       set -eu
-      find workloads platform -name kustomization.yaml -exec sh -c '
+      find workloads -name kustomization.yaml -exec sh -c '
         for file do
           directory="$(dirname "$file")"
           echo "Rendering $directory"
           kubectl kustomize "$directory" > /dev/null
         done
       ' sh {} +
+    - echo "Validating raw platform manifests"
+    - kubectl apply --dry-run=client --validate=false --filename platform --recursive > /dev/null
 
 .sync-secrets:
   image: alpine/k8s:1.31.4
   stage: secrets
   when: manual
-  allow_failure: true
+  allow_failure: false
   resource_group: cluster-secrets
   script:
     - set -eu
@@ -29,12 +31,5 @@ validate:kustomize:
     - kubectl cluster-info
     - sh ci/sync-secrets.sh
 
-sync:platform-secrets:
-  extends: .sync-secrets
-  variables:
-    SECRET_SCOPE: platform
-
 sync:workload-secrets:
   extends: .sync-secrets
-  variables:
-    SECRET_SCOPE: workloads

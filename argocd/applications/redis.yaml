@@ -1,19 +1,51 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: platform-redis
+  name: redis
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
   project: platform
   source:
-    repoURL: https://gitlab.com/lime985340/gitops.git
-    targetRevision: feature/clean-gitops-layout
-    path: platform/storage/redis/resources
+    repoURL: registry-1.docker.io/bitnamicharts
+    chart: redis
+    targetRevision: 28.0.2
+    helm:
+      releaseName: redis
+      values: |
+        fullnameOverride: redis
+
+        architecture: standalone
+
+        auth:
+          enabled: false
+
+        sentinel:
+          enabled: false
+
+        metrics:
+          enabled: false
+
+        commonConfiguration: |-
+          appendonly no
+          save ""
+
+        master:
+          count: 1
+          kind: Deployment
+          persistence:
+            enabled: false
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
   destination:
     server: https://kubernetes.default.svc
-    namespace: platform-redis
+    namespace: redis
   syncPolicy:
     automated:
       prune: true

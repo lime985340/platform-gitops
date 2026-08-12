@@ -9,8 +9,9 @@ spec:
   egress:
     - toEndpoints:
         - matchLabels:
-            k8s:io.kubernetes.pod.namespace: platform-redis
-            k8s:app.kubernetes.io/instance: platform-redis
+            k8s:io.kubernetes.pod.namespace: redis
+            k8s:app.kubernetes.io/component: master
+            k8s:app.kubernetes.io/instance: redis
       toPorts:
         - ports:
             - port: "6379"

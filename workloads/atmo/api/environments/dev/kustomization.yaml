@@ -11,8 +11,7 @@ labels:
   includeSelectors: false
   includeTemplates: true
 resources:
-- ../../common
+- ../../resources
 images:
 - name: registry.gitlab.com/lime985340/atmo-api
   newTag: dev-0dcc950
-  newName: registry.gitlab.com/lime985340/atmo-api

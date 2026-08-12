@@ -10,11 +10,11 @@ spec:
   generators:
     - list:
         elements:
-          - name: cluster-policies
+          - name: policies
             path: platform/policies
             namespace: argocd
             syncWave: "-10"
-          - name: platform-cloudflare-quick-tunnel
+          - name: cloudflare-quick-tunnel
             path: platform/networking/cloudflare-tunnel
             namespace: cloudflared
             syncWave: "3"

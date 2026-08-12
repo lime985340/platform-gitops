@@ -6,6 +6,9 @@ project. No plaintext or encrypted secret values are committed to Git.
 
 ## Secret management
 
+각 GitLab CI/CD Variable에 어떤 형식의 값을 입력하는지는
+[Secret Variables 입력 가이드](docs/secret-variables.md)를 참고합니다.
+
 The repository provides one manual job in `.gitlab-ci.yml`:
 
 - `sync:workload-secrets`: creates the Atmo API and registry Secrets in the
@@ -102,12 +105,19 @@ YAML files under `argocd/`. It does not recursively render all directories
 under `platform/`.
 
 The `platform` ApplicationSet generates the two Git-backed platform
-Applications (`cluster-policies` and `platform-cloudflare-quick-tunnel`) from
+Applications (`policies` and `cloudflare-quick-tunnel`) from
 one template. The Git revision is declared once in that template. The
 `workloads` ApplicationSet generates the environment Applications from the
 workload directory layout. Helm-based platform components remain individual
 Applications because their `targetRevision` values are Helm Chart versions,
 not Git branches.
+
+Argo CD Application names use short component names such as `redis`, `grafana`,
+and `traefik`. The `platform` AppProject and the source directories already
+provide the grouping context, so `platform-` and `cluster-` prefixes are not
+needed. This naming rule applies only to Argo CD Application objects; existing
+Helm release names, Kubernetes Service names, and internal DNS addresses are
+unchanged.
 
 All platform and workload namespaces are created by Argo CD with
 `CreateNamespace=true`. Namespace YAML files are not stored in the repository.

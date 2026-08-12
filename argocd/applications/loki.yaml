@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: platform-loki
+  name: loki
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -13,6 +13,8 @@ spec:
     targetRevision: 6.21.0
     helm:
       values: |
+        fullnameOverride: loki
+
         deploymentMode: SingleBinary
 
         resultsCache:

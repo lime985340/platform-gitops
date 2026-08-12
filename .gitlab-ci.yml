@@ -18,18 +18,45 @@ validate:manifests:
     - echo "Validating raw platform manifests"
     - kubectl apply --dry-run=client --validate=false --filename platform --recursive > /dev/null
 
-.sync-secrets:
+seal:workload-secrets:
   image: alpine/k8s:1.31.4
   stage: secrets
   when: manual
   allow_failure: false
-  resource_group: cluster-secrets
+  resource_group: gitops-sealed-secrets
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
   script:
-    - set -eu
-    - test -n "${KUBECONFIG:-}" || (echo "KUBECONFIG must be configured as a GitLab File variable" >&2; exit 1)
-    - test -f "$KUBECONFIG" || (echo "KUBECONFIG does not point to a file" >&2; exit 1)
-    - kubectl cluster-info
-    - sh ci/sync-secrets.sh
+    - |
+      set -eu
+      test -n "${SEALED_SECRETS_CERT:-}" || (echo "SEALED_SECRETS_CERT must be configured as a GitLab File variable" >&2; exit 1)
+      test -f "$SEALED_SECRETS_CERT" || (echo "SEALED_SECRETS_CERT does not point to a file" >&2; exit 1)
+      test -n "${GITOPS_PUSH_TOKEN:-}" || (echo "GITOPS_PUSH_TOKEN must be configured" >&2; exit 1)
 
-sync:workload-secrets:
-  extends: .sync-secrets
+      apk add --no-cache curl git tar
+      kubeseal_version="${KUBESEAL_VERSION:-0.37.0}"
+      curl --fail --silent --show-error --location \
+        --output /tmp/kubeseal.tar.gz \
+        "https://github.com/bitnami/sealed-secrets/releases/download/v${kubeseal_version}/kubeseal-${kubeseal_version}-linux-amd64.tar.gz"
+      tar --extract --gzip --file /tmp/kubeseal.tar.gz --directory /usr/local/bin kubeseal
+      chmod 755 /usr/local/bin/kubeseal
+
+      sh ci/seal-secrets.sh
+
+      git config user.name "gitlab-ci[bot]"
+      git config user.email "gitlab-ci[bot]@users.noreply.gitlab.com"
+      git add \
+        workloads/atmo/api/environments/dev/sealed-secrets.yaml \
+        workloads/atmo/api/environments/prod/sealed-secrets.yaml \
+        workloads/atmo/web/environments/dev/sealed-secrets.yaml \
+        workloads/atmo/web/environments/prod/sealed-secrets.yaml
+
+      if git diff --cached --quiet; then
+        echo "No SealedSecret changes to commit"
+        exit 0
+      fi
+
+      git commit -m "chore: update sealed secrets [skip ci]"
+      git push \
+        "https://oauth2:${GITOPS_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" \
+        "HEAD:${CI_COMMIT_BRANCH}"

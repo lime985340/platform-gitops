@@ -1,70 +1,61 @@
 # GitLab Secret Variables 입력 가이드
 
-이 문서는 GitOps 저장소의 `sync:workload-secrets` 작업에 필요한 GitLab
-CI/CD Variables의 입력 형식을 설명합니다. 실제 비밀번호, 토큰, 키, 인증서,
-`kubeconfig` 내용은 이 문서나 Git 저장소에 넣지 않습니다.
+이 저장소는 GitLab CI에서 Secret 값을 `kubeseal`로 암호화한 뒤, 암호화된
+`SealedSecret` YAML만 Git에 커밋합니다. Argo CD는 이 YAML을 적용하고,
+클러스터의 Sealed Secrets Controller가 Kubernetes Secret을 생성합니다.
 
-## 1. GitLab에 변수 추가
+실제 비밀번호·토큰·키·kubeconfig 내용은 이 문서와 Git 저장소에 넣지 않습니다.
+
+## 사전 구성
+
+클러스터에는 Sealed Secrets Controller가 설치되어 있어야 합니다. 현재 저장소는
+`argocd/applications/sealed-secrets.yaml`의 Helm Chart Application으로 Controller를
+관리합니다. Controller가 사용하는 Private Key는 클러스터 외부의 안전한 백업에도
+보관해야 하며 Git에는 저장하지 않습니다.
+
+로컬에서 처음 인증서를 가져올 때만 Kubernetes 접근이 필요합니다.
+
+```bash
+kubeseal --fetch-cert > sealed-secrets.crt
+```
+
+이후 `sealed-secrets.crt`는 공개 인증서이므로 GitLab의 File Variable로 등록해
+CI에서 사용할 수 있습니다. 인증서가 갱신되면 다시 가져와 변수를 교체합니다.
+
+## GitLab 변수 등록
 
 GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 
 `Settings` → `CI/CD` → `Variables` → `Add variable`
 
-각 변수는 다음 원칙으로 추가합니다.
+다음 원칙으로 등록합니다.
 
-- `Type`: `File`
-- `Visibility`: 가능한 경우 `Masked` 또는 `Masked and hidden`
-- 운영용 변수: `Protected`를 사용하고 실행 권한을 제한
-- 변수의 `Value`에는 파일 경로가 아니라 파일의 실제 내용을 입력
-- 변수명과 파일 내용의 키 이름은 아래 예시와 정확히 일치
+- 여러 줄 값은 `Type: File`로 등록
+- 운영 값은 `Protected`로 등록하고 실행 권한을 제한
+- Secret 값은 `Masked` 또는 `Masked and hidden`을 사용
+- 변수의 Value에는 파일 경로가 아니라 파일의 실제 내용을 입력
+- `GITOPS_PUSH_TOKEN`은 대상 저장소에 `write_repository` 권한이 있는
+  Project Access Token 또는 동일한 권한의 토큰으로 등록
 
-`File` 변수는 CI 실행 시 임시 파일로 제공됩니다. `ci/sync-secrets.sh`는
-그 임시 파일을 Kubernetes Secret으로 변환한 뒤 작업 종료 시 삭제합니다.
+## 필요한 변수
 
-> Feature 브랜치에서 Protected 변수를 사용할 경우 해당 브랜치가 보호되어
-> 있어야 합니다. 보호되지 않은 브랜치에서 운영 Secret을 사용할 필요가
-> 있다면 먼저 브랜치 보호 정책을 확인하세요.
+### `SEALED_SECRETS_CERT`
 
-## 2. 클러스터 접속 변수
+`kubeseal --fetch-cert`로 받은 Controller 공개 인증서 전체를 File 변수로
+등록합니다. Private Key는 입력하지 않습니다.
 
-### `KUBECONFIG`
+### `GITOPS_PUSH_TOKEN`
 
-GitLab CI Runner가 접근할 수 있는 Kubernetes 클러스터의 kubeconfig 전체
-내용을 `File` 변수로 입력합니다.
+CI가 생성한 암호화 YAML을 현재 Git 브랜치에 Push하기 위한 토큰입니다.
+값을 로그나 문서에 출력하지 않습니다. Feature 브랜치에서 Protected 변수를
+사용하려면 해당 브랜치가 보호되어 있어야 합니다.
 
-```yaml
-apiVersion: v1
-kind: Config
-clusters:
-  # 실제 클러스터 설정을 입력합니다.
-contexts:
-  # 실제 context 설정을 입력합니다.
-current-context: your-context
-users:
-  # 실제 인증 설정을 입력합니다.
-```
-
-로컬 `kind` 클러스터는 일반적으로 GitLab.com shared runner에서 접근할 수
-없습니다. 이 경우 CI 작업 대신 로컬에서 같은 `ci/sync-secrets.sh`를
-실행하거나, Runner가 접근 가능한 클러스터와 제한된 ServiceAccount용
-kubeconfig를 사용합니다. 광범위한 `cluster-admin` kubeconfig를 등록하지
-않습니다.
-
-## 3. Atmo API 환경 변수
-
-개발과 운영은 같은 형식의 파일을 사용하지만 반드시 별도 변수로 등록합니다.
-
-- 개발: `ATMO_API_DEV_*`
-- 운영: `ATMO_API_PROD_*`
-
-### DB 및 Redis
+### API DB/Redis
 
 변수명:
 
 - `ATMO_API_DEV_DB_ENV`
 - `ATMO_API_PROD_DB_ENV`
-
-값은 `KEY=value` 형식의 여러 줄 파일입니다.
 
 ```env
 SPRING_DATASOURCE_URL=jdbc:postgresql://db.example.com:5432/atmo
@@ -74,8 +65,7 @@ SPRING_REDIS_HOST=redis-master.redis.svc.cluster.local
 SPRING_REDIS_PORT=6379
 ```
 
-`SPRING_DATASOURCE_URL`, 사용자명, 비밀번호는 실제 DB 환경에 맞게 바꿉니다.
-현재 GitOps의 Redis Service 이름은 `redis-master`이며 Namespace는 `redis`입니다.
+개발과 운영은 각각 별도 DB 값을 사용합니다.
 
 ### JWT
 
@@ -91,8 +81,7 @@ JWT_ACCESS_TTL_SECONDS=900
 JWT_REFRESH_TTL_SECONDS=1209600
 ```
 
-Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합니다. TTL은
-초 단위이며 애플리케이션 정책에 맞춰 설정합니다.
+Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합니다.
 
 ### OAuth
 
@@ -100,9 +89,6 @@ Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합�
 
 - `ATMO_API_DEV_OAUTH_ENV`
 - `ATMO_API_PROD_OAUTH_ENV`
-
-각 공급자의 Client ID, Client Secret, callback URI와 OAuth endpoint를
-모두 입력합니다.
 
 ```env
 KAKAO_CLIENT_ID=KAKAO_CLIENT_ID_VALUE
@@ -130,11 +116,6 @@ NAVER_USERINFO_URI=https://openapi.naver.com/v1/nid/me
 NAVER_SCOPE=name,email
 ```
 
-`YOUR_HOST`는 실제 외부 접속 주소로 변경합니다. Quick Tunnel은 파드가
-재생성될 때 `trycloudflare.com` 주소가 바뀔 수 있으므로 OAuth 공급자에
-등록한 Redirect URI와 현재 주소가 일치해야 합니다. 고정 주소가 필요하면
-Named Tunnel과 고정 도메인을 사용합니다.
-
 ### 공공데이터 API
 
 변수명:
@@ -146,14 +127,14 @@ Named Tunnel과 고정 도메인을 사용합니다.
 PUBLIC_SERVICE_KEY=PUBLIC_DATA_SERVICE_KEY_VALUE
 ```
 
-## 4. GitLab Container Registry 인증
+### GitLab Container Registry
 
 변수명:
 
 - `GITLAB_REGISTRY_DOCKER_CONFIG`
 
-이 변수는 `registry.gitlab.com`에서 private 이미지를 받을 수 있는 Docker
-`config.json` 전체 내용을 `File` 변수로 입력합니다.
+`registry.gitlab.com` private 이미지를 Pull할 수 있는 Docker `config.json`
+전체 내용을 File 변수로 입력합니다.
 
 ```json
 {
@@ -167,29 +148,11 @@ PUBLIC_SERVICE_KEY=PUBLIC_DATA_SERVICE_KEY_VALUE
 }
 ```
 
-권장 방식은 GitLab Deploy Token을 만들고 `read_registry` 권한만 부여하는
-것입니다. `auth` 값은 `username:token`을 Base64로 인코딩한 값이어야 하며,
-실제 Token을 문서나 로그에 남기지 않습니다.
+Deploy Token에는 `read_registry` 권한만 부여하는 것을 권장합니다.
 
-Docker가 로그인된 환경에서는 다음 명령으로 생성된 Docker 설정 파일을
-확인한 뒤 그 파일의 내용을 GitLab File 변수에 넣을 수 있습니다.
+## 변수와 SealedSecret 매핑
 
-```bash
-docker login registry.gitlab.com
-cat ~/.docker/config.json
-```
-
-Windows에서는 다음 경로를 사용합니다.
-
-```powershell
-Get-Content $env:USERPROFILE\.docker\config.json -Raw
-```
-
-## 5. 변수와 Kubernetes Secret 매핑
-
-`sync:workload-secrets`를 실행하면 다음 Secret이 생성 또는 갱신됩니다.
-
-| GitLab CI/CD Variable | Namespace | Kubernetes Secret |
+| GitLab Variable | Namespace | SealedSecret |
 | --- | --- | --- |
 | `ATMO_API_DEV_DB_ENV` | `atmo-api-dev` | `atmo-db-secret` |
 | `ATMO_API_DEV_JWT_ENV` | `atmo-api-dev` | `atmo-jwt-secret` |
@@ -199,35 +162,52 @@ Get-Content $env:USERPROFILE\.docker\config.json -Raw
 | `ATMO_API_PROD_JWT_ENV` | `atmo-api-prod` | `atmo-jwt-secret` |
 | `ATMO_API_PROD_OAUTH_ENV` | `atmo-api-prod` | `atmo-oauth-secret` |
 | `ATMO_API_PROD_PUBLICDATA_ENV` | `atmo-api-prod` | `atmo-publicdata-secret` |
-| `GITLAB_REGISTRY_DOCKER_CONFIG` | 모든 Atmo API/Web Namespace | `gitlab-regcred` |
+| `GITLAB_REGISTRY_DOCKER_CONFIG` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
 
-현재 애플리케이션은 다음 Secret 이름을 참조합니다.
+생성되는 파일은 다음과 같습니다.
 
-- API: `atmo-db-secret`, `atmo-jwt-secret`, `atmo-oauth-secret`,
-  `atmo-publicdata-secret`
-- API와 Web 이미지 Pull: `gitlab-regcred`
+```text
+workloads/atmo/api/environments/dev/sealed-secrets.yaml
+workloads/atmo/api/environments/prod/sealed-secrets.yaml
+workloads/atmo/web/environments/dev/sealed-secrets.yaml
+workloads/atmo/web/environments/prod/sealed-secrets.yaml
+```
 
-Cloudflare Quick Tunnel과 Redis는 현재 별도 Secret 입력이 필요하지 않습니다.
-Redis 인증을 활성화하거나 Named Tunnel로 변경할 때는 별도의 Secret 관리
-절차를 추가해야 합니다.
+파일 안에는 `encryptedData`만 저장되며 실제 값은 저장되지 않습니다.
+SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같아야 합니다.
 
-## 6. 동기화 실행
+## 동기화 실행
 
-1. 위 변수를 모두 추가하거나 수정합니다.
-2. GitLab의 `Build` → `Pipelines`에서 Pipeline을 실행합니다.
-3. 수동 작업 `sync:workload-secrets`를 시작합니다.
-4. 작업 로그에 Secret 값이 출력되지 않고 성공했는지 확인합니다.
-5. 이미 실행 중인 애플리케이션이 값을 시작 시점에만 읽는다면 해당
-   Deployment를 재시작합니다.
+1. 위 GitLab 변수를 등록하거나 수정합니다.
+2. `Build` → `Pipelines`에서 Pipeline을 실행합니다.
+3. 수동 작업 `seal:workload-secrets`를 실행합니다.
+4. CI가 `kubeseal`로 YAML을 생성하고 `[skip ci]` 커밋으로 현재 브랜치에 Push합니다.
+5. Argo CD가 변경된 SealedSecret을 동기화합니다.
+6. Controller가 일반 Kubernetes Secret을 생성하면 API/Web이 새 값을 사용합니다.
 
-Secret 값만 변경하는 경우 Git 커밋은 필요하지 않습니다. Secret 이름과
-환경별 Namespace는 `ci/sync-secrets.sh`에서 고정되어 있습니다.
+Secret 값을 변경할 때마다 Git 커밋이 생성됩니다. 애플리케이션이 값을 시작
+시점에만 읽는다면 Secret 동기화 후 해당 Deployment를 재시작해야 합니다.
+
+## GitLab Runner
+
+이 작업은 Kubernetes API에 접근하지 않고 공개 인증서로 암호화한 뒤 Git만
+Push하므로 GitLab.com shared runner로 충분합니다. 따라서 현재 저장소에는
+GitLab Runner Helm Chart나 Runner ServiceAccount를 추가하지 않습니다.
+
+클러스터 내부 Runner는 다음과 같은 경우에만 별도로 검토합니다.
+
+- GitLab.com에 접근할 수 없는 폐쇄망
+- 전용 빌드 도구나 사설 네트워크가 필요한 경우
+- CI Job을 클러스터 내부에서 실행해야 하는 정책이 있는 경우
+
+Runner를 추가하더라도 SealedSecret 암호화에는 Kubernetes 권한을 부여하지
+않는 것이 기본 원칙입니다.
 
 ## 보안 주의사항
 
-- 실제 값을 Markdown, YAML, Issue, Merge Request, 로그에 기록하지 않습니다.
-- `set -x` 또는 Secret 값을 출력하는 디버그 로그를 사용하지 않습니다.
-- `.env`, Docker 인증 파일, kubeconfig를 Git에 커밋하지 않습니다.
-- 토큰이 노출되면 즉시 폐기하고 새 토큰으로 교체합니다.
-- GitLab 변수와 Kubernetes Secret에 접근할 수 있는 사용자 및 Runner 권한을
-  최소화합니다.
+- SealedSecret YAML의 `encryptedData`는 Git에 저장해도 되지만 실제 값은 넣지 않습니다.
+- Controller Private Key와 Kubernetes Secret 백업은 Git에 저장하지 않습니다.
+- `SEALED_SECRETS_CERT`에는 공개 인증서만 넣습니다.
+- `.env`, Docker 인증 파일, kubeconfig, Token을 커밋하지 않습니다.
+- Secret 값이나 Push Token을 CI 로그에 출력하지 않습니다.
+- Controller Private Key를 잃으면 기존 SealedSecret을 복호화할 수 없으므로 안전하게 백업합니다.

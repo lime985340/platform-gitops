@@ -12,6 +12,7 @@ labels:
   includeTemplates: true
 resources:
 - ../../resources
+- sealed-secrets.yaml
 images:
 - name: registry.gitlab.com/lime985340/atmo-web
   newTag: dev-ab00ca6

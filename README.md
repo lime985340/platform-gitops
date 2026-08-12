@@ -1,93 +1,46 @@
 # GitOps
 
 This repository contains the Kubernetes manifests managed by Argo CD.
-Secret values are managed in the GitLab CI/CD Variables of this GitOps
-project. No plaintext or encrypted secret values are committed to Git.
+Secret values are provided through GitLab CI/CD Variables. Plaintext values are
+never committed to Git; only encrypted `SealedSecret` data is stored.
 
 ## Secret management
 
 각 GitLab CI/CD Variable에 어떤 형식의 값을 입력하는지는
 [Secret Variables 입력 가이드](docs/secret-variables.md)를 참고합니다.
 
-The repository provides one manual job in `.gitlab-ci.yml`:
+### Sealed Secrets 흐름
 
-- `sync:workload-secrets`: creates the Atmo API and registry Secrets in the
-  development and production namespaces.
-
-The jobs run `ci/sync-secrets.sh`. The script sends generated Secret
-manifests directly to Kubernetes and removes its temporary files when it
-finishes. Secret values are never printed by the script.
-
-### Required GitLab Variables
-
-Create these variables in the GitOps project's `Settings > CI/CD > Variables`.
-Use `Protected` for production values and restrict who can run the secret
-jobs. Use `File` type for variables whose value contains multiple lines.
-
-Cluster access:
-
-- `KUBECONFIG` as a protected `File` variable. The CI jobs in this repository
-  are designed for a GitLab.com shared runner and do not use GitLab Agent.
-
-Workload values, all as `File` variables containing `KEY=value` lines:
-
-- `ATMO_API_DEV_DB_ENV`
-- `ATMO_API_DEV_JWT_ENV`
-- `ATMO_API_DEV_OAUTH_ENV`
-- `ATMO_API_DEV_PUBLICDATA_ENV`
-- `ATMO_API_PROD_DB_ENV`
-- `ATMO_API_PROD_JWT_ENV`
-- `ATMO_API_PROD_OAUTH_ENV`
-- `ATMO_API_PROD_PUBLICDATA_ENV`
-- `GITLAB_REGISTRY_DOCKER_CONFIG`, containing the Docker registry JSON
-
-Example `ATMO_API_DEV_DB_ENV` value:
-
-```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://db.example.com:5432/atmo
-SPRING_DATASOURCE_USERNAME=atmo
-SPRING_DATASOURCE_PASSWORD=REPLACE_WITH_REAL_VALUE
-SPRING_REDIS_HOST=redis.example.com
-SPRING_REDIS_PORT=6379
+```text
+GitLab CI Variables
+  → kubeseal
+  → encrypted SealedSecret YAML
+  → Git commit/push
+  → Argo CD
+  → Sealed Secrets Controller
+  → Kubernetes Secret
 ```
 
-The OAuth file must contain the keys used by the Atmo API for Kakao, Google,
-and Naver. The registry file must contain the Docker `config.json` content.
+수동 작업 `seal:workload-secrets`가 공개 인증서로 Secret을 암호화하고,
+암호화된 YAML을 현재 브랜치에 `[skip ci]` 커밋으로 Push합니다. CI는
+Kubernetes API에 접근하지 않으므로 `KUBECONFIG`가 필요하지 않습니다.
 
-### Run the secret sync
+각 변수의 입력 형식은 [Secret Variables 입력 가이드](docs/secret-variables.md)를
+참고합니다. 주요 변수는 다음과 같습니다.
 
-After adding or changing a variable, open `Build > Pipelines` and run the
-pipeline. Start `sync:workload-secrets` after the application variables are
-ready. Secret synchronization failures now fail the manual job and must be
-resolved before considering the pipeline successful.
+- `SEALED_SECRETS_CERT`: Controller 공개 인증서, `File` 타입
+- `GITOPS_PUSH_TOKEN`: 암호화 YAML Push 권한이 있는 토큰
+- `ATMO_API_DEV_*`, `ATMO_API_PROD_*`: API 환경별 File 변수
+- `GITLAB_REGISTRY_DOCKER_CONFIG`: Registry 인증 설정 File 변수
 
-No Git commit is required for a Secret value change. The generated Kubernetes
-Secret names remain stable:
+Kubernetes Secret 이름은 기존과 동일합니다. API는 DB, JWT, OAuth,
+Publicdata Secret을 사용하고 API/Web의 private 이미지 Pull에는
+`gitlab-regcred`를 사용합니다.
 
-- `atmo-api-dev/atmo-db-secret`, `atmo-jwt-secret`, `atmo-oauth-secret`, and
-  `atmo-publicdata-secret`
-- The same four API Secrets in `atmo-api-prod`
-- `gitlab-regcred` in both Atmo API namespaces and both Atmo Web namespaces
-
-The application manifests reference these names, while the Secret objects are
-created by the CI job. If a workload reads a changed value only at startup,
-restart that workload after the sync job completes.
-
-### Cluster access from GitLab CI
-
-The shared runner must be able to reach the Kubernetes API through the
-network. A protected `KUBECONFIG` File variable is not enough when the API
-endpoint is private or only available on the developer's PC.
-
-The current local `kind` cluster cannot be reached by a GitLab.com shared
-runner. The secret jobs will work only after the cluster has a reachable API
-endpoint and the API server firewall allows the runner traffic. Exposing the
-Kubernetes API publicly and granting a broad cluster-admin kubeconfig is not
-recommended; use a narrowly scoped service account and protect the variable.
-
-If the target remains a local `kind` cluster, run the same
-`ci/sync-secrets.sh` script locally with the GitLab variable values supplied
-through a secure local environment instead of running the CI job.
+GitLab.com shared runner로 충분하므로 현재 저장소에는 GitLab Runner Helm
+Chart와 Runner ServiceAccount를 추가하지 않습니다. Sealed Secrets
+Controller 설치는 `argocd/applications/sealed-secrets.yaml`의 Helm
+Application이 담당합니다.
 
 ## Argo CD recursion and Kustomize
 
@@ -153,7 +106,8 @@ Bitnami Redis Helm Chart directly from the Docker Hub OCI registry.
 
 Platform components use one of two deployment styles:
 
-- Traefik, Grafana, Loki, Prometheus, and Promtail use external Helm Charts.
+- Sealed Secrets, Traefik, Grafana, Loki, Prometheus, and Promtail use external
+  Helm Charts.
   Their Argo CD Application files define the chart repository, chart version,
   and Helm values. The chart renders the underlying Deployments, Services, and
   configuration resources.
@@ -163,6 +117,13 @@ Platform components use one of two deployment styles:
 - Redis uses the Bitnami Redis Helm Chart. Its Argo CD Application defines the
   OCI chart repository, chart version, standalone mode, disabled persistence,
   and resource limits. The chart generates the Redis Deployment and Service.
+
+The Sealed Secrets Controller uses the official Bitnami Labs Helm Chart in the
+`sealed-secrets` namespace. The controller stores its decryption Private Key
+in the cluster. GitLab CI only runs `kubeseal` with the public certificate and
+Pushes encrypted `SealedSecret` YAML to Git; it does not need Kubernetes API
+access. The `kubeseal` CLI is downloaded in the CI job and is not a Helm Chart
+resource.
 
 The current Cloudflare integration intentionally keeps a small raw Deployment.
 It runs the Quick Tunnel command
@@ -248,9 +209,10 @@ The bootstrap Application's recursion setting applies only to its `argocd/`
 source. Platform raw resources are kept directly under their Application
 source directories.
 
-If the cluster is recreated, run the secret jobs again. Argo CD manages the
-workload manifests; the GitLab CI secret job manages these Kubernetes Secret
-objects.
+If the cluster is recreated, restore the Sealed Secrets Controller Private Key
+backup before syncing workload SealedSecrets. Argo CD manages both the
+workload manifests and encrypted SealedSecret resources; the Controller
+creates the Kubernetes Secret objects.
 
 ## Validation
 
@@ -268,5 +230,6 @@ Git-backed platform Applications, and the `workloads` ApplicationSet owns the
 revision used for generated workload Applications. Change these revisions to
 `refs/heads/main` only as part of the merge or the first post-merge cleanup.
 
-Do not enable shell tracing for the secret jobs and never commit `.env` files,
-plain Secret YAML, passwords, tokens, or kubeconfig files.
+Do not enable shell tracing for the secret job and never commit `.env` files,
+plain Secret YAML, passwords, tokens, Controller Private Keys, or kubeconfig
+files. Encrypted `SealedSecret` YAML is expected to be committed.

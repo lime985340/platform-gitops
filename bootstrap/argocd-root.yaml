@@ -12,7 +12,7 @@ spec:
 
   source:
     repoURL: https://gitlab.com/lime985340/gitops.git
-    targetRevision: feature/clean-gitops-layout
+    targetRevision: refs/heads/feature/clean-gitops-layout
     path: argocd
     directory:
       recurse: true

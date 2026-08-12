@@ -101,10 +101,13 @@ This recursively discovers the Application, AppProject, and ApplicationSet
 YAML files under `argocd/`. It does not recursively render all directories
 under `platform/`.
 
-Each child Application chooses its own source path. Static platform resources
-are loaded directly by Argo CD's Directory source. The `cluster-policies`
-Application loads the raw Cilium policy YAML files directly from
-`platform/policies`.
+The `platform` ApplicationSet generates the two Git-backed platform
+Applications (`cluster-policies` and `platform-cloudflare-quick-tunnel`) from
+one template. The Git revision is declared once in that template. The
+`workloads` ApplicationSet generates the environment Applications from the
+workload directory layout. Helm-based platform components remain individual
+Applications because their `targetRevision` values are Helm Chart versions,
+not Git branches.
 
 All platform and workload namespaces are created by Argo CD with
 `CreateNamespace=true`. Namespace YAML files are not stored in the repository.
@@ -144,9 +147,9 @@ Platform components use one of two deployment styles:
   Their Argo CD Application files define the chart repository, chart version,
   and Helm values. The chart renders the underlying Deployments, Services, and
   configuration resources.
-- Cloudflare Quick Tunnel uses raw Kubernetes YAML under `platform/`. Its Argo
-  CD Application points to the Git directory, and `deployment.yaml` defines
-  the resource and pinned container image.
+- Cloudflare Quick Tunnel uses raw Kubernetes YAML under `platform/`. The
+  `platform` ApplicationSet generates its Argo CD Application, while
+  `deployment.yaml` defines the resource and pinned container image.
 - Redis uses the Bitnami Redis Helm Chart. Its Argo CD Application defines the
   OCI chart repository, chart version, standalone mode, disabled persistence,
   and resource limits. The chart generates the Redis Deployment and Service.
@@ -247,10 +250,13 @@ validation does not require Secret values.
 
 ## Argo CD revision policy
 
-This feature branch intentionally keeps `feature/clean-gitops-layout` in the
-bootstrap, Application, and ApplicationSet sources so the branch can be tested
-before merging. Change these revisions to `main` only as part of the merge or
-the first post-merge cleanup.
+This feature branch intentionally keeps
+`refs/heads/feature/clean-gitops-layout` in the bootstrap and ApplicationSet
+sources so the branch can be tested before merging. The bootstrap source is the
+one-time entry point; the `platform` ApplicationSet owns the revision for its
+Git-backed platform Applications, and the `workloads` ApplicationSet owns the
+revision used for generated workload Applications. Change these revisions to
+`refs/heads/main` only as part of the merge or the first post-merge cleanup.
 
 Do not enable shell tracing for the secret jobs and never commit `.env` files,
 plain Secret YAML, passwords, tokens, or kubeconfig files.

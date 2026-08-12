@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - list:
+        elements:
+          - name: cluster-policies
+            path: platform/policies
+            namespace: argocd
+            syncWave: "-10"
+          - name: platform-cloudflare-quick-tunnel
+            path: platform/networking/cloudflare-tunnel
+            namespace: cloudflared
+            syncWave: "3"
+  template:
+    metadata:
+      name: '{{ .name }}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{ .syncWave }}'
+    spec:
+      project: platform
+      source:
+        repoURL: https://gitlab.com/lime985340/gitops.git
+        targetRevision: refs/heads/feature/clean-gitops-layout
+        path: '{{ .path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ .namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

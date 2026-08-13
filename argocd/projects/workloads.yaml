@@ -34,5 +34,7 @@ spec:
       kind: StatefulSet
     - group: batch
       kind: CronJob
+    - group: bitnami.com
+      kind: SealedSecret
     - group: networking.k8s.io
       kind: Ingress

@@ -22,16 +22,17 @@ validate:platform:
     entrypoint: [""]
   stage: validate
   script:
-    - /kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.31.0 -summary platform
+    - /kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.31.0 -summary platform argocd bootstrap
 
 seal:workload-secrets:
   image: alpine/k8s:1.31.4
   stage: secrets
-  when: manual
-  allow_failure: false
   resource_group: gitops-sealed-secrets
   rules:
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $UPDATE_SECRETS == "true"'
+      when: manual
+      allow_failure: false
+    - when: never
   script:
     - |
       set -eu

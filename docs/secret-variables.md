@@ -188,6 +188,20 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 Secret 값을 변경할 때마다 Git 커밋이 생성됩니다. 애플리케이션이 값을 시작
 시점에만 읽는다면 Secret 동기화 후 해당 Deployment를 재시작해야 합니다.
 
+## Pipeline trigger
+
+Normal pushes run the manifest validation jobs only. The Secret sealing job is
+created only when starting a pipeline manually with the variable below:
+
+```text
+UPDATE_SECRETS=true
+```
+
+In GitLab, open `Build` → `Pipelines` → `New pipeline`, select the target
+branch, add `UPDATE_SECRETS=true` as a pipeline variable, and run the pipeline.
+Then start the `seal:workload-secrets` manual job. The generated commit uses
+`[skip ci]`, so it does not create another pipeline.
+
 ## GitLab Runner
 
 이 작업은 Kubernetes API에 접근하지 않고 공개 인증서로 암호화한 뒤 Git만

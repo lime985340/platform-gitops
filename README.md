@@ -4,6 +4,9 @@ This repository contains the Kubernetes manifests managed by Argo CD.
 Secret values are provided through GitLab CI/CD Variables. Plaintext values are
 never committed to Git; only encrypted `SealedSecret` data is stored.
 
+Cluster and Argo CD installation prerequisites are documented in
+[`docs/cluster-bootstrap.md`](docs/cluster-bootstrap.md).
+
 ## Secret management
 
 각 GitLab CI/CD Variable에 어떤 형식의 값을 입력하는지는

@@ -60,7 +60,9 @@ Controller Private Key 백업은 Git 저장소 밖에 보관해야 합니다.
 
 ## 현재 진행하지 않는 작업
 
-- 서비스 API/Web 저장소의 실제 CI 연동: 해당 서비스 저장소가 현재 작업 공간에 없어 보류
+- 서비스 API/Web 저장소 CI 연동 코드는 각 저장소의
+  `feature/clean-gitops-layout` 브랜치에 반영했습니다. 실제 Pipeline 실행을
+  위해서는 각 서비스 저장소에 `GITOPS_PUSH_TOKEN`을 등록해야 합니다.
 - Feature 브랜치 참조를 `main`으로 변경: Feature 브랜치 검증을 위해 현재 상태 유지
 - 실제 Secret 값의 GitLab 등록: 값 준비 후 수동으로 진행
 

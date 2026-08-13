@@ -6,6 +6,10 @@ never committed to Git; only encrypted `SealedSecret` data is stored.
 
 Cluster and Argo CD installation prerequisites are documented in
 [`docs/cluster-bootstrap.md`](docs/cluster-bootstrap.md).
+Sealed Secrets recovery is documented in
+[`docs/sealed-secrets-recovery.md`](docs/sealed-secrets-recovery.md), and
+service CI image tag updates are described in
+[`docs/image-updates.md`](docs/image-updates.md).
 
 ## Secret management
 

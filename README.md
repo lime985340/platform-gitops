@@ -10,6 +10,8 @@ Sealed Secrets recovery is documented in
 [`docs/sealed-secrets-recovery.md`](docs/sealed-secrets-recovery.md), and
 service CI image tag updates are described in
 [`docs/image-updates.md`](docs/image-updates.md).
+Pending Secret setup and remaining verification work are tracked in
+[`docs/next-steps.md`](docs/next-steps.md).
 
 ## Secret management
 

@@ -22,7 +22,32 @@ workloads/atmo/web/environments/dev/kustomization.yaml
 workloads/atmo/web/environments/prod/kustomization.yaml
 ~~~
 
-## Example service CI flow
+## Current Atmo service CI flow
+
+The `atmo-api` and `atmo-web` repositories now use the same two follow-up CI
+jobs after their Docker jobs:
+
+- `gitops:update-dev` runs for the `dev` branch and updates the matching `dev`
+  Kustomize tag.
+- `gitops:update-prod` runs for a semantic version tag such as `v0.2.5` and
+  updates the matching `prod` Kustomize tag.
+
+Both jobs use the GitOps branch from `GITOPS_BRANCH`, which currently defaults
+to `feature/clean-gitops-layout` while this branch is being tested. The
+variable can later be changed to `main` after the GitOps changes are merged.
+
+Each service repository needs the following masked CI/CD variable:
+
+```text
+GITOPS_PUSH_TOKEN
+```
+
+The token needs `write_repository` permission on the GitOps repository. The
+service CI does not need Kubernetes access, a kubeconfig, or Argo CD access.
+The generated GitOps commit uses `[skip ci]`, so it does not create a loop in
+the GitOps validation pipeline.
+
+## Manual service CI flow
 
 The service repository can clone this repository after publishing its image,
 run the script, and push the resulting Git change:

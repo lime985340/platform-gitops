@@ -13,7 +13,6 @@ spec:
     - https://grafana.github.io/helm-charts
     - https://prometheus-community.github.io/helm-charts
     - registry-1.docker.io/bitnamicharts
-    - https://bitnami-labs.github.io/sealed-secrets
   destinations:
     - namespace: argocd
       server: https://kubernetes.default.svc

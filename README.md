@@ -125,7 +125,7 @@ Platform components use one of two deployment styles:
   OCI chart repository, chart version, standalone mode, disabled persistence,
   and resource limits. The chart generates the Redis Deployment and Service.
 
-The Sealed Secrets Controller uses the official Bitnami Labs Helm Chart in the
+The Sealed Secrets Controller uses the Bitnami OCI Helm Chart in the
 `sealed-secrets` namespace. The controller stores its decryption Private Key
 in the cluster. GitLab CI only runs `kubeseal` with the public certificate and
 Pushes encrypted `SealedSecret` YAML to Git; it does not need Kubernetes API

@@ -41,7 +41,7 @@ seal:workload-secrets:
       test -n "${GITOPS_PUSH_TOKEN:-}" || (echo "GITOPS_PUSH_TOKEN must be configured" >&2; exit 1)
 
       apk add --no-cache curl git tar
-      kubeseal_version="${KUBESEAL_VERSION:-0.37.0}"
+      kubeseal_version="${KUBESEAL_VERSION:-0.38.1}"
       curl --fail --silent --show-error --location \
         --output /tmp/kubeseal.tar.gz \
         "https://github.com/bitnami/sealed-secrets/releases/download/v${kubeseal_version}/kubeseal-${kubeseal_version}-linux-amd64.tar.gz"

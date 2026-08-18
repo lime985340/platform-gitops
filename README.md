@@ -37,6 +37,19 @@ GitLab CI Variables
 GitLab의 사전 정의 `CI_JOB_TOKEN`으로 Push하며, CI는 Kubernetes API에 접근하지
 않으므로 `KUBECONFIG`가 필요하지 않습니다.
 
+Secret sealing은 일반 Pipeline 변수로 활성화하지 않습니다. `Build` →
+`Pipelines` → `New pipeline`에서 `feature/clean-gitops-layout`을 선택하고,
+`Inputs`의 boolean `update_secrets`를 `true`로 설정한 뒤 Pipeline을 실행하고
+`seal:workload-secrets` 수동 Job을 시작합니다. 입력의 기본값은 `false`이며,
+Secret 값은 Pipeline 화면이 아니라 GitLab CI/CD Variables에만 입력합니다.
+이 입력은 root `.gitlab-ci.yml`의 `spec:inputs`로 선언되므로, 일반 Pipeline
+변수 override 권한을 완화하지 않습니다. Inputs가 비어 있으면 최신 feature
+branch CI 설정이 로드되었는지 확인합니다.
+
+서비스 저장소의 image tag update Job은 이 sealing flow와 별개이며,
+`lime985340` Group에서 상속한 `GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`,
+`GITOPS_BRANCH`를 사용합니다.
+
 각 변수의 입력 형식은 [Secret Variables 입력 가이드](docs/secret-variables.md)를
 참고합니다. 주요 변수는 다음과 같습니다.
 

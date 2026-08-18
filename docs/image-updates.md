@@ -44,16 +44,35 @@ GITOPS_PUSH_TOKEN_USER
 GITOPS_BRANCH
 ```
 
-`GITOPS_PUSH_TOKEN` and `GITOPS_PUSH_TOKEN_USER` are ordinary single-line
-`Variable` values, not `File` variables. The token should be Masked only when
-GitLab's masking constraints allow it. `GITOPS_PUSH_TOKEN_USER` is not secret in
-the same way, but keep it protected with the token and do not print it
-unnecessarily. `GITOPS_BRANCH` is a non-secret Variable; while this feature
-branch is being tested, set it to `feature/clean-gitops-layout`.
-The token needs `write_repository` permission on the GitOps repository. The
-service CI does not need Kubernetes access, a kubeconfig, or Argo CD access.
-The generated GitOps commit uses `[skip ci]`, so it does not create a loop in
-the GitOps validation pipeline.
+These variables may be managed once as protected variables in the
+`lime985340` GitLab Group and inherited by both service projects. They are used
+only by the service repositories' cross-project image-update jobs. The GitOps
+repository's own `seal:workload-secrets` job uses the predefined `CI_JOB_TOKEN`
+instead and does not use these Group variables.
+
+While the feature branch is being tested, set the inherited `GITOPS_BRANCH` to
+`feature/clean-gitops-layout`; change it to `main` only after the GitOps changes
+are merged and the service CI contract is intentionally switched. The service
+jobs allow only `feature/clean-gitops-layout` and `main` as target branches.
+
+The service variables are intentionally Group-level rather than duplicated in
+each service project. Keep the token protected with the selected service refs,
+and ensure the token identity is allowed to push the protected GitOps branch.
+The `GITOPS_PUSH_TOKEN_USER` value must match the username generated for the
+chosen token type. Do not print either token variable in CI logs.
+
+The GitOps sealing flow is separate. Its project-level variables are
+`SEALED_SECRETS_CERT`, the `ATMO_API_*_ENV` File variables, and the Registry
+username/token pair described in [secret-variables.md](secret-variables.md).
+The GitOps project does not need a duplicate `GITOPS_*` variable for sealing.
+The service image-update variables are not Registry credentials, and Registry
+credentials are not used for Git pushes.
+
+The service repositories need no Kubernetes, kubeconfig, or Argo CD access for
+this flow. The generated GitOps commit uses `[skip ci]`, so it does not create a
+validation loop in the GitOps pipeline. Current image tags remain usable until
+a service publishes a replacement; no service image needs to be rebuilt merely
+because the GitOps feature branch exists.
 
 ## Manual service CI flow
 
@@ -72,6 +91,11 @@ umask 077
 : "${GITOPS_PUSH_TOKEN:?GITOPS_PUSH_TOKEN is required}"
 : "${GITOPS_PUSH_TOKEN_USER:?GITOPS_PUSH_TOKEN_USER is required}"
 : "${GITOPS_BRANCH:?GITOPS_BRANCH is required}"
+
+case "$GITOPS_BRANCH" in
+  feature/clean-gitops-layout|main) ;;
+  *) printf '%s\n' 'Unsupported GitOps branch' >&2; exit 1 ;;
+esac
 
 askpass_file="$(mktemp)"
 cleanup() { rm -f "$askpass_file"; }
@@ -104,7 +128,7 @@ git config user.email "gitlab-ci[bot]@users.noreply.gitlab.com"
 git add workloads/atmo/api/environments/dev/kustomization.yaml
 git commit -m "chore: deploy atmo-api ${CI_COMMIT_SHORT_SHA} [skip ci]"
 git -c credential.helper= -c http.followRedirects=false \
-  push origin "$GITOPS_BRANCH"
+  push origin "HEAD:$GITOPS_BRANCH"
 ~~~
 
 `GITOPS_PUSH_TOKEN_USER` must match the generated username for the token
@@ -113,11 +137,11 @@ appropriate for OAuth-style credentials, not a universal username. The token
 needs `write_repository` permission on the GitOps repository. `write_repository`
 does not bypass Protected branch rules, so the token identity must also be
 allowed to push the selected branch. Protected variables are unavailable on
-unprotected refs; protect the test branch or run this flow from the protected
-release branch before enabling Protected on the variables.
+unprotected refs; protect the service refs that run these jobs or use an
+appropriate protected release ref before enabling Protected on the variables.
 
 Keep `CI_DEBUG_TRACE`, `set -x`, and all Git tracing disabled. Do not print the
 token, certificate, plaintext Secret, or kubeconfig, and do not store them in
-artifacts. The GitOps CI then validates the changed Kustomize output, and Argo
-CD detects the commit and deploys the new image. The GitOps repository does not
+artifacts. The GitOps CI validates the changed Kustomize output, and Argo CD
+detects the commit and deploys the new image. The GitOps repository does not
 need access to the service repository.

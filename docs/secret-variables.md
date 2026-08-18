@@ -83,9 +83,8 @@ branch 정책은 그대로 적용됩니다. 이 설정을 켜도 Job token이 Pr
 저장소로 Push하는 별도 흐름은 여전히 `docs/image-updates.md`의
 `GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH` 계약을 사용합니다.
 
-Protected 변수는 Protected ref에서만 Job에 전달됩니다. Feature 브랜치에서
-Protected 변수를 사용하려면 해당 브랜치를 보호하거나, Secret sealing을
-Protected release 브랜치에서만 실행하도록 운영 정책을 정해야 합니다.
+Protected 변수는 Protected ref에서만 Job에 전달됩니다. 현재 sealing 대상인
+`feature/clean-gitops-layout` 브랜치는 Protected로 관리합니다.
 
 ### API DB/Redis
 
@@ -228,8 +227,7 @@ credential이 두 프로젝트의 이미지를 모두 읽을 수 있어야 합�
 
 이 JSON은 예시 구조일 뿐이며 GitLab 변수에 직접 입력하지 않습니다. Registry
 username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. 기존
-`GITLAB_REGISTRY_DOCKER_CONFIG` File 변수는 새 CI 코드가 배포된 뒤 더 이상 사용하지
-않습니다.
+`GITLAB_REGISTRY_DOCKER_CONFIG` File 변수는 사용하지 않습니다.
 
 ## 변수와 SealedSecret 매핑
 
@@ -260,31 +258,49 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 ## 동기화 실행
 
 1. 위 GitLab 변수를 등록하거나 수정합니다.
-2. `Build` → `Pipelines`에서 Pipeline을 실행합니다.
-3. 수동 작업 `seal:workload-secrets`를 실행합니다.
-4. CI가 `kubeseal`로 YAML을 생성하고 현재 브랜치에 Push합니다.
-5. GitOps validation Job이 변경사항을 검증합니다.
-6. Argo CD가 변경된 SealedSecret을 동기화합니다.
-7. Controller가 일반 Kubernetes Secret을 생성하면 API/Web이 새 값을 사용합니다.
+2. `Build` → `Pipelines` → `New pipeline`에서
+   `feature/clean-gitops-layout`을 선택합니다.
+3. `Inputs`의 boolean `update_secrets`를 `true`로 설정하고 Pipeline을 실행합니다.
+4. 수동 작업 `seal:workload-secrets`를 실행합니다.
+5. CI가 `kubeseal`로 YAML을 생성하고 현재 브랜치에 Push합니다.
+6. GitOps validation Job이 변경사항을 검증합니다.
+7. Argo CD가 변경된 SealedSecret을 동기화합니다.
+8. Controller가 일반 Kubernetes Secret을 생성하면 API/Web이 새 값을 사용합니다.
 
-Secret 값을 변경할 때마다 Git 커밋이 생성됩니다. 애플리케이션이 값을 시작
-시점에만 읽는다면 Secret 동기화 후 해당 Deployment를 재시작해야 합니다.
+Secret 값은 GitLab CI/CD Variables에만 저장하며 Pipeline 입력 화면에는 입력하지
+않습니다. 일반 `UPDATE_SECRETS` Pipeline 변수는 사용하지 않습니다.
 
 ## Pipeline trigger
 
 Normal pushes run the manifest validation jobs only. The Secret sealing job is
-created only when starting a pipeline manually with the variable below:
+created only for a manually started web pipeline whose typed input is enabled.
 
-```text
-UPDATE_SECRETS=true
-```
+The `update_secrets` boolean input is declared by the root `spec:inputs` section
+in `.gitlab-ci.yml`. Its default is `false`, and push pipelines cannot create the
+sealing job. If the Inputs section is empty, ensure the updated feature-branch CI
+configuration has been loaded; do not loosen the project setting that disallows
+ad-hoc pipeline variables.
 
-In GitLab, open `Build` → `Pipelines` → `New pipeline`, select the target
-branch, add `UPDATE_SECRETS=true` as a pipeline variable, and run the pipeline.
-Then start the `seal:workload-secrets` manual job. The job renders the generated
-workload manifests before pushing. A push authenticated with `CI_JOB_TOKEN` does not
-start another pipeline, and the sealing job's manual web-pipeline rule prevents a
-recursive sealing run.
+A push authenticated with `CI_JOB_TOKEN` does not start another pipeline, and the
+sealing job's manual web-pipeline rule prevents a recursive sealing run. The
+GitOps sealing job uses `CI_JOB_TOKEN`; the service repositories' separate
+image-update jobs use `GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`, and
+`GITOPS_BRANCH`, inherited from the `lime985340` Group.
+
+### GitLab project metadata
+
+Keep the sealing variables in the GitOps project with the documented types and
+protect them according to the branch policy. The GitOps project does not need a
+`GITOPS_PUSH_TOKEN` or the legacy `GITLAB_REGISTRY_DOCKER_CONFIG` variable.
+Protected variables are provided only to Protected refs, so the selected feature
+branch must remain Protected when the sealing job needs those values.
+
+The GitLab project setting that disallows ordinary pipeline-variable overrides is
+intentional and remains unchanged; typed CI inputs are the supported operator
+control for this manual job.
+
+Secret 값을 변경할 때마다 Git 커밋이 생성됩니다. 애플리케이션이 값을 시작
+시점에만 읽는다면 Secret 동기화 후 해당 Deployment를 재시작해야 합니다.
 
 ## GitLab Runner
 

@@ -344,9 +344,20 @@ awk '/^encryptedData:[[:space:]]*$/ { in_data=1; next } in_data && /^[^[:space:]
 
 GitOps 저장소 자체에 대한 CI Push는 GitLab 사전 정의 `CI_JOB_TOKEN`을 사용하므로
 `GITOPS_PUSH_TOKEN`과 `GITOPS_PUSH_TOKEN_USER`는 이 Job에 등록하지 않습니다.
-서비스 저장소의 image update Job이 이 저장소로 Push하는 별도 흐름에서는 두 변수가
-여전히 필요합니다. 실제 값을 모두 등록하기 전에는 `UPDATE_SECRETS=true` 파이프라인을
-실행하지 않습니다.
+이 변수들은 서비스 저장소가 새 image tag를 GitOps 저장소에 반영할 때 사용하는
+별도 Group 변수입니다. 실제 값을 모두 등록하고 대상 Protected branch를 확인한
+뒤에만 sealing을 실행합니다.
+
+Sealing 실행은 일반 Pipeline 변수 `UPDATE_SECRETS`를 사용하지 않습니다. GitLab의
+`Build` → `Pipelines` → `New pipeline`에서 `feature/clean-gitops-layout`을
+선택하고 `Inputs`의 boolean `update_secrets`를 `true`로 설정한 뒤 Pipeline을
+실행하고 `seal:workload-secrets` 수동 Job을 시작합니다. Secret 값은 Pipeline
+입력 화면이 아니라 GitLab CI/CD Variables에만 둡니다. `spec:inputs`가 반영된
+최신 CI 설정인데도 Inputs가 비어 있으면 feature branch의 YAML이 로드되었는지
+확인하며, 일반 Pipeline 변수 override 권한을 완화하지 않습니다.
+
+실제 값과 Protected ref 정책을 확인하기 전에는 sealing을 실행하지 않습니다.
+
 
 ## 문제 해결과 갱신
 

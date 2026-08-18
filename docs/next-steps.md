@@ -39,16 +39,25 @@ Registry JSON이나 `auth` 값은 직접 만들지 않으며, CI가 username/tok
 
 Secret 값을 입력한 뒤 다음 순서로 실행합니다.
 
-1. GitLab에서 `New pipeline`을 선택합니다.
+1. GitLab에서 `Build` → `Pipelines` → `New pipeline`을 선택합니다.
 2. 대상 브랜치로 `feature/clean-gitops-layout`을 선택합니다.
-3. Pipeline 변수 `UPDATE_SECRETS=true`를 추가합니다.
-4. 수동 Job `seal:workload-secrets`를 실행합니다.
+3. `Inputs`에서 boolean 입력 `update_secrets`를 `true`로 설정합니다.
+4. Pipeline을 실행한 뒤 수동 Job `seal:workload-secrets`를 실행합니다.
 5. CI가 `kubeseal`로 암호화된 YAML을 생성하고 현재 브랜치에 Push합니다.
 6. Argo CD가 변경사항을 동기화하는지 확인합니다.
 
+`update_secrets`는 root `.gitlab-ci.yml`의 `spec:inputs`로 선언된 입력입니다.
+따라서 일반 Pipeline 변수 `UPDATE_SECRETS`를 추가하지 않으며, Secret 값도
+Pipeline 입력 화면에 입력하지 않습니다. Inputs가 보이지 않는다면 최신
+feature 브랜치의 CI 설정이 반영되었는지 확인합니다. Pipeline 변수 override
+권한을 완화하는 방식으로 우회하지 않습니다.
+
+기본값은 `false`이므로 입력을 `true`로 선택한 웹 Pipeline에서만 sealing Job이
+생성됩니다. Push Pipeline에서는 생성되지 않습니다.
+
 `Protected` 변수를 사용할 경우 이 대상 브랜치가 GitLab의 Protected ref여야
-합니다. 그렇지 않으면 변수는 Job에 전달되지 않습니다. Feature 브랜치를 보호하거나
-Protected release 브랜치에서 이 작업을 실행하는 정책을 먼저 확정합니다.
+합니다. 그렇지 않으면 변수는 Job에 전달되지 않습니다. 현재 feature 브랜치는
+sealing 실행을 위해 Protected로 관리합니다.
 
 생성되는 파일은 다음 네 개입니다.
 
@@ -76,22 +85,24 @@ Controller Private Key 백업은 Git 저장소 밖의 암호화되고 접근이 
 ## 현재 진행하지 않는 작업
 
 - 서비스 API/Web 저장소 CI 연동 코드는 각 저장소의
-  `feature/clean-gitops-layout` 브랜치에 반영했습니다. 실제 Pipeline 실행을
-  위해서는 각 서비스 저장소에 `GITOPS_PUSH_TOKEN`과
-  `GITOPS_PUSH_TOKEN_USER`를 등록해야 합니다.
+  `feature/clean-gitops-layout` 브랜치에 반영했습니다. 두 저장소는
+  `lime985340` Group에서 상속한 `GITOPS_PUSH_TOKEN`,
+  `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH`를 사용합니다.
 - Feature 브랜치 참조를 `main`으로 변경: Feature 브랜치 검증을 위해 현재 상태 유지
 - 실제 Secret 값의 GitLab 등록: 값 준비 후 수동으로 진행
-- 새 Registry 변수(`GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`) 등록 후
-  기존 `GITLAB_REGISTRY_DOCKER_CONFIG` placeholder는 별도 정리
-- GitOps sealing Job은 `CI_JOB_TOKEN` repository push 설정이 필요하며, 현재
-  프로젝트 설정을 확인한 뒤 Protected branch 정책을 별도로 결정
-- Protected 변수는 Protected ref에서만 전달되므로, 현재 feature 브랜치에서
-  사용할지 Protected branch 정책을 먼저 결정
-- 기존 `GITOPS_PUSH_TOKEN`은 새 sealing 코드 배포와 수동 검증이 끝난 뒤에만 삭제
-  (서비스 저장소의 별도 image update token은 유지)
-- 서비스 저장소의 image update CI에는 `GITOPS_PUSH_TOKEN`과
-  `GITOPS_PUSH_TOKEN_USER`가 모두 필요하며, `GITOPS_BRANCH`는 현재
-  `feature/clean-gitops-layout`로 설정해야 함
+- GitOps sealing Job은 `CI_JOB_TOKEN` repository push 설정과 Protected branch를
+  사용하며, 서비스 image update용 Group token과 분리됩니다.
+- 서비스 저장소의 image update CI에는 Group의
+  `GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH`가 필요하며,
+  현재 `GITOPS_BRANCH`는 `feature/clean-gitops-layout`로 설정합니다.
+- 기존 `GITLAB_REGISTRY_DOCKER_CONFIG`는 사용하지 않으며, Registry JSON과
+  `auth`는 CI가 생성합니다.
+- API release tag Pipeline을 사용할 때는 atmo-api의 `v*` Protected tag 정책도
+  atmo-web과 일치하는지 확인합니다.
+- 일반 Pipeline 변수 override 권한은 완화하지 않고 현재 `no_one_allowed` 정책을
+  유지합니다.
+- 실제 image update Pipeline은 서비스 코드가 변경되어 새 이미지를 만들 때만
+  실행되며, 현재 GitOps에 기록된 image tag는 그대로 사용할 수 있습니다.
 - 실제 atmo-api OAuth 값은 `secret-variables.md`의 `KAKAO_*`, `GOOGLE_*`,
   `NAVER_*` 키 형식을 사용하고, atmo-web에는 OAuth client secret을 넣지 않음
 

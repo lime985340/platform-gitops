@@ -131,23 +131,19 @@ PUBLIC_SERVICE_KEY=PUBLIC_DATA_SERVICE_KEY_VALUE
 
 변수명:
 
-- `GITLAB_REGISTRY_DOCKER_CONFIG`
+- `GITLAB_REGISTRY_USERNAME`
+- `GITLAB_REGISTRY_TOKEN`
 
-`registry.gitlab.com` private 이미지를 Pull할 수 있는 Docker `config.json`
-전체 내용을 File 변수로 입력합니다.
+`registry.gitlab.com` private 이미지를 Pull할 수 있는 사용자명과 토큰을
+일반 CI/CD 변수로 입력합니다. CI가 `kubectl create secret docker-registry`로
+`gitlab-regcred` Secret을 생성한 뒤 SealedSecret으로 암호화합니다.
 
-```json
-{
-  "auths": {
-    "registry.gitlab.com": {
-      "username": "gitlab+deploy-token-123456",
-      "password": "DEPLOY_TOKEN_VALUE",
-      "auth": "BASE64_OF_USERNAME_COLON_TOKEN"
-    }
-  }
-}
+```text
+GITLAB_REGISTRY_USERNAME=gitlab+deploy-token-123456
+GITLAB_REGISTRY_TOKEN=DEPLOY_TOKEN_VALUE
 ```
 
+Docker `config.json`을 직접 저장하지 않습니다.
 Deploy Token에는 `read_registry` 권한만 부여하는 것을 권장합니다.
 
 ## 변수와 SealedSecret 매핑
@@ -162,7 +158,7 @@ Deploy Token에는 `read_registry` 권한만 부여하는 것을 권장합니다
 | `ATMO_API_PROD_JWT_ENV` | `atmo-api-prod` | `atmo-jwt-secret` |
 | `ATMO_API_PROD_OAUTH_ENV` | `atmo-api-prod` | `atmo-oauth-secret` |
 | `ATMO_API_PROD_PUBLICDATA_ENV` | `atmo-api-prod` | `atmo-publicdata-secret` |
-| `GITLAB_REGISTRY_DOCKER_CONFIG` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
+| `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
 
 생성되는 파일은 다음과 같습니다.
 

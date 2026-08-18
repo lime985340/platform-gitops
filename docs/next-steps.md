@@ -21,7 +21,8 @@
 - `ATMO_API_PROD_JWT_ENV`
 - `ATMO_API_PROD_OAUTH_ENV`
 - `ATMO_API_PROD_PUBLICDATA_ENV`
-- `GITLAB_REGISTRY_DOCKER_CONFIG` - GitLab Container Registry Pull 인증 파일, `File` 변수
+- `GITLAB_REGISTRY_USERNAME` - GitLab Container Registry 사용자명
+- `GITLAB_REGISTRY_TOKEN` - `read_registry` 권한이 있는 GitLab Container Registry 토큰
 
 변수의 실제 환경변수 형식과 예시는
 [`secret-variables.md`](secret-variables.md)에 기록되어 있습니다.

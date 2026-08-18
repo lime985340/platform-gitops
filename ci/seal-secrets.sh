@@ -69,19 +69,22 @@ seal_env_secret() {
 seal_registry_secret() {
   output="$1"
   namespace="$2"
-  docker_config="${GITLAB_REGISTRY_DOCKER_CONFIG:-}"
   plain_manifest="$tmp_dir/${namespace}-gitlab-regcred.yaml"
   sealed_manifest="$tmp_dir/${namespace}-gitlab-regcred-sealed.yaml"
 
-  if [ -z "$docker_config" ] || [ ! -f "$docker_config" ]; then
-    echo "Missing GitLab File variable: GITLAB_REGISTRY_DOCKER_CONFIG" >&2
+  registry_username="${GITLAB_REGISTRY_USERNAME:-}"
+  registry_token="${GITLAB_REGISTRY_TOKEN:-}"
+
+  if [ -z "$registry_username" ] || [ -z "$registry_token" ]; then
+    echo "Missing GitLab variables: GITLAB_REGISTRY_USERNAME and GITLAB_REGISTRY_TOKEN" >&2
     exit 1
   fi
 
-  kubectl create secret generic gitlab-regcred \
+  kubectl create secret docker-registry gitlab-regcred \
     --namespace "$namespace" \
-    --type kubernetes.io/dockerconfigjson \
-    --from-file=.dockerconfigjson="$docker_config" \
+    --docker-server=registry.gitlab.com \
+    --docker-username="$registry_username" \
+    --docker-password="$registry_token" \
     --dry-run=client \
     --output yaml > "$plain_manifest"
 

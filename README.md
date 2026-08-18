@@ -7,7 +7,9 @@ never committed to Git; only encrypted `SealedSecret` data is stored.
 Cluster and Argo CD installation prerequisites are documented in
 [`docs/cluster-bootstrap.md`](docs/cluster-bootstrap.md).
 Sealed Secrets recovery is documented in
-[`docs/sealed-secrets-recovery.md`](docs/sealed-secrets-recovery.md), and
+[`docs/sealed-secrets-recovery.md`](docs/sealed-secrets-recovery.md).
+The Controller public certificate and GitLab variable setup are described in
+[`docs/sealed-secrets-certificate.md`](docs/sealed-secrets-certificate.md), and
 service CI image tag updates are described in
 [`docs/image-updates.md`](docs/image-updates.md).
 Pending Secret setup and remaining verification work are tracked in
@@ -31,16 +33,26 @@ GitLab CI Variables
 ```
 
 수동 작업 `seal:workload-secrets`가 공개 인증서로 Secret을 암호화하고,
-암호화된 YAML을 현재 브랜치에 `[skip ci]` 커밋으로 Push합니다. CI는
-Kubernetes API에 접근하지 않으므로 `KUBECONFIG`가 필요하지 않습니다.
+암호화된 YAML을 현재 브랜치에 Push합니다. 같은 GitOps 프로젝트의 CI Job은
+GitLab의 사전 정의 `CI_JOB_TOKEN`으로 Push하며, CI는 Kubernetes API에 접근하지
+않으므로 `KUBECONFIG`가 필요하지 않습니다.
 
 각 변수의 입력 형식은 [Secret Variables 입력 가이드](docs/secret-variables.md)를
 참고합니다. 주요 변수는 다음과 같습니다.
 
-- `SEALED_SECRETS_CERT`: Controller 공개 인증서, `File` 타입
-- `GITOPS_PUSH_TOKEN`: 암호화 YAML Push 권한이 있는 토큰
-- `ATMO_API_DEV_*`, `ATMO_API_PROD_*`: API 환경별 File 변수
-- `GITLAB_REGISTRY_DOCKER_CONFIG`: Registry 인증 설정 File 변수
+- `SEALED_SECRETS_CERT`: Controller 공개 인증서 전체 PEM, `File` 타입
+- `GITLAB_REGISTRY_USERNAME`: 두 서비스 이미지에 접근할 Registry username, 일반 `Variable`
+- `GITLAB_REGISTRY_TOKEN`: 두 서비스 이미지에 `read_registry` 권한이 있는 token, 일반 `Variable`
+- `ATMO_API_DEV_*`, `ATMO_API_PROD_*`: `KEY=VALUE` 형식의 API 환경별 `File` 변수
+
+CI가 Registry username/token으로 Docker 인증 JSON과 `auth` 값을 내부에서 생성하므로,
+`GITLAB_REGISTRY_DOCKER_CONFIG` File 변수나 수동 Base64 계산은 사용하지 않습니다.
+서비스 저장소가 GitOps 저장소로 image tag를 Push하는 별도 흐름은
+[image update guide](docs/image-updates.md)의 토큰 계약을 따릅니다.
+
+`ATMO_API_*_ENV` 파일은 한 줄에 하나의 `KEY=VALUE`를 작성하며 `export`, YAML,
+JSON 또는 Markdown 코드 펜스를 포함하지 않습니다. 실제 키 이름과 각 변수의
+매핑은 [Secret Variables 입력 가이드](docs/secret-variables.md)를 따릅니다.
 
 Kubernetes Secret 이름은 기존과 동일합니다. API는 DB, JWT, OAuth,
 Publicdata Secret을 사용하고 API/Web의 private 이미지 Pull에는

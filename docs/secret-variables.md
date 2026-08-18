@@ -13,14 +13,12 @@
 관리합니다. Controller가 사용하는 Private Key는 클러스터 외부의 안전한 백업에도
 보관해야 하며 Git에는 저장하지 않습니다.
 
-로컬에서 처음 인증서를 가져올 때만 Kubernetes 접근이 필요합니다.
+로컬에서 처음 인증서를 가져올 때만 Kubernetes 접근이 필요합니다. Controller의 실제
+namespace·Service 이름, Windows 셸별 명령, context 확인, PEM 검증 절차는
+[`sealed-secrets-certificate.md`](sealed-secrets-certificate.md)를 따릅니다.
 
-```bash
-kubeseal --fetch-cert > sealed-secrets.crt
-```
-
-이후 `sealed-secrets.crt`는 공개 인증서이므로 GitLab의 File Variable로 등록해
-CI에서 사용할 수 있습니다. 인증서가 갱신되면 다시 가져와 변수를 교체합니다.
+이후 공개 인증서의 전체 PEM 내용은 GitLab의 File Variable로 등록해 CI에서 사용할
+수 있습니다. 인증서가 갱신되면 같은 절차로 다시 가져와 변수를 교체합니다.
 
 ## GitLab 변수 등록
 
@@ -30,12 +28,41 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 
 다음 원칙으로 등록합니다.
 
-- 여러 줄 값은 `Type: File`로 등록
-- 운영 값은 `Protected`로 등록하고 실행 권한을 제한
-- Secret 값은 `Masked` 또는 `Masked and hidden`을 사용
-- 변수의 Value에는 파일 경로가 아니라 파일의 실제 내용을 입력
-- `GITOPS_PUSH_TOKEN`은 대상 저장소에 `write_repository` 권한이 있는
-  Project Access Token 또는 동일한 권한의 토큰으로 등록
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`처럼 Job에 파일 경로로 전달되는 값은
+  내용이 한 줄이어도 `Type: File`로 등록
+- `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`처럼 한 줄로 전달되는 값은
+  `Type: Variable`로 등록
+- 이 GitOps 프로젝트의 sealing Job은 별도 Push token이 아니라 GitLab 사전 정의
+  `CI_JOB_TOKEN`을 사용합니다. GitLab 프로젝트에서 Job token의 repository push를
+  허용하고, 대상 Protected branch 정책도 맞아야 합니다.
+- 운영 값은 `Protected`로 등록하고 실행 ref와 권한을 제한
+- GitLab masking 조건을 충족하는 단일 행 Secret만 `Masked` 또는
+  `Masked and hidden`으로 등록
+- multiline File 변수에는 Masked 설정을 강제하지 않음
+- File 변수의 Value에는 파일 경로가 아니라 파일의 실제 내용을 입력하며,
+  Job 안에서는 GitLab이 만들어 준 임시 파일 경로로 제공됨
+- `GITLAB_REGISTRY_TOKEN`은 `atmo-api`와 `atmo-web` 두 이미지 프로젝트를 읽을 수
+  있는 `read_registry` 권한만 부여한 credential을 사용
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`는 multiline File 변수이므로 Masked를
+  요구하지 않음; 대신 Protected, scope, 접근 권한과 로그 미출력으로 보호
+- `GITLAB_REGISTRY_USERNAME`은 일반 Variable로 등록하고, `GITLAB_REGISTRY_TOKEN`은
+  일반 Variable로 등록하되 GitLab masking 조건을 충족하면 `Masked`와 `Protected`를
+  사용
+- 두 값은 로그에 출력하지 않으며, CI가 Job 내부의 임시 Docker config를 생성한 뒤 정리
+- `GITOPS_PUSH_TOKEN`과 `GITOPS_PUSH_TOKEN_USER`는 서비스 저장소가 별도 GitOps
+  저장소로 Push하는 흐름에서만 사용하며, 이 프로젝트의 sealing Job에는 등록하지 않음
+
+`CI_JOB_TOKEN`은 GitLab이 Job 실행 중 자동으로 제공하는 값이며 GitLab 변수 목록에
+직접 생성하지 않습니다. Job token repository push 설정이 비활성화되어 있거나
+Protected branch가 Push를 허용하지 않으면 sealing Job은 Push 단계에서 실패합니다.
+
+`ATMO_API_*_ENV` File 변수의 내용은 `kubectl create secret --from-env-file`에
+전달됩니다. 따라서 한 줄에 하나의 `KEY=VALUE`를 작성하고 `export`를 붙이지
+않습니다. YAML, JSON, Markdown 코드 펜스를 값에 포함하지 않으며, File 변수
+자체를 shell 스크립트나 GitLab dotenv artifact로 해석하지 않습니다. 따옴표는
+shell처럼 제거되지 않으므로 `KEY="value"`가 아니라 `KEY=value`로 작성합니다.
+빈 줄과 `#`로 시작하는 주석은 피하고, 값 안에 줄바꿈이 필요한 Secret은 이
+env-file 형식으로 표현하지 않습니다.
 
 ## 필요한 변수
 
@@ -44,11 +71,21 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 `kubeseal --fetch-cert`로 받은 Controller 공개 인증서 전체를 File 변수로
 등록합니다. Private Key는 입력하지 않습니다.
 
-### `GITOPS_PUSH_TOKEN`
+### GitOps sealing Job의 Push 인증
 
-CI가 생성한 암호화 YAML을 현재 Git 브랜치에 Push하기 위한 토큰입니다.
-값을 로그나 문서에 출력하지 않습니다. Feature 브랜치에서 Protected 변수를
-사용하려면 해당 브랜치가 보호되어 있어야 합니다.
+이 프로젝트의 `seal:workload-secrets`는 별도 `GITOPS_PUSH_TOKEN`이나
+`GITOPS_PUSH_TOKEN_USER`를 사용하지 않습니다. GitLab이 Job 실행 중 제공하는
+`CI_JOB_TOKEN`과 고정 username `gitlab-ci-token`으로 현재 GitOps 저장소에 Push합니다.
+
+GitLab 프로젝트에서 Job token의 repository push 허용 설정을 켜야 하며, Protected
+branch 정책은 그대로 적용됩니다. 이 설정을 켜도 Job token이 Protected branch
+제한을 우회하지는 않습니다. 저장소 외부의 `atmo-api`/`atmo-web` 서비스 CI가 이
+저장소로 Push하는 별도 흐름은 여전히 `docs/image-updates.md`의
+`GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH` 계약을 사용합니다.
+
+Protected 변수는 Protected ref에서만 Job에 전달됩니다. Feature 브랜치에서
+Protected 변수를 사용하려면 해당 브랜치를 보호하거나, Secret sealing을
+Protected release 브랜치에서만 실행하도록 운영 정책을 정해야 합니다.
 
 ### API DB/Redis
 
@@ -58,9 +95,9 @@ CI가 생성한 암호화 YAML을 현재 Git 브랜치에 Push하기 위한 토�
 - `ATMO_API_PROD_DB_ENV`
 
 ```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://db.example.com:5432/atmo
-SPRING_DATASOURCE_USERNAME=atmo
-SPRING_DATASOURCE_PASSWORD=DB_PASSWORD
+SPRING_DATASOURCE_URL=jdbc:postgresql://<DB_HOST>:5432/<DB_NAME>
+SPRING_DATASOURCE_USERNAME=<DB_USERNAME>
+SPRING_DATASOURCE_PASSWORD=<DB_PASSWORD>
 SPRING_REDIS_HOST=redis-master.redis.svc.cluster.local
 SPRING_REDIS_PORT=6379
 ```
@@ -75,13 +112,15 @@ SPRING_REDIS_PORT=6379
 - `ATMO_API_PROD_JWT_ENV`
 
 ```env
-JWT_ACCESS_SECRET=JWT_ACCESS_SECRET_VALUE
-JWT_REFRESH_SECRET=JWT_REFRESH_SECRET_VALUE
+JWT_ACCESS_SECRET=<LONG_RANDOM_ACCESS_SECRET>
+JWT_REFRESH_SECRET=<LONG_RANDOM_REFRESH_SECRET>
 JWT_ACCESS_TTL_SECONDS=900
-JWT_REFRESH_TTL_SECONDS=1209600
+JWT_REFRESH_TTL_SECONDS=2592000
 ```
 
-Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합니다.
+Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합니다. 키 이름은
+`JWT_ACCESS_SECRET`/`JWT_REFRESH_SECRET`이며, `APP_JWT_*`로 작성하지 않습니다.
+현재 Kustomize projected Secret이 이 키를 `/etc/secrets/app/jwt/...`로 전달합니다.
 
 ### OAuth
 
@@ -91,30 +130,42 @@ Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합�
 - `ATMO_API_PROD_OAUTH_ENV`
 
 ```env
-KAKAO_CLIENT_ID=KAKAO_CLIENT_ID_VALUE
-KAKAO_CLIENT_SECRET=KAKAO_CLIENT_SECRET_VALUE
-KAKAO_REDIRECT_URI=https://YOUR_HOST/login/oauth2/code/kakao
+KAKAO_CLIENT_ID=<KAKAO_CLIENT_ID>
+KAKAO_CLIENT_SECRET=<KAKAO_CLIENT_SECRET>
+KAKAO_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/kakao/callback
 KAKAO_AUTH_URI=https://kauth.kakao.com/oauth/authorize
 KAKAO_TOKEN_URI=https://kauth.kakao.com/oauth/token
 KAKAO_USERINFO_URI=https://kapi.kakao.com/v2/user/me
-KAKAO_SCOPE=profile_nickname,account_email
+KAKAO_SCOPE=<KAKAO_SCOPE>
 
-GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID_VALUE
-GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET_VALUE
-GOOGLE_REDIRECT_URI=https://YOUR_HOST/login/oauth2/code/google
+GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
+GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
+GOOGLE_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/google/callback
 GOOGLE_AUTH_URI=https://accounts.google.com/o/oauth2/v2/auth
 GOOGLE_TOKEN_URI=https://oauth2.googleapis.com/token
 GOOGLE_USERINFO_URI=https://openidconnect.googleapis.com/v1/userinfo
-GOOGLE_SCOPE=openid,profile,email
+GOOGLE_SCOPE=<GOOGLE_SCOPE>
 
-NAVER_CLIENT_ID=NAVER_CLIENT_ID_VALUE
-NAVER_CLIENT_SECRET=NAVER_CLIENT_SECRET_VALUE
-NAVER_REDIRECT_URI=https://YOUR_HOST/login/oauth2/code/naver
+NAVER_CLIENT_ID=<NAVER_CLIENT_ID>
+NAVER_CLIENT_SECRET=<NAVER_CLIENT_SECRET>
+NAVER_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/naver/callback
 NAVER_AUTH_URI=https://nid.naver.com/oauth2.0/authorize
 NAVER_TOKEN_URI=https://nid.naver.com/oauth2.0/token
 NAVER_USERINFO_URI=https://openapi.naver.com/v1/nid/me
-NAVER_SCOPE=name,email
+NAVER_SCOPE=<NAVER_SCOPE>
 ```
+
+이 블록은 현재 GitOps workload가 요구하는 **Secret 키 이름**과 일치합니다.
+Kustomize는 이 키를 `/etc/secrets/app/oauth/providers/...` 경로로 투영하고,
+Spring Boot `configtree`가 `app.oauth` 설정으로 읽습니다. API 애플리케이션의
+환경 변수 이름을 직접 사용하는 별도 실행 방식에서는 `APP_OAUTH_*` 이름이
+사용될 수 있지만, 이 GitOps File 변수와 Kubernetes Secret에는 위의
+`KAKAO_*`, `GOOGLE_*`, `NAVER_*` 키를 사용합니다.
+
+각 provider의 `*_SCOPE` 값은 해당 provider가 요구하는 형식으로 입력합니다.
+예를 들어 공백으로 구분되는 scope는 쉼표로 바꾸지 않습니다. Redirect URI는
+실제 API 호스트와 provider 콘솔에 등록한 값으로 바꾸고, `/api/v1/auth/oauth/...
+/callback` 경로를 유지합니다.
 
 ### 공공데이터 API
 
@@ -124,31 +175,61 @@ NAVER_SCOPE=name,email
 - `ATMO_API_PROD_PUBLICDATA_ENV`
 
 ```env
-PUBLIC_SERVICE_KEY=PUBLIC_DATA_SERVICE_KEY_VALUE
+PUBLIC_SERVICE_KEY=<PUBLIC_DATA_SERVICE_KEY>
 ```
+
+이 키 이름은 API Deployment와 ingestion CronJob이 projected Secret에서 읽는 이름과
+같습니다. 내용이 한 줄이어도 CI가 `--from-env-file`에 파일 경로를 전달하므로 이
+변수는 `File` 타입으로 등록합니다.
+
+### atmo-web 빌드 변수
+
+atmo-web의 다음 값은 GitOps `ATMO_API_*_ENV` File 변수에 넣지 않습니다. 서비스
+저장소의 CI/CD Variables에서 각각 일반 `Variable`로 설정하고 Docker build argument로
+전달합니다.
+
+```text
+VITE_API_BASE_URL=/api/v1
+VITE_KAKAO_APP_KEY=<PUBLIC_KAKAO_APP_KEY>
+```
+
+`VITE_KAKAO_APP_KEY`는 프런트엔드 번들에 포함되는 공개 값입니다. OAuth client
+secret은 이 변수나 frontend에 넣지 말고 API의 `ATMO_API_DEV_OAUTH_ENV` 또는
+`ATMO_API_PROD_OAUTH_ENV` File 변수에만 입력합니다.
 
 ### GitLab Container Registry
 
+서비스 이미지가 `registry.gitlab.com/lime985340/atmo-api`와
+`registry.gitlab.com/lime985340/atmo-web`에서 Pull되므로, 하나의 Registry
+credential이 두 프로젝트의 이미지를 모두 읽을 수 있어야 합니다. GitOps 프로젝트
+하나에만 만든 Deploy Token은 Pull 권한이 부족할 수 있습니다.
+
 변수명:
 
-- `GITLAB_REGISTRY_DOCKER_CONFIG`
+- `GITLAB_REGISTRY_USERNAME` - 일반 `Variable`
+- `GITLAB_REGISTRY_TOKEN` - 일반 `Variable`
 
-`registry.gitlab.com` private 이미지를 Pull할 수 있는 Docker `config.json`
-전체 내용을 File 변수로 입력합니다.
+두 값 모두 GitLab CI/CD Variables에 한 줄로 입력합니다. `GITLAB_REGISTRY_TOKEN`에는
+두 이미지 프로젝트에 대한 `read_registry` 권한만 부여합니다. 사용자가 Docker
+`config.json`을 만들거나 `auth`를 Base64로 계산할 필요는 없습니다. CI가 Job 내부의
+보호된 임시 디렉터리에 다음 구조를 생성한 뒤 SealedSecret으로 암호화합니다.
 
 ```json
 {
   "auths": {
     "registry.gitlab.com": {
-      "username": "gitlab+deploy-token-123456",
-      "password": "DEPLOY_TOKEN_VALUE",
-      "auth": "BASE64_OF_USERNAME_COLON_TOKEN"
+      "username": "<GITLAB_REGISTRY_USERNAME>",
+      "password": "<GITLAB_REGISTRY_TOKEN>",
+      "auth": "<CI가 username:token 전체를 Base64로 생성>"
     }
   }
 }
 ```
 
-Deploy Token에는 `read_registry` 권한만 부여하는 것을 권장합니다.
+이 JSON은 예시 구조일 뿐이며 GitLab 변수에 직접 입력하지 않습니다. Registry
+username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. 기존
+`GITLAB_REGISTRY_DOCKER_CONFIG` File 변수는 새 CI 코드가 배포된 뒤 더 이상 사용하지
+않습니다.
 
 ## 변수와 SealedSecret 매핑
 
@@ -162,7 +243,7 @@ Deploy Token에는 `read_registry` 권한만 부여하는 것을 권장합니다
 | `ATMO_API_PROD_JWT_ENV` | `atmo-api-prod` | `atmo-jwt-secret` |
 | `ATMO_API_PROD_OAUTH_ENV` | `atmo-api-prod` | `atmo-oauth-secret` |
 | `ATMO_API_PROD_PUBLICDATA_ENV` | `atmo-api-prod` | `atmo-publicdata-secret` |
-| `GITLAB_REGISTRY_DOCKER_CONFIG` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
+| `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
 
 생성되는 파일은 다음과 같습니다.
 
@@ -181,9 +262,10 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 1. 위 GitLab 변수를 등록하거나 수정합니다.
 2. `Build` → `Pipelines`에서 Pipeline을 실행합니다.
 3. 수동 작업 `seal:workload-secrets`를 실행합니다.
-4. CI가 `kubeseal`로 YAML을 생성하고 `[skip ci]` 커밋으로 현재 브랜치에 Push합니다.
-5. Argo CD가 변경된 SealedSecret을 동기화합니다.
-6. Controller가 일반 Kubernetes Secret을 생성하면 API/Web이 새 값을 사용합니다.
+4. CI가 `kubeseal`로 YAML을 생성하고 현재 브랜치에 Push합니다.
+5. GitOps validation Job이 변경사항을 검증합니다.
+6. Argo CD가 변경된 SealedSecret을 동기화합니다.
+7. Controller가 일반 Kubernetes Secret을 생성하면 API/Web이 새 값을 사용합니다.
 
 Secret 값을 변경할 때마다 Git 커밋이 생성됩니다. 애플리케이션이 값을 시작
 시점에만 읽는다면 Secret 동기화 후 해당 Deployment를 재시작해야 합니다.
@@ -199,8 +281,10 @@ UPDATE_SECRETS=true
 
 In GitLab, open `Build` → `Pipelines` → `New pipeline`, select the target
 branch, add `UPDATE_SECRETS=true` as a pipeline variable, and run the pipeline.
-Then start the `seal:workload-secrets` manual job. The generated commit uses
-`[skip ci]`, so it does not create another pipeline.
+Then start the `seal:workload-secrets` manual job. The job renders the generated
+workload manifests before pushing. A push authenticated with `CI_JOB_TOKEN` does not
+start another pipeline, and the sealing job's manual web-pipeline rule prevents a
+recursive sealing run.
 
 ## GitLab Runner
 

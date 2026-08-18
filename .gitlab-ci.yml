@@ -29,26 +29,50 @@ seal:workload-secrets:
   stage: secrets
   resource_group: gitops-sealed-secrets
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "web" && $UPDATE_SECRETS == "true"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $UPDATE_SECRETS == "true" && $CI_COMMIT_BRANCH != ""'
       when: manual
       allow_failure: false
     - when: never
   script:
     - |
       set -eu
+      test -n "${CI_COMMIT_BRANCH:-}" || (echo "Secret sealing requires a branch pipeline" >&2; exit 1)
+      test "${CI_DEBUG_TRACE:-false}" != "true" || (echo "CI_DEBUG_TRACE must be disabled for secret sealing" >&2; exit 1)
       test -n "${SEALED_SECRETS_CERT:-}" || (echo "SEALED_SECRETS_CERT must be configured as a GitLab File variable" >&2; exit 1)
       test -f "$SEALED_SECRETS_CERT" || (echo "SEALED_SECRETS_CERT does not point to a file" >&2; exit 1)
-      test -n "${GITOPS_PUSH_TOKEN:-}" || (echo "GITOPS_PUSH_TOKEN must be configured" >&2; exit 1)
+      test -n "${GITLAB_REGISTRY_USERNAME:-}" || (echo "GITLAB_REGISTRY_USERNAME is required" >&2; exit 1)
+      test -n "${GITLAB_REGISTRY_TOKEN:-}" || (echo "GITLAB_REGISTRY_TOKEN is required" >&2; exit 1)
+      test -n "${CI_JOB_TOKEN:-}" || (echo "CI_JOB_TOKEN is required for the GitOps repository push" >&2; exit 1)
 
-      apk add --no-cache curl git tar
-      kubeseal_version="${KUBESEAL_VERSION:-0.38.1}"
+      apk add --no-cache curl git jq tar
+      kubeseal_version='0.38.1'
+      kubeseal_archive="kubeseal-${kubeseal_version}-linux-amd64.tar.gz"
+      kubeseal_sha256='71791ebf0c26675927153e7c2a4418ae769db27084931d24dee2ac58a3c76c2d'
+      kubeseal_tmp_dir="$(mktemp -d)"
+      cleanup() {
+        rm -rf "$kubeseal_tmp_dir"
+        if [ -n "${askpass_file:-}" ]; then
+          rm -f "$askpass_file"
+        fi
+      }
+      trap cleanup EXIT INT TERM
+      kubeseal_archive_path="$kubeseal_tmp_dir/$kubeseal_archive"
       curl --fail --silent --show-error --location \
-        --output /tmp/kubeseal.tar.gz \
-        "https://github.com/bitnami/sealed-secrets/releases/download/v${kubeseal_version}/kubeseal-${kubeseal_version}-linux-amd64.tar.gz"
-      tar --extract --gzip --file /tmp/kubeseal.tar.gz --directory /usr/local/bin kubeseal
+        --output "$kubeseal_archive_path" \
+        "https://github.com/bitnami/sealed-secrets/releases/download/v${kubeseal_version}/${kubeseal_archive}"
+      printf '%s  %s\n' "$kubeseal_sha256" "$kubeseal_archive_path" | sha256sum -c -
+      tar --extract --gzip --file "$kubeseal_archive_path" --directory /usr/local/bin kubeseal
       chmod 755 /usr/local/bin/kubeseal
 
       sh ci/seal-secrets.sh
+
+      find workloads -name kustomization.yaml -exec sh -c '
+        for file do
+          directory="$(dirname "$file")"
+          echo "Rendering $directory"
+          kubectl kustomize "$directory" > /dev/null
+        done
+      ' sh {} +
 
       git config user.name "gitlab-ci[bot]"
       git config user.email "gitlab-ci[bot]@users.noreply.gitlab.com"
@@ -63,7 +87,23 @@ seal:workload-secrets:
         exit 0
       fi
 
-      git commit -m "chore: update sealed secrets [skip ci]"
-      git push \
-        "https://oauth2:${GITOPS_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" \
+      git commit -m "chore: update sealed secrets"
+
+      askpass_file="$(mktemp)"
+      umask 077
+      cat > "$askpass_file" <<'ASKPASS'
+      #!/bin/sh
+      case "${1-}" in
+        *[Uu]sername*) printf '%s\n' 'gitlab-ci-token' ;;
+        *[Pp]assword*) test -n "${CI_JOB_TOKEN:-}" && printf '%s\n' "$CI_JOB_TOKEN" ;;
+        *) exit 1 ;;
+      esac
+      ASKPASS
+      chmod 700 "$askpass_file"
+      export GIT_ASKPASS="$askpass_file"
+      export GIT_TERMINAL_PROMPT=0
+      export LC_ALL=C
+      unset GIT_TRACE GIT_TRACE2 GIT_TRACE_CURL GIT_CURL_VERBOSE
+      git -c credential.helper= -c http.followRedirects=false \
+        push "https://${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" \
         "HEAD:${CI_COMMIT_BRANCH}"

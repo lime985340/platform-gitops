@@ -19,13 +19,43 @@ command -v kubeseal >/dev/null 2>&1 || {
   exit 1
 }
 
+command -v jq >/dev/null 2>&1 || {
+  echo "jq is required" >&2
+  exit 1
+}
+
+: "${GITLAB_REGISTRY_USERNAME:?GITLAB_REGISTRY_USERNAME is required}"
+: "${GITLAB_REGISTRY_TOKEN:?GITLAB_REGISTRY_TOKEN is required}"
+
+umask 077
 tmp_dir="$(mktemp -d)"
+registry_config="$tmp_dir/registry-config.json"
 
 cleanup() {
   rm -rf "$tmp_dir"
 }
 
 trap cleanup EXIT INT TERM
+
+if ! jq -n \
+  '{auths: {"registry.gitlab.com": {
+    username: env.GITLAB_REGISTRY_USERNAME,
+    password: env.GITLAB_REGISTRY_TOKEN,
+    auth: ((env.GITLAB_REGISTRY_USERNAME + ":" + env.GITLAB_REGISTRY_TOKEN) | @base64)
+  }}}' \
+  > "$registry_config"; then
+  echo "Failed to create the temporary registry configuration" >&2
+  exit 1
+fi
+
+if [ ! -s "$registry_config" ]; then
+  echo "Temporary registry configuration is empty" >&2
+  exit 1
+fi
+
+unset GITLAB_REGISTRY_USERNAME GITLAB_REGISTRY_TOKEN
+
+# Keep the generated config only until all registry SealedSecrets are created.
 
 append_sealed() {
   output="$1"
@@ -69,19 +99,13 @@ seal_env_secret() {
 seal_registry_secret() {
   output="$1"
   namespace="$2"
-  docker_config="${GITLAB_REGISTRY_DOCKER_CONFIG:-}"
   plain_manifest="$tmp_dir/${namespace}-gitlab-regcred.yaml"
   sealed_manifest="$tmp_dir/${namespace}-gitlab-regcred-sealed.yaml"
-
-  if [ -z "$docker_config" ] || [ ! -f "$docker_config" ]; then
-    echo "Missing GitLab File variable: GITLAB_REGISTRY_DOCKER_CONFIG" >&2
-    exit 1
-  fi
 
   kubectl create secret generic gitlab-regcred \
     --namespace "$namespace" \
     --type kubernetes.io/dockerconfigjson \
-    --from-file=.dockerconfigjson="$docker_config" \
+    --from-file=.dockerconfigjson="$registry_config" \
     --dry-run=client \
     --output yaml > "$plain_manifest"
 

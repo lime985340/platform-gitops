@@ -40,8 +40,7 @@ Kubernetes API에 접근하지 않으므로 `KUBECONFIG`가 필요하지 않습�
 - `SEALED_SECRETS_CERT`: Controller 공개 인증서, `File` 타입
 - `GITOPS_PUSH_TOKEN`: 암호화 YAML Push 권한이 있는 토큰
 - `ATMO_API_DEV_*`, `ATMO_API_PROD_*`: API 환경별 File 변수
-- `GITLAB_REGISTRY_USERNAME`: GitLab Container Registry 사용자명
-- `GITLAB_REGISTRY_TOKEN`: `read_registry` 권한이 있는 Registry 토큰
+- `GITLAB_REGISTRY_DOCKER_CONFIG`: Registry 인증 설정 File 변수
 
 Kubernetes Secret 이름은 기존과 동일합니다. API는 DB, JWT, OAuth,
 Publicdata Secret을 사용하고 API/Web의 private 이미지 Pull에는

@@ -132,39 +132,23 @@ Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합�
 KAKAO_CLIENT_ID=<KAKAO_CLIENT_ID>
 KAKAO_CLIENT_SECRET=<KAKAO_CLIENT_SECRET>
 KAKAO_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/kakao/callback
-KAKAO_AUTH_URI=https://kauth.kakao.com/oauth/authorize
-KAKAO_TOKEN_URI=https://kauth.kakao.com/oauth/token
-KAKAO_USERINFO_URI=https://kapi.kakao.com/v2/user/me
-KAKAO_SCOPE=<KAKAO_SCOPE>
 
 GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
 GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
 GOOGLE_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/google/callback
-GOOGLE_AUTH_URI=https://accounts.google.com/o/oauth2/v2/auth
-GOOGLE_TOKEN_URI=https://oauth2.googleapis.com/token
-GOOGLE_USERINFO_URI=https://openidconnect.googleapis.com/v1/userinfo
-GOOGLE_SCOPE=<GOOGLE_SCOPE>
 
 NAVER_CLIENT_ID=<NAVER_CLIENT_ID>
 NAVER_CLIENT_SECRET=<NAVER_CLIENT_SECRET>
 NAVER_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/naver/callback
-NAVER_AUTH_URI=https://nid.naver.com/oauth2.0/authorize
-NAVER_TOKEN_URI=https://nid.naver.com/oauth2.0/token
-NAVER_USERINFO_URI=https://openapi.naver.com/v1/nid/me
-NAVER_SCOPE=<NAVER_SCOPE>
 ```
 
-이 블록은 현재 GitOps workload가 요구하는 **Secret 키 이름**과 일치합니다.
-Kustomize는 이 키를 `/etc/secrets/app/oauth/providers/...` 경로로 투영하고,
-Spring Boot `configtree`가 `app.oauth` 설정으로 읽습니다. API 애플리케이션의
-환경 변수 이름을 직접 사용하는 별도 실행 방식에서는 `APP_OAUTH_*` 이름이
-사용될 수 있지만, 이 GitOps File 변수와 Kubernetes Secret에는 위의
-`KAKAO_*`, `GOOGLE_*`, `NAVER_*` 키를 사용합니다.
+이 블록은 현재 GitOps workload가 실제로 마운트하는 Secret 키 이름과 일치합니다.
+OAuth 인증에 필요한 Client ID/Secret과 provider 콘솔에 등록한 Redirect URI만
+GitLab File 변수에 넣습니다. OAuth authorize/token/userinfo endpoint와 scope는
+현재 GitOps Secret에서 사용하지 않으므로 입력하지 않습니다.
 
-각 provider의 `*_SCOPE` 값은 해당 provider가 요구하는 형식으로 입력합니다.
-예를 들어 공백으로 구분되는 scope는 쉼표로 바꾸지 않습니다. Redirect URI는
-실제 API 호스트와 provider 콘솔에 등록한 값으로 바꾸고, `/api/v1/auth/oauth/...
-/callback` 경로를 유지합니다.
+Redirect URI는 실제 API 호스트와 provider 콘솔에 등록한 값으로 바꾸고,
+`/api/v1/auth/oauth/.../callback` 경로를 유지합니다.
 
 ### 공공데이터 API
 

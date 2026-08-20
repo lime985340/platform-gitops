@@ -76,6 +76,21 @@ Chart와 Runner ServiceAccount를 추가하지 않습니다. Sealed Secrets
 Controller 설치는 `argocd/applications/sealed-secrets.yaml`의 Helm
 Application이 담당합니다.
 
+### Secret 변경 후 API 자동 재시작
+
+`argocd/applications/reloader.yaml`은 Stakater Reloader Helm Chart를 설치합니다.
+API Deployment에는 API가 실제로 참조하는 Secret 목록을
+`secret.reloader.stakater.com/reload` annotation으로 지정해 두었습니다.
+따라서 Secret sealing Pipeline이 새 `SealedSecret`을 Push하고 Argo CD가 동기화하면,
+Sealed Secrets Controller가 Kubernetes Secret을 갱신하고 Reloader가 API Deployment를
+rolling update합니다. Secret 값을 바꿀 때 API Pod를 수동으로 삭제하거나
+`kubectl rollout restart`를 실행할 필요가 없습니다.
+
+이 동작은 API 프로세스 시작 시 읽는 DB, JWT, OAuth, Publicdata 설정에 적용됩니다.
+Web의 `VITE_*` 값은 이미지 빌드 시 번들에 포함되는 값이므로 Web Secret 변경만으로
+기존 Web Pod의 JavaScript가 바뀌지는 않습니다. Web 환경 변수 변경은 Web 이미지
+재빌드와 image tag update가 필요합니다.
+
 ## Argo CD recursion and Kustomize
 
 The bootstrap Application in `bootstrap/argocd-root.yaml` uses:

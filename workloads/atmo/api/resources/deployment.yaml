@@ -9,6 +9,8 @@ spec:
       app: atmo-api
   template:
     metadata:
+      annotations:
+        secret.reloader.stakater.com/reload: "atmo-db-secret,atmo-jwt-secret,atmo-oauth-secret,atmo-publicdata-secret,gitlab-regcred"
       labels:
         app: atmo-api
         app.kubernetes.io/name: atmo-api

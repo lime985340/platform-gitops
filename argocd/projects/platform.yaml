@@ -12,6 +12,7 @@ spec:
     - https://traefik.github.io/charts
     - https://grafana.github.io/helm-charts
     - https://prometheus-community.github.io/helm-charts
+    - https://stakater.github.io/stakater-charts
     - registry-1.docker.io/bitnamicharts
   destinations:
     - namespace: argocd
@@ -25,6 +26,8 @@ spec:
     - namespace: traefik
       server: https://kubernetes.default.svc
     - namespace: sealed-secrets
+      server: https://kubernetes.default.svc
+    - namespace: reloader
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ''

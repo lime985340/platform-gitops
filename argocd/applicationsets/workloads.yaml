@@ -27,9 +27,15 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jqPathExpressions:
+            - .spec.template.metadata.annotations["reloader.stakater.com/last-reloaded-from"]
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - RespectIgnoreDifferences=true

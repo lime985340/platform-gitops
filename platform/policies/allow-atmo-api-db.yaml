@@ -8,6 +8,17 @@ spec:
     matchLabels:
       k8s:app.kubernetes.io/name: atmo-api
   egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchName: ep-withered-dew-ah1nuf4r-pooler.c-3.us-east-1.aws.neon.tech
     - toFQDNs:
         - matchName: ep-withered-dew-ah1nuf4r-pooler.c-3.us-east-1.aws.neon.tech
       toPorts:

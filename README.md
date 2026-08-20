@@ -254,6 +254,28 @@ The only raw `Deployment` resource under `platform/` is currently
 Cilium policies and Ingresses are raw Kubernetes resources by nature and do
 not need Helm Charts.
 
+### Cilium policy scope
+
+`platform/policies` uses Cilium `CiliumClusterwideNetworkPolicy` resources for
+the small test cluster. Non-system Pods start with default-deny Egress, and
+only the required flows are opened:
+
+- Atmo API: external HTTP(S), the managed PostgreSQL FQDN on `5432`, and Redis
+  on `6379`
+- Argo CD and platform controllers: Kubernetes API access; Argo CD also uses
+  HTTPS to read Git and Helm repositories
+- Cloudflared: Cloudflare `7844/TCP`, `7844/UDP`, HTTPS, and the internal
+  Traefik entrypoint
+- Traefik: Atmo Web/API backends; Prometheus: metrics endpoints
+- Redis and Atmo Web: only the required inbound paths are allowed
+
+The policies intentionally avoid a cluster-wide `0.0.0.0/0:5432` database rule
+and do not grant every workload unrestricted Internet or Node access. The
+monitoring namespace retains broader internal scrape access because it must
+discover and collect metrics from multiple cluster components. In a larger
+production cluster, this exception should be narrowed further using specific
+service endpoints and Cilium FQDN policies.
+
 The bootstrap Application's recursion setting applies only to its `argocd/`
 source. Platform raw resources are kept directly under their Application
 source directories.

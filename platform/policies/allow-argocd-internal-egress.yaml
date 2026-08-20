@@ -1,0 +1,13 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-argocd-internal-egress
+spec:
+  description: Allow Argo CD components to communicate with their own namespace services.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: argocd
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: argocd

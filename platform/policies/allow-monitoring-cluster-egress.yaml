@@ -1,0 +1,12 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-monitoring-cluster-egress
+spec:
+  description: Allow monitoring components to scrape cluster endpoints.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: monitoring
+  egress:
+    - toEntities:
+        - cluster

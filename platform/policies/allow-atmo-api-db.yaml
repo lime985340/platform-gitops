@@ -3,12 +3,13 @@ kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: ccnp-allow-atmo-api-db-egress
 spec:
+  description: Allow Atmo API pods to reach only the managed PostgreSQL endpoint.
   endpointSelector:
     matchLabels:
       k8s:app.kubernetes.io/name: atmo-api
   egress:
-    - toCIDR:
-        - 0.0.0.0/0
+    - toFQDNs:
+        - matchName: ep-withered-dew-ah1nuf4r-pooler.c-3.us-east-1.aws.neon.tech
       toPorts:
         - ports:
             - port: "5432"

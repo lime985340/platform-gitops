@@ -1,0 +1,16 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-argocd-internet-egress
+spec:
+  description: Allow Argo CD repository and Helm chart access over HTTPS.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: argocd
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

@@ -3,6 +3,7 @@ kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: ccnp-allow-cloudflared-egress
 spec:
+  description: Allow the Quick Tunnel to reach Cloudflare and the internal Traefik entrypoint.
   endpointSelector:
     matchLabels:
       k8s:io.kubernetes.pod.namespace: cloudflared
@@ -15,3 +16,15 @@ spec:
               protocol: TCP
             - port: "7844"
               protocol: UDP
+            - port: "443"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: traefik
+            k8s:app.kubernetes.io/name: traefik
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP

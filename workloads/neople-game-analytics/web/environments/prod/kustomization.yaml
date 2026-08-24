@@ -15,6 +15,17 @@ resources:
   - ingress.yaml
   - middleware.yaml
   - sealed-secrets.yaml
+patches:
+  # The current test cluster has an unhealthy worker-to-worker Cilium path.
+  # Keep the public web beside Traefik until that node-network issue is fixed.
+  - target:
+      kind: Deployment
+      name: neople-game-analytics-web
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          kubernetes.io/hostname: cilium-gitops-test-worker2
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-web
     newTag: v0.1.1

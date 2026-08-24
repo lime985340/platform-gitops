@@ -19,6 +19,8 @@ spec:
         app.kubernetes.io/name: neople-game-analytics-web
         app.kubernetes.io/component: web
     spec:
+      imagePullSecrets:
+        - name: gitlab-regcred
       containers:
         - name: web
           image: registry.gitlab.com/lime985340/neople-game-analytics-web

@@ -38,3 +38,5 @@ spec:
       kind: SealedSecret
     - group: networking.k8s.io
       kind: Ingress
+    - group: traefik.io
+      kind: Middleware

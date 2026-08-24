@@ -1,0 +1,22 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-traefik-neople-egress
+spec:
+  description: Allow Traefik to route to Neople Web backends.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: traefik
+      k8s:app.kubernetes.io/name: traefik
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: neople-game-analytics-web-dev
+            k8s:app.kubernetes.io/name: neople-game-analytics-web
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: neople-game-analytics-web-prod
+            k8s:app.kubernetes.io/name: neople-game-analytics-web
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

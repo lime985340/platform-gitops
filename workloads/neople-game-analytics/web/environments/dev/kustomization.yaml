@@ -23,4 +23,4 @@ patches:
         value: neople-game-analytics-api.neople-game-analytics-api-dev.svc.cluster.local
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-web
-    newTag: dev-initial
+    newTag: dev-066d1a0f

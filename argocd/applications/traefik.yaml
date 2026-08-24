@@ -33,7 +33,7 @@ spec:
             publishedService:
               enabled: false
           kubernetesCRD:
-            enabled: false
+            enabled: true
 
         ingressRoute:
           dashboard:

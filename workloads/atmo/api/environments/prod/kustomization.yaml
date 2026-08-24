@@ -13,6 +13,7 @@ labels:
 resources:
 - ../../resources
 - ingress.yaml
+- middleware.yaml
 - sealed-secrets.yaml
 images:
 - name: registry.gitlab.com/lime985340/atmo-api

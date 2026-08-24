@@ -204,24 +204,24 @@ values in Git. See the [Cloudflare Kubernetes guide](https://developers.cloudfla
 for the Named Tunnel deployment model.
 
 Named Tunnel 전환 후에는 Quick Tunnel의 랜덤 주소 대신 직접 관리하는 도메인과
-서브도메인을 사용한다. 도메인 하나만 있으면 여러 서브도메인을 만들 수 있다.
-예를 들어 `example.com` 하나로 다음과 같이 환경을 분리할 수 있다.
+애플리케이션 prefix를 사용한다. 도메인 하나만 있으면 경로로 서비스를 분리할
+수 있다. 예를 들어 `example.com` 하나로 다음과 같이 연결할 수 있다.
 
 ```text
-atmo-dev.example.com → atmo-web-dev
-api-dev.example.com  → atmo-api-dev
-
-atmo.example.com     → atmo-web-prod
-api.example.com      → atmo-api-prod
+example.com/atmo       → atmo-web-prod
+example.com/atmo/api   → atmo-api-prod
+example.com/neople     → neople-game-analytics-web-prod
 ```
 
 현재 저장소는 `prod`만 외부에 공개하고 `dev`는 클러스터 내부 확인용으로
 사용한다. 따라서 현재 Quick Tunnel은 `prod` 환경의 hostless Ingress에
-`/`와 `/api` 경로를 연결하며, `dev`에는 Ingress를 배포하지 않는다.
+`/atmo`, `/atmo/api`, `/neople` 경로를 연결하며, `dev`에는 Ingress를
+배포하지 않는다. 각 Ingress에는 Traefik `StripPrefix` Middleware가 적용되어
+애플리케이션은 기존 내부 경로를 유지할 수 있다.
 향후 개발 환경도 외부에 공개할 때만 `dev` 환경에 별도 Ingress를 추가하고,
-`atmo-dev.example.com` 같은 서브도메인을 지정한다. 운영용 Named Tunnel을
-사용할 때는 `atmo.example.com`과 `api.example.com` 같은 운영 서브도메인을
-`prod` Ingress에 지정한다.
+`/atmo`와 `/neople` prefix를 동일하게 적용한다. 운영용 Named Tunnel을
+사용할 때는 하나의 호스트에서 `/atmo`, `/neople`을 사용하거나, 별도 호스트를
+사용할 경우에도 각 애플리케이션의 prefix 규칙을 유지한다.
 
 요청 흐름은 다음과 같다.
 

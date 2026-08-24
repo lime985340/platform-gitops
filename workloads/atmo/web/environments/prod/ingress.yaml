@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: atmo-web-prod
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: atmo-web-prod-atmo-strip-prefix@kubernetescrd
   labels:
     app.kubernetes.io/name: atmo-web
     app.kubernetes.io/component: prod-ingress
@@ -11,7 +13,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /
+          - path: /atmo
             pathType: Prefix
             backend:
               service:

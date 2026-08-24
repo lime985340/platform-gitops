@@ -131,15 +131,15 @@ Access와 Refresh Secret은 서로 다른 충분히 긴 랜덤 값을 사용합�
 ```env
 KAKAO_CLIENT_ID=<KAKAO_CLIENT_ID>
 KAKAO_CLIENT_SECRET=<KAKAO_CLIENT_SECRET>
-KAKAO_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/kakao/callback
+KAKAO_REDIRECT_URI=https://<PUBLIC_HOST>/atmo/api/v1/auth/oauth/kakao/callback
 
 GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
 GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
-GOOGLE_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/google/callback
+GOOGLE_REDIRECT_URI=https://<PUBLIC_HOST>/atmo/api/v1/auth/oauth/google/callback
 
 NAVER_CLIENT_ID=<NAVER_CLIENT_ID>
 NAVER_CLIENT_SECRET=<NAVER_CLIENT_SECRET>
-NAVER_REDIRECT_URI=https://<API_HOST>/api/v1/auth/oauth/naver/callback
+NAVER_REDIRECT_URI=https://<PUBLIC_HOST>/atmo/api/v1/auth/oauth/naver/callback
 ```
 
 이 블록은 현재 GitOps workload가 실제로 마운트하는 Secret 키 이름과 일치합니다.
@@ -147,8 +147,9 @@ OAuth 인증에 필요한 Client ID/Secret과 provider 콘솔에 등록한 Redir
 GitLab File 변수에 넣습니다. OAuth authorize/token/userinfo endpoint와 scope는
 현재 GitOps Secret에서 사용하지 않으므로 입력하지 않습니다.
 
-Redirect URI는 실제 API 호스트와 provider 콘솔에 등록한 값으로 바꾸고,
-`/api/v1/auth/oauth/.../callback` 경로를 유지합니다.
+Redirect URI는 실제 공개 호스트와 provider 콘솔에 등록한 값으로 바꿉니다.
+현재 외부 경로는 `/atmo/api/v1/auth/oauth/.../callback`이며, Traefik이
+`/atmo`를 제거한 뒤 API 내부의 `/api/v1` Controller로 전달합니다.
 
 ### 공공데이터 API
 
@@ -172,13 +173,30 @@ atmo-web의 다음 값은 GitOps `ATMO_API_*_ENV` File 변수에 넣지 않습�
 전달합니다.
 
 ```text
-VITE_API_BASE_URL=/api/v1
+VITE_API_BASE_URL=/atmo/api/v1
 VITE_KAKAO_APP_KEY=<PUBLIC_KAKAO_APP_KEY>
 ```
 
 `VITE_KAKAO_APP_KEY`는 프런트엔드 번들에 포함되는 공개 값입니다. OAuth client
 secret은 이 변수나 frontend에 넣지 말고 API의 `ATMO_API_DEV_OAUTH_ENV` 또는
 `ATMO_API_PROD_OAUTH_ENV` File 변수에만 입력합니다.
+
+`VITE_API_BASE_URL`은 Kubernetes Secret이 아니라 atmo-web 이미지 빌드 시
+주입되는 GitLab CI/CD Variable입니다. `/atmo` 경로 전환 후 반드시
+`/atmo/api/v1`로 변경하고 새 Web 이미지를 빌드해야 합니다.
+
+### Refresh Cookie 경로
+
+Refresh Token Cookie는 API 코드의 `APP_AUTH_REFRESH_COOKIE_PATH` 설정을 사용합니다.
+운영 GitOps Deployment는 다음 공개 경로를 설정합니다.
+
+```text
+APP_AUTH_REFRESH_COOKIE_PATH=/atmo/api/v1/auth/refresh
+```
+
+이 값은 인증 비밀값이 아니므로 OAuth Secret File 변수에 넣지 않습니다. 기존
+`/api/v1/auth/refresh` Cookie가 브라우저에 남아 있다면 `/atmo` 전환 후 새 로그인
+또는 로그아웃으로 정리합니다.
 
 ### GitLab Container Registry
 

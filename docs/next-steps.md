@@ -103,6 +103,13 @@ Controller Private Key 백업은 Git 저장소 밖의 암호화되고 접근이 
   유지합니다.
 - 실제 image update Pipeline은 서비스 코드가 변경되어 새 이미지를 만들 때만
   실행되며, 현재 GitOps에 기록된 image tag는 그대로 사용할 수 있습니다.
+- Atmo 외부 경로는 `/atmo`, API 외부 경로는 `/atmo/api`를 사용합니다. Web 빌드
+  변수 `VITE_API_BASE_URL`은 `/atmo/api/v1`로 설정합니다.
+- Atmo OAuth Secret의 `KAKAO_REDIRECT_URI`, `GOOGLE_REDIRECT_URI`,
+  `NAVER_REDIRECT_URI`에도 `/atmo/api/v1/auth/oauth/.../callback`을 사용하고,
+  각 OAuth provider 콘솔에 같은 URL을 등록합니다.
+- Atmo API의 Refresh Cookie 경로는 비밀값이 아닌 Deployment 설정
+  `APP_AUTH_REFRESH_COOKIE_PATH=/atmo/api/v1/auth/refresh`로 관리합니다.
 - 실제 atmo-api OAuth 값은 `secret-variables.md`의 `KAKAO_*`, `GOOGLE_*`,
   `NAVER_*` 키 형식을 사용하고, atmo-web에는 OAuth client secret을 넣지 않음
 

@@ -12,19 +12,20 @@ The generated `https://<random>.trycloudflare.com` URL is printed in the
 for development and testing only. Quick Tunnels do not require a Cloudflare
 account, DNS record, custom domain, or tunnel token.
 
-The hostless Ingress resources in the Atmo prod workload Kustomizations route
-the random hostname by path:
+The hostless Ingress resources in the Atmo and Neople prod workload
+Kustomizations route the random hostname by application prefix:
 
 ```text
-https://<random>.trycloudflare.com/      -> atmo-web-prod
-https://<random>.trycloudflare.com/api  -> atmo-api-prod
+https://<random>.trycloudflare.com/atmo       -> atmo-web-prod
+https://<random>.trycloudflare.com/atmo/api   -> atmo-api-prod
+https://<random>.trycloudflare.com/neople     -> neople-game-analytics-web-prod
 ```
 
 The browser-side web application must call the API with the relative path
-`/api`, for example `fetch('/api/users')`. Because the web page and API use the
-same current hostname, the API URL automatically follows the new Quick Tunnel
-URL. The browser must not use a Kubernetes pod IP or a cluster-only Service
-DNS name.
+`/atmo/api`, for example `fetch('/atmo/api/v1/stations')`. Because the web page
+and API use the same current hostname, the API URL automatically follows the
+new Quick Tunnel URL. The browser must not use a Kubernetes pod IP or a
+cluster-only Service DNS name.
 
 There is no host or TLS section in the current prod Ingress resources. Cloudflare
 terminates HTTPS for the temporary hostname, while `cloudflared` connects to

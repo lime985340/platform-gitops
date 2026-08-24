@@ -36,6 +36,7 @@ spec:
                 name: neople-game-analytics-api-config
             - secretRef:
                 name: neople-game-analytics-api-secret
+                optional: true
           readinessProbe:
             httpGet:
               path: /healthz

@@ -266,7 +266,8 @@ only the required flows are opened:
   HTTPS to read Git and Helm repositories
 - Cloudflared: Cloudflare `7844/TCP`, `7844/UDP`, HTTPS, and the internal
   Traefik entrypoint
-- Traefik: Atmo Web/API backends; Prometheus: metrics endpoints
+- Traefik: Atmo and Neople Web backends; Prometheus: metrics endpoints
+- Neople Web: matching Neople API proxy access; Neople API: HTTPS to Power BI and Microsoft Entra
 - Redis and Atmo Web: only the required inbound paths are allowed
 
 The policies intentionally avoid a cluster-wide `0.0.0.0/0:5432` database rule

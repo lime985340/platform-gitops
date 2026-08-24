@@ -269,7 +269,8 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 `POSTGRES_PASSWORD`, `POWERBI_TENANT_ID`, `POWERBI_CLIENT_ID`,
 `POWERBI_CLIENT_SECRET`를 포함하고, 외부 PostgreSQL·Power BI 연결 값은
 각 환경의 `workloads/neople-game-analytics/api/resources/configmap.yaml`에서
-관리합니다.
+관리합니다. Secret이 아직 생성되지 않아도 API 컨테이너는 기동하지만,
+`/api/powerbi/embed-config`는 Power BI 값을 등록하기 전까지 503을 반환합니다.
 
 ## 동기화 실행
 

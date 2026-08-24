@@ -13,6 +13,16 @@ IMAGE_TAG=dev-abc1234 \
 sh ci/update-image-tag.sh
 ~~~
 
+Neople Game Analytics uses the same script with an explicit application name:
+
+~~~bash
+APPLICATION=neople-game-analytics \
+WORKLOAD=api \
+ENVIRONMENT=dev \
+IMAGE_TAG=dev-abc1234 \
+sh ci/update-image-tag.sh
+~~~
+
 The supported paths are:
 
 ~~~text
@@ -20,6 +30,10 @@ workloads/atmo/api/environments/dev/kustomization.yaml
 workloads/atmo/api/environments/prod/kustomization.yaml
 workloads/atmo/web/environments/dev/kustomization.yaml
 workloads/atmo/web/environments/prod/kustomization.yaml
+workloads/neople-game-analytics/api/environments/dev/kustomization.yaml
+workloads/neople-game-analytics/api/environments/prod/kustomization.yaml
+workloads/neople-game-analytics/web/environments/dev/kustomization.yaml
+workloads/neople-game-analytics/web/environments/prod/kustomization.yaml
 ~~~
 
 ## Current Atmo service CI flow

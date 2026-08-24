@@ -2,9 +2,18 @@
 
 set -eu
 
+: "${APPLICATION:=atmo}"
 : "${WORKLOAD:?WORKLOAD is required (api or web)}"
 : "${ENVIRONMENT:?ENVIRONMENT is required (dev or prod)}"
 : "${IMAGE_TAG:?IMAGE_TAG is required}"
+
+case "$APPLICATION" in
+  atmo|neople-game-analytics) ;;
+  *)
+    echo "APPLICATION must be atmo or neople-game-analytics" >&2
+    exit 1
+    ;;
+esac
 
 case "$WORKLOAD" in
   api|web) ;;
@@ -29,7 +38,7 @@ case "$IMAGE_TAG" in
     ;;
 esac
 
-file="workloads/atmo/${WORKLOAD}/environments/${ENVIRONMENT}/kustomization.yaml"
+file="workloads/${APPLICATION}/${WORKLOAD}/environments/${ENVIRONMENT}/kustomization.yaml"
 test -f "$file" || {
   echo "Image configuration not found: $file" >&2
   exit 1

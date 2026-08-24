@@ -304,3 +304,21 @@ revision used for generated workload Applications. Change these revisions to
 Do not enable shell tracing for the secret job and never commit `.env` files,
 plain Secret YAML, passwords, tokens, Controller Private Keys, or kubeconfig
 files. Encrypted `SealedSecret` YAML is expected to be committed.
+
+## Neople Game Analytics
+
+The `neople-game-analytics` application uses the same workload layout as Atmo:
+
+```text
+workloads/neople-game-analytics/api  -> FastAPI + daily data Worker CronJob
+workloads/neople-game-analytics/web  -> Power BI report Web UI
+```
+
+The API repository publishes
+`registry.gitlab.com/lime985340/neople-game-analytics-api` and its Worker image
+under the `/worker` image path. The Web repository publishes
+`registry.gitlab.com/lime985340/neople-game-analytics-web`.
+
+The API and Worker share the `neople-game-analytics-api-config` ConfigMap and
+`neople-game-analytics-api-secret` SealedSecret in each environment. Configure
+the external PostgreSQL and Power BI values before syncing the workloads.

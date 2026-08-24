@@ -226,6 +226,9 @@ username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. �
 | `ATMO_API_PROD_OAUTH_ENV` | `atmo-api-prod` | `atmo-oauth-secret` |
 | `ATMO_API_PROD_PUBLICDATA_ENV` | `atmo-api-prod` | `atmo-publicdata-secret` |
 | `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
+| `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
+| `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
+| `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
 
 생성되는 파일은 다음과 같습니다.
 
@@ -234,10 +237,21 @@ workloads/atmo/api/environments/dev/sealed-secrets.yaml
 workloads/atmo/api/environments/prod/sealed-secrets.yaml
 workloads/atmo/web/environments/dev/sealed-secrets.yaml
 workloads/atmo/web/environments/prod/sealed-secrets.yaml
+workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml
+workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml
+workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
+workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
 ```
 
 파일 안에는 `encryptedData`만 저장되며 실제 값은 저장되지 않습니다.
 SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같아야 합니다.
+
+`NEOPLE_GAME_ANALYTICS_API_*_ENV` File 변수에는 API와 Worker가 공통으로 읽는
+환경변수를 `KEY=VALUE` 형식으로 넣습니다. 최소한 `NEOPLE_API_KEY`,
+`POSTGRES_PASSWORD`, `POWERBI_TENANT_ID`, `POWERBI_CLIENT_ID`,
+`POWERBI_CLIENT_SECRET`를 포함하고, 외부 PostgreSQL·Power BI 연결 값은
+각 환경의 `workloads/neople-game-analytics/api/resources/configmap.yaml`에서
+관리합니다.
 
 ## 동기화 실행
 

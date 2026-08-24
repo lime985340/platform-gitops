@@ -96,6 +96,20 @@ seal_env_secret() {
   echo "Generated encrypted SealedSecret ${namespace}/${name}"
 }
 
+seal_env_secret_if_configured() {
+  output="$1"
+  namespace="$2"
+  name="$3"
+  env_file="$4"
+
+  if [ -z "$env_file" ]; then
+    echo "Skipping optional SealedSecret ${namespace}/${name}"
+    return 0
+  fi
+
+  seal_env_secret "$output" "$namespace" "$name" "$env_file"
+}
+
 seal_registry_secret() {
   output="$1"
   namespace="$2"
@@ -122,6 +136,10 @@ dev_api_output="workloads/atmo/api/environments/dev/sealed-secrets.yaml"
 prod_api_output="workloads/atmo/api/environments/prod/sealed-secrets.yaml"
 dev_web_output="workloads/atmo/web/environments/dev/sealed-secrets.yaml"
 prod_web_output="workloads/atmo/web/environments/prod/sealed-secrets.yaml"
+dev_neople_api_output="workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml"
+prod_neople_api_output="workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml"
+dev_neople_web_output="workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml"
+prod_neople_web_output="workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml"
 
 : > "$dev_api_output"
 seal_env_secret "$dev_api_output" atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB_ENV:-}"
@@ -142,3 +160,25 @@ seal_registry_secret "$dev_web_output" atmo-web-dev
 
 : > "$prod_web_output"
 seal_registry_secret "$prod_web_output" atmo-web-prod
+
+: > "$dev_neople_api_output"
+seal_env_secret_if_configured \
+  "$dev_neople_api_output" \
+  neople-game-analytics-api-dev \
+  neople-game-analytics-api-secret \
+  "${NEOPLE_GAME_ANALYTICS_API_DEV_ENV:-}"
+seal_registry_secret "$dev_neople_api_output" neople-game-analytics-api-dev
+
+: > "$prod_neople_api_output"
+seal_env_secret_if_configured \
+  "$prod_neople_api_output" \
+  neople-game-analytics-api-prod \
+  neople-game-analytics-api-secret \
+  "${NEOPLE_GAME_ANALYTICS_API_PROD_ENV:-}"
+seal_registry_secret "$prod_neople_api_output" neople-game-analytics-api-prod
+
+: > "$dev_neople_web_output"
+seal_registry_secret "$dev_neople_web_output" neople-game-analytics-web-dev
+
+: > "$prod_neople_web_output"
+seal_registry_secret "$prod_neople_web_output" neople-game-analytics-web-prod

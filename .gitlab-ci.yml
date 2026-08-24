@@ -88,7 +88,11 @@ seal:workload-secrets:
         workloads/atmo/api/environments/dev/sealed-secrets.yaml \
         workloads/atmo/api/environments/prod/sealed-secrets.yaml \
         workloads/atmo/web/environments/dev/sealed-secrets.yaml \
-        workloads/atmo/web/environments/prod/sealed-secrets.yaml
+        workloads/atmo/web/environments/prod/sealed-secrets.yaml \
+        workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml \
+        workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml \
+        workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml \
+        workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
 
       if git diff --cached --quiet; then
         echo "No SealedSecret changes to commit"

@@ -28,10 +28,14 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 
 다음 원칙으로 등록합니다.
 
-- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`처럼 Job에 파일 경로로 전달되는 값은
-  내용이 한 줄이어도 `Type: File`로 등록
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`처럼
+  Job에 파일 경로로 전달되는 값은 내용이 한 줄이어도 `Type: File`로 등록
 - `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`처럼 한 줄로 전달되는 값은
   `Type: Variable`로 등록
+- `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`은 `lime985340` Group의
+  CI/CD Variables에 한 번만 등록합니다. `atmo-api`, `atmo-web`,
+  `neople-game-analytics-api`, `neople-game-analytics-web`, GitOps 프로젝트에
+  같은 이름의 프로젝트 변수를 반복해서 만들지 않습니다.
 - 이 GitOps 프로젝트의 sealing Job은 별도 Push token이 아니라 GitLab 사전 정의
   `CI_JOB_TOKEN`을 사용합니다. GitLab 프로젝트에서 Job token의 repository push를
   허용하고, 대상 Protected branch 정책도 맞아야 합니다.
@@ -41,10 +45,11 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 - multiline File 변수에는 Masked 설정을 강제하지 않음
 - File 변수의 Value에는 파일 경로가 아니라 파일의 실제 내용을 입력하며,
   Job 안에서는 GitLab이 만들어 준 임시 파일 경로로 제공됨
-- `GITLAB_REGISTRY_TOKEN`은 `atmo-api`와 `atmo-web` 두 이미지 프로젝트를 읽을 수
-  있는 `read_registry` 권한만 부여한 credential을 사용
-- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`는 multiline File 변수이므로 Masked를
-  요구하지 않음; 대신 Protected, scope, 접근 권한과 로그 미출력으로 보호
+- `GITLAB_REGISTRY_TOKEN`은 `atmo`와 `neople-game-analytics` 이미지 프로젝트를
+  읽을 수 있는 `read_registry` 권한만 부여한 credential을 사용
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`는
+  multiline File 변수이므로 Masked를 요구하지 않음; 대신 Protected, scope, 접근
+  권한과 로그 미출력으로 보호
 - `GITLAB_REGISTRY_USERNAME`은 일반 Variable로 등록하고, `GITLAB_REGISTRY_TOKEN`은
   일반 Variable로 등록하되 GitLab masking 조건을 충족하면 `Masked`와 `Protected`를
   사용
@@ -201,17 +206,32 @@ APP_AUTH_REFRESH_COOKIE_PATH=/atmo/api/v1/auth/refresh
 ### GitLab Container Registry
 
 서비스 이미지가 `registry.gitlab.com/lime985340/atmo-api`와
-`registry.gitlab.com/lime985340/atmo-web`에서 Pull되므로, 하나의 Registry
-credential이 두 프로젝트의 이미지를 모두 읽을 수 있어야 합니다. GitOps 프로젝트
-하나에만 만든 Deploy Token은 Pull 권한이 부족할 수 있습니다.
+`registry.gitlab.com/lime985340/atmo-web`,
+`registry.gitlab.com/lime985340/neople-game-analytics-api`,
+`registry.gitlab.com/lime985340/neople-game-analytics-web`에서 Pull됩니다.
+따라서 하나의 Registry credential이 네 프로젝트의 이미지를 모두 읽을 수 있어야
+합니다. GitOps 프로젝트 하나에만 만든 Deploy Token은 다른 프로젝트 이미지 Pull
+권한이 부족할 수 있습니다.
 
-변수명:
+이 값은 프로젝트별 변수가 아니라 `lime985340` Group 변수로 등록합니다.
+
+| Group Variable | Type | 용도 |
+| --- | --- | --- |
+| `GITLAB_REGISTRY_USERNAME` | Variable | Registry credential username |
+| `GITLAB_REGISTRY_TOKEN` | Variable | 네 이미지 프로젝트를 읽는 `read_registry` token |
+
+Group 변수의 `Environment scope`는 기본값 `*`로 두고, 운영 정책에 맞게
+`Protected`를 사용합니다. 하위 프로젝트에 같은 이름의 변수를 추가하면 GitLab
+변수 우선순위에 따라 Group 값이 가려질 수 있으므로 중복 등록하지 않습니다.
+
+Group 변수명:
 
 - `GITLAB_REGISTRY_USERNAME` - 일반 `Variable`
 - `GITLAB_REGISTRY_TOKEN` - 일반 `Variable`
 
-두 값 모두 GitLab CI/CD Variables에 한 줄로 입력합니다. `GITLAB_REGISTRY_TOKEN`에는
-두 이미지 프로젝트에 대한 `read_registry` 권한만 부여합니다. 사용자가 Docker
+두 값 모두 `lime985340` Group의 CI/CD Variables에 한 줄로 입력합니다.
+`GITLAB_REGISTRY_TOKEN`에는 네 이미지 프로젝트에 대한 `read_registry` 권한만
+부여합니다. 사용자가 Docker
 `config.json`을 만들거나 `auth`를 Base64로 계산할 필요는 없습니다. CI가 Job 내부의
 보호된 임시 디렉터리에 다음 구조를 생성한 뒤 SealedSecret으로 암호화합니다.
 
@@ -231,6 +251,43 @@ credential이 두 프로젝트의 이미지를 모두 읽을 수 있어야 합�
 username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. 기존
 `GITLAB_REGISTRY_DOCKER_CONFIG` File 변수는 사용하지 않습니다.
 
+### Neople API/Worker
+
+API Deployment와 일일 Worker CronJob은 같은 Secret을 공유합니다. 따라서 Dev와
+Prod에 각각 별도의 File 변수를 등록합니다.
+
+- `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` → `neople-game-analytics-api-dev`
+- `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` → `neople-game-analytics-api-prod`
+
+두 File 변수의 기본 형식은 다음과 같습니다.
+
+```env
+NEOPLE_API_KEY=<NEOPLE_API_KEY>
+POSTGRES_PASSWORD=<MANAGED_POSTGRES_PASSWORD>
+POWERBI_TENANT_ID=<MICROSOFT_ENTRA_TENANT_ID>
+POWERBI_CLIENT_ID=<POWERBI_APP_REGISTRATION_CLIENT_ID>
+POWERBI_CLIENT_SECRET=<POWERBI_APP_REGISTRATION_CLIENT_SECRET>
+POWERBI_WORKSPACE_ID=<POWERBI_WORKSPACE_ID>
+POWERBI_REPORT_ID=<POWERBI_REPORT_ID>
+```
+
+`DEV`와 `PROD`는 각각 실제 사용하는 네오플 API Key, 외부 PostgreSQL 비밀번호,
+Power BI App Registration 및 Report 값을 넣습니다. Power BI Service Principal은
+해당 Workspace에 접근 권한이 있어야 하며, `POWERBI_CLIENT_SECRET`은 실제 Secret
+값만 입력합니다.
+
+다음 값은 Secret File 변수에 넣지 않습니다.
+
+- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`: 외부 관리형
+  PostgreSQL 접속 정보로서 각 환경의 API ConfigMap에 설정
+- `POSTGRES_SSLMODE`, `POWERBI_API_BASE_URL`, `POWERBI_SCOPE`,
+  `POWERBI_TOKEN_LIFETIME_MINUTES`: 비밀이 아닌 애플리케이션 설정
+
+현재 ConfigMap의 `replace_with_managed_postgres_*` placeholder는 실제 DB 정보로
+교체해야 합니다. Power BI Workspace/Report ID를 ConfigMap으로 관리하는 방식도
+가능하지만, 현재 API는 `envFrom`으로 Secret과 ConfigMap을 함께 읽으므로 위 예시처럼
+API/Worker 공통 Secret에 넣는 편이 환경별 누락을 줄입니다.
+
 ## 변수와 SealedSecret 매핑
 
 | GitLab Variable | Namespace | SealedSecret |
@@ -243,10 +300,10 @@ username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. �
 | `ATMO_API_PROD_JWT_ENV` | `atmo-api-prod` | `atmo-jwt-secret` |
 | `ATMO_API_PROD_OAUTH_ENV` | `atmo-api-prod` | `atmo-oauth-secret` |
 | `ATMO_API_PROD_PUBLICDATA_ENV` | `atmo-api-prod` | `atmo-publicdata-secret` |
-| `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
+| `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
 | `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
 | `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
-| `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
+| `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
 
 생성되는 파일은 다음과 같습니다.
 
@@ -264,13 +321,10 @@ workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
 파일 안에는 `encryptedData`만 저장되며 실제 값은 저장되지 않습니다.
 SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같아야 합니다.
 
-`NEOPLE_GAME_ANALYTICS_API_*_ENV` File 변수에는 API와 Worker가 공통으로 읽는
-환경변수를 `KEY=VALUE` 형식으로 넣습니다. 최소한 `NEOPLE_API_KEY`,
-`POSTGRES_PASSWORD`, `POWERBI_TENANT_ID`, `POWERBI_CLIENT_ID`,
-`POWERBI_CLIENT_SECRET`를 포함하고, 외부 PostgreSQL·Power BI 연결 값은
-각 환경의 `workloads/neople-game-analytics/api/resources/configmap.yaml`에서
-관리합니다. Secret이 아직 생성되지 않아도 API 컨테이너는 기동하지만,
-`/api/powerbi/embed-config`는 Power BI 값을 등록하기 전까지 503을 반환합니다.
+`NEOPLE_GAME_ANALYTICS_API_*_ENV` File 변수의 전체 예시는 위의
+`Neople API/Worker` 절을 따릅니다. Secret이 아직 생성되지 않아도 API 컨테이너는
+기동하지만, 필수 환경변수가 없으면 수집 작업이나 `/api/powerbi/embed-config`가
+실패할 수 있습니다.
 
 ## 동기화 실행
 

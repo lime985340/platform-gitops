@@ -30,3 +30,5 @@ configMapGenerator:
       - TRIPLESTORE_TIMEOUT_SECONDS=30
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"

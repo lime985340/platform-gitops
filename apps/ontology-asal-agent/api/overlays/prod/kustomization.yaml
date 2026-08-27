@@ -17,7 +17,7 @@ resources:
   - job-publish-ontology.yaml
 images:
   - name: registry.gitlab.com/lime985340/ontology-asal-agent
-    newTag: 7a45c5f1cf647d5ef20f3ab66b6ecbcd3f1bf5aa
+    newTag: 3a00a134de66413b9c631bf2942917f4865d85f5
 configMapGenerator:
   - name: ontology-asal-agent-config
     literals:
@@ -29,5 +29,6 @@ configMapGenerator:
       - TRIPLESTORE_ONTOLOGY_GRAPH=https://example.org/asal-agent/graph/ontology
       - TRIPLESTORE_SHAPES_GRAPH=https://example.org/asal-agent/graph/shapes
       - TRIPLESTORE_TIMEOUT_SECONDS=30
+      - TRIPLESTORE_ALLOW_LOCAL_FALLBACK=false
 generatorOptions:
   disableNameSuffixHash: true

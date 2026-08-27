@@ -29,11 +29,13 @@ Required properties are:
 ```text
 users.js             # GraphDB initial users.js document
 GRAPHDB_AUTH_TOKEN   # base64(username:password) for the provisioner user
+graphdb.license      # GraphDB license file contents
 ```
 
 The `users.js` document must define the administrator and `graphdb-provisioner`
 users with bcrypt password hashes. Do not commit that document or the token to
-Git. The application reader credentials belong in a separate OpenBao record so
+Git. The license is also kept only in OpenBao and mounted by the Helm chart. The
+application reader credentials belong in a separate OpenBao record so
 the agent never receives the GraphDB administrator/provisioner secret.
 
 The GraphDB bootstrap secret is consumed once on first initialization. Rotating

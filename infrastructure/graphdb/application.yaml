@@ -18,6 +18,11 @@ spec:
         # Move to three nodes only after the data and resource profile justify it.
         replicas: 1
 
+        # GraphDB validates writes against the mounted license. Keep the license
+        # in OpenBao and never inline it in this Helm values block.
+        license:
+          existingSecret: graphdb-license
+
         configuration:
           externalUrl: http://graphdb.graphdb.svc.cluster.local/
 

@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - application.yaml
   - manifests/externalsecret-users.yaml
+  - manifests/externalsecret-license.yaml

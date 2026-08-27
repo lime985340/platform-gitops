@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-graphdb-internal-egress
+spec:
+  description: Allow GraphDB provisioning jobs to reach the GraphDB HTTP endpoint.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: graphdb
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: graphdb
+      toPorts:
+        - ports:
+            - port: "7200"
+              protocol: TCP

@@ -20,6 +20,12 @@ spec:
 
         # Standalone GraphDB does not create a cluster proxy. Disable the
         # scale-cluster hook, which is only needed for multi-node clusters.
+        # The test cluster can start without the Secret, but GraphDB writes
+        # remain unavailable until graphdb-license is populated.
+        license:
+          existingSecret: graphdb-license
+          optional: true
+
         configuration:
           externalUrl: http://graphdb.graphdb.svc.cluster.local/
 

@@ -19,6 +19,7 @@ spec:
     - https://openbao.github.io/openbao-helm
     - https://metallb.github.io/metallb
     - https://charts.longhorn.io
+    - https://maven.ontotext.com/repository/helm-public/
   destinations:
     - namespace: '*'
       server: https://kubernetes.default.svc

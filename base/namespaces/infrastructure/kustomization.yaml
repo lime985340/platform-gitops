@@ -10,3 +10,4 @@ resources:
   - monitoring.yaml
   - openbao.yaml
   - platform-redis.yaml
+  - graphdb.yaml

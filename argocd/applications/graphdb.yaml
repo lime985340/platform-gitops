@@ -18,8 +18,15 @@ spec:
         # GraphDB security after the SealedSecret contract is provisioned.
         replicas: 1
 
+        # Standalone GraphDB does not create a cluster proxy. Disable the
+        # scale-cluster hook, which is only needed for multi-node clusters.
         configuration:
           externalUrl: http://graphdb.graphdb.svc.cluster.local/
+
+        cluster:
+          jobs:
+            scaleCluster:
+              enabled: false
 
         security:
           enabled: false

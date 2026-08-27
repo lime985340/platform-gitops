@@ -110,6 +110,51 @@ seal_env_secret_if_configured() {
   seal_env_secret "$output" "$namespace" "$name" "$env_file"
 }
 
+seal_file_secret() {
+  output="$1"
+  namespace="$2"
+  name="$3"
+  key="$4"
+  file_path="$5"
+  plain_manifest="$tmp_dir/${namespace}-${name}.yaml"
+  sealed_manifest="$tmp_dir/${namespace}-${name}-sealed.yaml"
+
+  if [ ! -f "$file_path" ]; then
+    echo "Missing GitLab File variable for ${namespace}/${name}" >&2
+    exit 1
+  fi
+
+  kubectl create secret generic "$name" \
+    --namespace "$namespace" \
+    --from-file="${key}=${file_path}" \
+    --dry-run=client \
+    --output yaml > "$plain_manifest"
+
+  kubeseal \
+    --cert "$SEALED_SECRETS_CERT" \
+    --format yaml \
+    < "$plain_manifest" > "$sealed_manifest"
+
+  append_sealed "$output" "$sealed_manifest"
+  echo "Generated encrypted SealedSecret ${namespace}/${name}"
+}
+
+seal_file_secret_if_configured() {
+  output="$1"
+  namespace="$2"
+  name="$3"
+  key="$4"
+  file_path="$5"
+
+  if [ -z "$file_path" ]; then
+    echo "Skipping optional SealedSecret ${namespace}/${name}"
+    return 0
+  fi
+
+  : > "$output"
+  seal_file_secret "$output" "$namespace" "$name" "$key" "$file_path"
+}
+
 seal_registry_secret() {
   output="$1"
   namespace="$2"
@@ -141,6 +186,7 @@ prod_neople_api_output="workloads/neople-game-analytics/api/environments/prod/se
 dev_neople_web_output="workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml"
 prod_neople_web_output="workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml"
 prod_ontology_agent_output="workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml"
+graphdb_license_output="platform/graphdb/sealed-secret.yaml"
 
 : > "$dev_api_output"
 seal_env_secret "$dev_api_output" atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB_ENV:-}"
@@ -191,3 +237,10 @@ seal_env_secret_if_configured \
   ontology-asal-agent-secrets \
   "${ONTOLOGY_ASAL_AGENT_PROD_ENV:-}"
 seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
+
+seal_file_secret_if_configured \
+  "$graphdb_license_output" \
+  graphdb \
+  graphdb-license \
+  graphdb.license \
+  "${GRAPHDB_LICENSE_FILE:-}"

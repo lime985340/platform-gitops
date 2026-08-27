@@ -1,0 +1,25 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-ontology-asal-agent-egress
+spec:
+  description: Allow the ontology agent to call OpenAI and the internal GraphDB service.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-prod
+      k8s:app.kubernetes.io/name: ontology-asal-agent
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: graphdb
+            k8s:app.kubernetes.io/name: graphdb
+      toPorts:
+        - ports:
+            - port: "7200"
+              protocol: TCP

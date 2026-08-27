@@ -14,6 +14,7 @@ spec:
     - https://prometheus-community.github.io/helm-charts
     - https://stakater.github.io/stakater-charts
     - registry-1.docker.io/bitnamicharts
+    - https://maven.ontotext.com/repository/helm-public/
   destinations:
     - namespace: argocd
       server: https://kubernetes.default.svc
@@ -28,6 +29,8 @@ spec:
     - namespace: sealed-secrets
       server: https://kubernetes.default.svc
     - namespace: reloader
+      server: https://kubernetes.default.svc
+    - namespace: graphdb
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ''

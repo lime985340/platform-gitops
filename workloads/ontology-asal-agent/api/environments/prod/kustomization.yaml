@@ -28,6 +28,7 @@ configMapGenerator:
       - TRIPLESTORE_ONTOLOGY_GRAPH=https://example.org/asal-agent/graph/ontology
       - TRIPLESTORE_SHAPES_GRAPH=https://example.org/asal-agent/graph/shapes
       - TRIPLESTORE_TIMEOUT_SECONDS=30
+      - TRIPLESTORE_ALLOW_LOCAL_FALLBACK=true
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

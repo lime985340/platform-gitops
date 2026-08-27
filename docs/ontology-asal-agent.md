@@ -8,14 +8,17 @@ is managed under `workloads/ontology-asal-agent/api/environments/prod`.
 ```text
 GraphDB Helm Application
   -> asal-agent repository
-  -> migration Job loads domain.ttl and shapes.ttl
+  -> migration Job loads domain.ttl and shapes.ttl when a GraphDB license exists
   -> ontology agent Deployment starts in triplestore mode
   -> Traefik exposes /ontology-asal-agent
 ```
 
 The test cluster uses GraphDB without authentication so the data path can be
-verified before the SealedSecret values are prepared. The application has no
-LLM key initially, so `/api/health` is available while `/api/ready` remains 503.
+verified before the SealedSecret values are prepared. Until a valid
+`graphdb.license` is sealed, GraphDB accepts reads but rejects writes and the
+migration Job skips cleanly. The application is configured with an explicit
+development-only local TTL fallback, so `/api/health` is available while
+`/api/ready` remains 503 until an LLM key is provided.
 
 ## Secret input
 

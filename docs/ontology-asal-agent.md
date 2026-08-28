@@ -15,8 +15,8 @@ GraphDB Helm Application
 
 The test cluster uses GraphDB without authentication so the data path can be
 verified before the SealedSecret values are prepared. Until a valid
-`graphdb.license` is sealed, GraphDB accepts reads but rejects writes and the
-migration Job skips cleanly. The application is configured with an explicit
+`graphdb.license` is sealed, the repository can be listed but RDF queries and
+writes fail with HTTP 500, so the migration Job skips cleanly. The application is configured with an explicit
 development-only local TTL fallback, so `/api/health` is available while
 `/api/ready` remains 503 until an LLM key is provided.
 

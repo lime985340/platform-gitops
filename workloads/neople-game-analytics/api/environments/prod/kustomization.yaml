@@ -12,6 +12,8 @@ labels:
     includeTemplates: true
 resources:
   - ../../resources
+  - ingress.yaml
+  - middleware.yaml
   - sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-api

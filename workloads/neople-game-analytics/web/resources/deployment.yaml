@@ -24,9 +24,6 @@ spec:
       containers:
         - name: web
           image: registry.gitlab.com/lime985340/neople-game-analytics-web
-          env:
-            - name: API_UPSTREAM
-              value: neople-game-analytics-api.neople-game-analytics-api-prod.svc.cluster.local
           resources:
             requests:
               cpu: 10m

@@ -262,31 +262,25 @@ Prod에 각각 별도의 File 변수를 등록합니다.
 두 File 변수의 기본 형식은 다음과 같습니다.
 
 ```env
-NEOPLE_API_KEY=<NEOPLE_API_KEY>
-POSTGRES_PASSWORD=<MANAGED_POSTGRES_PASSWORD>
-POWERBI_TENANT_ID=<MICROSOFT_ENTRA_TENANT_ID>
-POWERBI_CLIENT_ID=<POWERBI_APP_REGISTRATION_CLIENT_ID>
-POWERBI_CLIENT_SECRET=<POWERBI_APP_REGISTRATION_CLIENT_SECRET>
-POWERBI_WORKSPACE_ID=<POWERBI_WORKSPACE_ID>
-POWERBI_REPORT_ID=<POWERBI_REPORT_ID>
+DNF_API_KEY=<DNF_API_KEY>
+CYPHERS_API_KEY=<CYPHERS_API_KEY>
 ```
 
-`DEV`와 `PROD`는 각각 실제 사용하는 네오플 API Key, 외부 PostgreSQL 비밀번호,
-Power BI App Registration 및 Report 값을 넣습니다. Power BI Service Principal은
-해당 Workspace에 접근 권한이 있어야 하며, `POWERBI_CLIENT_SECRET`은 실제 Secret
-값만 입력합니다.
+`DEV`와 `PROD`는 각각 게임별로 발급한 DNF API Key와 Cyphers API Key를
+입력합니다. 두 게임의 키를 하나의 값으로 합치거나 공통 `NEOPLE_API_KEY`로
+대체하지 않습니다.
 
 다음 값은 Secret File 변수에 넣지 않습니다.
 
-- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`: 외부 관리형
-  PostgreSQL 접속 정보로서 각 환경의 API ConfigMap에 설정
-- `POSTGRES_SSLMODE`, `POWERBI_API_BASE_URL`, `POWERBI_SCOPE`,
-  `POWERBI_TOKEN_LIFETIME_MINUTES`: 비밀이 아닌 애플리케이션 설정
+- `DNF_SERVERS`, `DNF_FAME_BANDS`, `DNF_SAMPLE_LIMIT`, `DNF_AUCTION_ITEM_LIMIT`:
+  API ConfigMap의 수집 설정
+- `CYPHERS_*`, `PUBLIC_DASHBOARD_PATH`, `CORS_ALLOW_ORIGINS`: 비밀이 아닌
+  애플리케이션 설정
 
-현재 ConfigMap의 `replace_with_managed_postgres_*` placeholder는 실제 DB 정보로
-교체해야 합니다. Power BI Workspace/Report ID를 ConfigMap으로 관리하는 방식도
-가능하지만, 현재 API는 `envFrom`으로 Secret과 ConfigMap을 함께 읽으므로 위 예시처럼
-API/Worker 공통 Secret에 넣는 편이 환경별 누락을 줄입니다.
+API/Worker는 `envFrom`으로 Secret과 ConfigMap을 함께 읽습니다. Worker가 생성한
+`data/public/dashboard.json`은 기본적으로 실행 컨테이너 내부 산출물이므로, 정적
+Web을 갱신하려면 검토 후 Web 저장소의 `public/data/dashboard.json`으로 전달하는
+별도 artifact/release 단계를 운영해야 합니다.
 
 ## 변수와 SealedSecret 매핑
 
@@ -323,8 +317,9 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 
 `NEOPLE_GAME_ANALYTICS_API_*_ENV` File 변수의 전체 예시는 위의
 `Neople API/Worker` 절을 따릅니다. Secret이 아직 생성되지 않아도 API 컨테이너는
-기동하지만, 필수 환경변수가 없으면 수집 작업이나 `/api/powerbi/embed-config`가
-실패할 수 있습니다.
+기동하지만, 필수 환경변수가 없으면 Worker 수집 작업이 실패할 수 있습니다.
+대시보드 API는 `/neople/api/dashboard`로 노출되며, Power BI Embed 설정은
+사용하지 않습니다.
 
 ## 동기화 실행
 

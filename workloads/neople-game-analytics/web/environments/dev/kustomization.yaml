@@ -13,14 +13,6 @@ labels:
 resources:
   - ../../resources
   - sealed-secrets.yaml
-patches:
-  - target:
-      kind: Deployment
-      name: neople-game-analytics-web
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/env/0/value
-        value: neople-game-analytics-api.neople-game-analytics-api-dev.svc.cluster.local
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-web
     newTag: dev-066d1a0f

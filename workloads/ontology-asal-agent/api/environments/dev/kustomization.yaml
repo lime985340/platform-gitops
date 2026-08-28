@@ -15,7 +15,7 @@ resources:
   - sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/ontology-asal-agent
-    newTag: 9944418170155ae868912a7aa1f3150c6bcddaf5
+    newTag: bd71d11b0a649614b9a075ce0503c08f61aa1aea
 configMapGenerator:
   - name: ontology-asal-agent-config
     literals:

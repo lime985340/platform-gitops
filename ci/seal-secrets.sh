@@ -197,6 +197,7 @@ dev_neople_api_output="workloads/neople-game-analytics/api/environments/dev/seal
 prod_neople_api_output="workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml"
 dev_neople_web_output="workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml"
 prod_neople_web_output="workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml"
+dev_ontology_agent_output="workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml"
 prod_ontology_agent_output="workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml"
 graphdb_license_output="platform/graphdb/sealed-secret.yaml"
 
@@ -241,6 +242,14 @@ seal_registry_secret "$dev_neople_web_output" neople-game-analytics-web-dev
 
 : > "$prod_neople_web_output"
 seal_registry_secret "$prod_neople_web_output" neople-game-analytics-web-prod
+
+: > "$dev_ontology_agent_output"
+seal_env_secret_if_configured \
+  "$dev_ontology_agent_output" \
+  ontology-asal-agent-api-dev \
+  ontology-asal-agent-secrets \
+  "${ONTOLOGY_ASAL_AGENT_DEV_ENV:-}"
+seal_registry_secret "$dev_ontology_agent_output" ontology-asal-agent-api-dev
 
 : > "$prod_ontology_agent_output"
 seal_env_secret_if_configured \

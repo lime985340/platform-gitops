@@ -6,8 +6,13 @@ spec:
   description: Allow Traefik and Prometheus to reach the ontology agent.
   endpointSelector:
     matchLabels:
-      k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-prod
       k8s:app.kubernetes.io/name: ontology-asal-agent
+    matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: In
+        values:
+          - ontology-asal-agent-api-dev
+          - ontology-asal-agent-api-prod
   ingress:
     - fromEndpoints:
         - matchLabels:

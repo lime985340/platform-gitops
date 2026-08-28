@@ -11,6 +11,9 @@ spec:
   ingress:
     - fromEndpoints:
         - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-dev
+            k8s:app.kubernetes.io/name: ontology-asal-agent
+        - matchLabels:
             k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-prod
             k8s:app.kubernetes.io/name: ontology-asal-agent
         - matchLabels:

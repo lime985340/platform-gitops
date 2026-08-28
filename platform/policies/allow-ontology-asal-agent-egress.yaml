@@ -6,8 +6,13 @@ spec:
   description: Allow the ontology agent to call OpenAI and the internal GraphDB service.
   endpointSelector:
     matchLabels:
-      k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-prod
       k8s:app.kubernetes.io/name: ontology-asal-agent
+    matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: In
+        values:
+          - ontology-asal-agent-api-dev
+          - ontology-asal-agent-api-prod
   egress:
     - toEntities:
         - world

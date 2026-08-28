@@ -1,7 +1,7 @@
 # Ontology ASAL Agent
 
 The active test cluster follows `feature/clean-gitops-layout`, so this workload
-is managed under `workloads/ontology-asal-agent/api/environments/prod`.
+is managed under `workloads/ontology-asal-agent/api/environments/{dev,prod}`.
 
 ## Current test flow
 
@@ -9,8 +9,8 @@ is managed under `workloads/ontology-asal-agent/api/environments/prod`.
 GraphDB Helm Application
   -> asal-agent repository
   -> migration Job loads domain.ttl and shapes.ttl when a GraphDB license exists
-  -> ontology agent Deployment starts in triplestore mode
-  -> Traefik exposes /ontology-asal-agent
+  -> ontology agent Deployments start in triplestore mode
+  -> the prod route is exposed through Traefik
 ```
 
 The test cluster uses GraphDB without authentication so the data path can be
@@ -22,8 +22,9 @@ development-only local TTL fallback, so `/api/health` is available while
 
 ## Secret input
 
-When the runtime values are ready, create a GitLab File variable named
-`ONTOLOGY_ASAL_AGENT_PROD_ENV` with one `KEY=VALUE` per line:
+When the runtime values are ready, create separate GitLab File variables named
+`ONTOLOGY_ASAL_AGENT_DEV_ENV` and `ONTOLOGY_ASAL_AGENT_PROD_ENV`, with one
+`KEY=VALUE` per line:
 
 ```text
 LLM_API_KEY=<provider key>
@@ -34,8 +35,9 @@ TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 The GitOps sealing job encrypts this file with the Sealed Secrets controller
 certificate and writes only encrypted data to
 `workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml`.
-The shared group registry variables continue to create `gitlab-regcred` for the
-agent image.
+The Dev variable writes to the corresponding `environments/dev` path. The shared
+group registry variables continue to create `gitlab-regcred` for both agent
+Namespaces.
 
 For a protected environment, GraphDB bootstrap credentials must be sealed
 separately from the agent runtime credentials. The agent receives only the

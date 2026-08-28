@@ -282,6 +282,26 @@ API/Worker는 `envFrom`으로 Secret과 ConfigMap을 함께 읽습니다. Worker
 Web을 갱신하려면 검토 후 Web 저장소의 `public/data/dashboard.json`으로 전달하는
 별도 artifact/release 단계를 운영해야 합니다.
 
+### Ontology ASAL Agent
+
+Dev와 Prod는 서로 다른 Namespace와 SealedSecret을 사용하므로 Agent 런타임
+변수도 환경별로 분리합니다.
+
+- `ONTOLOGY_ASAL_AGENT_DEV_ENV` → `ontology-asal-agent-api-dev`
+- `ONTOLOGY_ASAL_AGENT_PROD_ENV` → `ontology-asal-agent-api-prod`
+
+두 File 변수의 형식은 다음과 같습니다.
+
+```env
+LLM_API_KEY=<provider key>
+TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
+TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
+```
+
+GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
+
+- `GRAPHDB_LICENSE_FILE` → `graphdb` / `graphdb-license`
+
 ## 변수와 SealedSecret 매핑
 
 | GitLab Variable | Namespace | SealedSecret |
@@ -298,6 +318,9 @@ Web을 갱신하려면 검토 후 Web 저장소의 `public/data/dashboard.json`�
 | `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
 | `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
+| `ONTOLOGY_ASAL_AGENT_DEV_ENV` | `ontology-asal-agent-api-dev` | `ontology-asal-agent-secrets` |
+| `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
+| `GRAPHDB_LICENSE_FILE` | `graphdb` | `graphdb-license` |
 
 생성되는 파일은 다음과 같습니다.
 
@@ -310,6 +333,9 @@ workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml
 workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml
 workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
 workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
+workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml
+workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml
+platform/graphdb/sealed-secret.yaml
 ```
 
 파일 안에는 `encryptedData`만 저장되며 실제 값은 저장되지 않습니다.

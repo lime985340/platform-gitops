@@ -36,6 +36,21 @@ workloads/neople-game-analytics/web/environments/dev/kustomization.yaml
 workloads/neople-game-analytics/web/environments/prod/kustomization.yaml
 ~~~
 
+## Neople Game Analytics service branch flow
+
+The Neople API and Web repositories use `main` and `feature/*` branches. They do
+not use a service-repository `dev` branch.
+
+- A `feature/*` branch publishes a `feature-<short-sha>` image and updates the
+  Neople `dev` overlay for cluster verification.
+- A `main` commit publishes a `main-<short-sha>` image without changing a
+  deployment overlay.
+- A semantic version tag such as `v0.2.5`, created from the release flow,
+  publishes the release image and updates the Neople `prod` overlay.
+
+The `dev` path above is a Kubernetes environment, not a Git branch. Atmo's
+existing `dev` branch and its CI flow remain unchanged.
+
 ## Current Atmo service CI flow
 
 The `atmo-api` and `atmo-web` repositories now use the same two follow-up CI

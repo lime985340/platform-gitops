@@ -44,6 +44,12 @@ separately from the agent runtime credentials. The agent receives only the
 reader account; the ontology migration receives only the writer account. Neither
 GraphDB administrator credentials nor plaintext values belong in Git.
 
+The notification Gateway defaults to `local`, which records an approved draft in
+the application outbox. To enable an external provider, set
+`NOTIFICATION_GATEWAY=webhook` and `NOTIFICATION_WEBHOOK_URL` in the environment
+ConfigMap, and provide `NOTIFICATION_WEBHOOK_API_KEY` through the workload Secret.
+The provider must honor the `idempotency_key` sent in each delivery payload.
+
 ## URLs
 
 ```text

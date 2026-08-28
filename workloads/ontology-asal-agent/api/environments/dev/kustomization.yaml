@@ -28,6 +28,9 @@ configMapGenerator:
       - TRIPLESTORE_SHAPES_GRAPH=https://example.org/asal-agent/graph/shapes
       - TRIPLESTORE_TIMEOUT_SECONDS=30
       - TRIPLESTORE_ALLOW_LOCAL_FALLBACK=true
+      - NOTIFICATION_GATEWAY=local
+      - NOTIFICATION_WEBHOOK_URL=
+      - NOTIFICATION_TIMEOUT_SECONDS=30
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

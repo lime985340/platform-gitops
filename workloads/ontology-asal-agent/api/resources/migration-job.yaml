@@ -47,6 +47,10 @@ spec:
                 --graph "$TRIPLESTORE_SHAPES_GRAPH" \
                 --file ontology/shapes.ttl \
                 --replace
+              python scripts/verify_ontology.py \
+                --endpoint "$TRIPLESTORE_QUERY_URL" \
+                --ontology-graph "$TRIPLESTORE_ONTOLOGY_GRAPH" \
+                --shapes-graph "$TRIPLESTORE_SHAPES_GRAPH"
           envFrom:
             - configMapRef:
                 name: ontology-asal-agent-config

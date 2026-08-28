@@ -57,6 +57,16 @@ unset GITLAB_REGISTRY_USERNAME GITLAB_REGISTRY_TOKEN
 
 # Keep the generated config only until all registry SealedSecrets are created.
 
+reject_placeholder_file() {
+  file_path="$1"
+  variable_name="$2"
+
+  if [ -f "$file_path" ] && grep -Eq 'REPLACE_WITH_[A-Z0-9_]+|PLACEHOLDER_ONLY' "$file_path"; then
+    echo "${variable_name} contains a placeholder; replace it with the real value before sealing" >&2
+    exit 1
+  fi
+}
+
 append_sealed() {
   output="$1"
   sealed_manifest="$2"
@@ -107,6 +117,7 @@ seal_env_secret_if_configured() {
     return 0
   fi
 
+  reject_placeholder_file "$env_file" "${namespace}/${name}"
   seal_env_secret "$output" "$namespace" "$name" "$env_file"
 }
 
@@ -151,6 +162,7 @@ seal_file_secret_if_configured() {
     return 0
   fi
 
+  reject_placeholder_file "$file_path" "${namespace}/${name}"
   : > "$output"
   seal_file_secret "$output" "$namespace" "$name" "$key" "$file_path"
 }

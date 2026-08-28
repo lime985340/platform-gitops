@@ -211,11 +211,12 @@ Named Tunnel 전환 후에는 Quick Tunnel의 랜덤 주소 대신 직접 관리
 example.com/atmo       → atmo-web-prod
 example.com/atmo/api   → atmo-api-prod
 example.com/neople     → neople-game-analytics-web-prod
+example.com/neople/api → neople-game-analytics-api-prod
 ```
 
 현재 저장소는 `prod`만 외부에 공개하고 `dev`는 클러스터 내부 확인용으로
 사용한다. 따라서 현재 Quick Tunnel은 `prod` 환경의 hostless Ingress에
-`/atmo`, `/atmo/api`, `/neople` 경로를 연결하며, `dev`에는 Ingress를
+`/atmo`, `/atmo/api`, `/neople`, `/neople/api` 경로를 연결하며, `dev`에는 Ingress를
 배포하지 않는다. 각 Ingress에는 Traefik `StripPrefix` Middleware가 적용되어
 애플리케이션은 기존 내부 경로를 유지할 수 있다.
 향후 개발 환경도 외부에 공개할 때만 `dev` 환경에 별도 Ingress를 추가하고,
@@ -312,7 +313,7 @@ The `neople-game-analytics` application uses the same workload layout as Atmo:
 
 ```text
 workloads/neople-game-analytics/api  -> FastAPI + daily data Worker CronJob
-workloads/neople-game-analytics/web  -> Power BI report Web UI
+workloads/neople-game-analytics/web  -> React + TypeScript static dashboard
 ```
 
 The API repository publishes
@@ -321,5 +322,7 @@ under the `/worker` image path. The Web repository publishes
 `registry.gitlab.com/lime985340/neople-game-analytics-web`.
 
 The API and Worker share the `neople-game-analytics-api-config` ConfigMap and
-`neople-game-analytics-api-secret` SealedSecret in each environment. Configure
-the external PostgreSQL and Power BI values before syncing the workloads.
+`neople-game-analytics-api-secret` SealedSecret in each environment. The API
+Ingress exposes `/neople/api` and keeps the internal FastAPI `/api/*` routes by
+stripping only the `/neople` prefix. The default portfolio path uses reviewed
+aggregate JSON and does not require PostgreSQL, Power BI Service, or Entra.

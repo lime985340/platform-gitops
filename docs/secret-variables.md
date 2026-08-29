@@ -29,20 +29,18 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 다음 원칙으로 등록합니다.
 
 기존 `lime985340` Group Variable에 이미 등록된 공통 값은 각 프로젝트에 다시
-만들지 않습니다. Neople Game Analytics에서 새로 필요한 값은 아래의
-`NEOPLE_GAME_ANALYTICS_API_DEV_ENV`와 `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` 두
-File Variable입니다.
+만들지 않습니다. Neople Game Analytics에서 사용하는 값은 아래의 두 File
+Variable입니다.
 
-- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`,
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_API_*_ENV`,
   `ONTOLOGY_ASAL_AGENT_*_ENV`처럼
   Job에 파일 경로로 전달되는 값은 내용이 한 줄이어도 `Type: File`로 등록
 - `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`처럼 한 줄로 전달되는 값은
   `Type: Variable`로 등록
-- `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`은 `lime985340` Group의
-  CI/CD Variables에 한 번만 등록합니다. `atmo-api`, `atmo-web`,
-  `neople-game-analytics-api`, `neople-game-analytics-web`,
-  `ontology-asal-agent-api`, `ontology-asal-agent-web`, GitOps 프로젝트에
-  같은 이름의 프로젝트 변수를 반복해서 만들지 않습니다.
+- `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`은 현재 `gitops` 프로젝트의
+  CI/CD Variables에 등록되어 있습니다. 모든 서비스가 동일한 Registry credential을
+  사용해야 할 때만 `lime985340` Group으로 이동하며, 프로젝트와 Group에 중복 등록하지
+  않습니다.
 - 이 GitOps 프로젝트의 sealing Job은 별도 Push token이 아니라 GitLab 사전 정의
   `CI_JOB_TOKEN`을 사용합니다. GitLab 프로젝트에서 Job token의 repository push를
   허용하고, 대상 Protected branch 정책도 맞아야 합니다.
@@ -52,9 +50,10 @@ File Variable입니다.
 - multiline File 변수에는 Masked 설정을 강제하지 않음
 - File 변수의 Value에는 파일 경로가 아니라 파일의 실제 내용을 입력하며,
   Job 안에서는 GitLab이 만들어 준 임시 파일 경로로 제공됨
-- `GITLAB_REGISTRY_TOKEN`은 `atmo`와 `neople-game-analytics` 이미지 프로젝트를
-  읽을 수 있는 `read_registry` 권한만 부여한 credential을 사용
-- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`는
+- `GITLAB_REGISTRY_TOKEN`은 `atmo`, `neople-game-analytics`,
+  `ontology-asal-agent` 이미지 프로젝트를 읽을 수 있는 `read_registry` 권한만
+  부여한 credential을 사용
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_API_*_ENV`는
   multiline File 변수이므로 Masked를 요구하지 않음; 대신 Protected, scope, 접근
   권한과 로그 미출력으로 보호
 - `GITLAB_REGISTRY_USERNAME`은 일반 Variable로 등록하고, `GITLAB_REGISTRY_TOKEN`은
@@ -264,8 +263,8 @@ username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. �
 Deployment에는 이 Secret을 주입하지 않습니다. 따라서 Dev와 Prod에 각각
 별도의 File 변수를 등록합니다.
 
-- `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` → `neople-game-analytics-api-dev`
-- `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` → `neople-game-analytics-api-prod`
+- `NEOPLE_API_DEV_ENV` → `neople-game-analytics-api-dev`
+- `NEOPLE_API_PROD_ENV` → `neople-game-analytics-api-prod`
 
 두 File 변수의 기본 형식은 다음과 같습니다.
 
@@ -361,13 +360,13 @@ GraphDB 보안 활성화, bootstrap Secret, reader/writer 분리, 클러스터 �
 | `ATMO_API_PROD_JWT_ENV` | `atmo-api-prod` | `atmo-jwt-secret` |
 | `ATMO_API_PROD_OAUTH_ENV` | `atmo-api-prod` | `atmo-oauth-secret` |
 | `ATMO_API_PROD_PUBLICDATA_ENV` | `atmo-api-prod` | `atmo-publicdata-secret` |
-| `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
-| `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
-| `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
-| `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
+| `gitops` 프로젝트의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
+| `NEOPLE_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
+| `NEOPLE_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
+| `gitops` 프로젝트의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
 | `ONTOLOGY_ASAL_AGENT_DEV_ENV` | `ontology-asal-agent-api-dev` | `ontology-asal-agent-secrets` |
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
-| `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Ontology ASAL Agent API/Web 각 Namespace | `gitlab-regcred` |
+| `gitops` 프로젝트의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Ontology ASAL Agent API/Web 각 Namespace | `gitlab-regcred` |
 | `GRAPHDB_LICENSE_FILE` | `graphdb` | `graphdb-license` |
 
 생성되는 파일은 다음과 같습니다.
@@ -391,7 +390,7 @@ platform/graphdb/sealed-secret.yaml
 파일 안에는 `encryptedData`만 저장되며 실제 값은 저장되지 않습니다.
 SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같아야 합니다.
 
-`NEOPLE_GAME_ANALYTICS_API_*_ENV` File 변수의 전체 예시는 위의
+`NEOPLE_API_*_ENV` File 변수의 전체 예시는 위의
 `Neople Worker` 절을 따릅니다. Secret이 아직 생성되지 않아도 API 컨테이너는
 기동하지만, 필수 환경변수가 없으면 Worker 수집 작업이 실패할 수 있습니다.
 대시보드 API는 `/neople/api/dashboard`로 노출되며, Power BI Embed 설정은

@@ -9,7 +9,7 @@ by itself:
 ~~~bash
 WORKLOAD=api \
 ENVIRONMENT=dev \
-IMAGE_TAG=dev-abc1234 \
+IMAGE_TAG=abc1234567890abcdef1234567890abcdef123456 \
 sh ci/update-image-tag.sh
 ~~~
 
@@ -83,19 +83,23 @@ semantic release tags update the `prod` overlays.
 
 ## Current Atmo service CI flow
 
-The `atmo-api` and `atmo-web` repositories now use the same two follow-up CI
-jobs after their Docker jobs:
+The `atmo-api` and `atmo-web` repositories use the same CI contract as Neople:
 
-- `gitops:update-dev` runs for the `dev` branch and updates the matching `dev`
-  Kustomize tag.
-- `gitops:update-prod` runs for a semantic version tag such as `v0.2.5` and
-  updates the matching `prod` Kustomize tag.
+- The default branch (`main`) builds once with the full commit SHA, pushes the
+  image, and updates the `dev` Kustomize tag.
+- A semantic version tag such as `v0.2.5` verifies the existing SHA image,
+  adds the version tag without rebuilding, and updates the `prod` Kustomize
+  tag.
+
+The CI job names are `build_images`, `promote_release`, `update_gitops_dev`,
+and `update_gitops_prod` in both service repositories.
 
 Both jobs use the GitOps branch from `GITOPS_BRANCH`, which currently defaults
 to `feature/clean-gitops-layout` while this branch is being tested. The
 variable can later be changed to `main` after the GitOps changes are merged.
 
-Each service repository needs the following CI/CD variables:
+Each service repository inherits the following CI/CD variables from the
+`lime985340` Group:
 
 ```text
 GITOPS_PUSH_TOKEN
@@ -103,16 +107,15 @@ GITOPS_PUSH_TOKEN_USER
 GITOPS_BRANCH
 ```
 
-These variables may be managed once as protected variables in the
-`lime985340` GitLab Group and inherited by both service projects. They are used
+These variables are used
 only by the service repositories' cross-project image-update jobs. The GitOps
 repository's own `seal:workload-secrets` job uses the predefined `CI_JOB_TOKEN`
 instead and does not use these Group variables.
 
-While the feature branch is being tested, set the inherited `GITOPS_BRANCH` to
-`feature/clean-gitops-layout`; change it to `main` only after the GitOps changes
-are merged and the service CI contract is intentionally switched. The service
-jobs allow only `feature/clean-gitops-layout` and `main` as target branches.
+While the GitOps feature branch is being tested, set the inherited
+`GITOPS_BRANCH` to `feature/clean-gitops-layout`; change this one Group Variable
+to `main` after the GitOps changes are merged. The service jobs allow only
+`feature/clean-gitops-layout` and `main` as target branches.
 
 The service variables are intentionally Group-level rather than duplicated in
 each service project. Keep the token protected with the selected service refs,

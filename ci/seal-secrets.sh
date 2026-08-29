@@ -224,19 +224,19 @@ seal_registry_secret "$dev_web_output" atmo-web-dev
 seal_registry_secret "$prod_web_output" atmo-web-prod
 
 : > "$dev_neople_api_output"
-seal_env_secret_if_configured \
+seal_env_secret \
   "$dev_neople_api_output" \
   neople-game-analytics-api-dev \
   neople-game-analytics-api-secret \
-  "${NEOPLE_GAME_ANALYTICS_API_DEV_ENV:-}"
+  "${NEOPLE_API_DEV_ENV:-}"
 seal_registry_secret "$dev_neople_api_output" neople-game-analytics-api-dev
 
 : > "$prod_neople_api_output"
-seal_env_secret_if_configured \
+seal_env_secret \
   "$prod_neople_api_output" \
   neople-game-analytics-api-prod \
   neople-game-analytics-api-secret \
-  "${NEOPLE_GAME_ANALYTICS_API_PROD_ENV:-}"
+  "${NEOPLE_API_PROD_ENV:-}"
 seal_registry_secret "$prod_neople_api_output" neople-game-analytics-api-prod
 
 : > "$dev_neople_web_output"

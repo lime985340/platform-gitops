@@ -331,8 +331,8 @@ awk '/^encryptedData:[[:space:]]*$/ { in_data=1; next } in_data && /^[^[:space:]
 
 `seal:workload-secrets`에는 인증서 외에도 다음 값이 필요합니다.
 
-- `GITLAB_REGISTRY_USERNAME` - 두 서비스 이미지에 접근하는 Registry username
-- `GITLAB_REGISTRY_TOKEN` - 두 서비스 이미지에 `read_registry` 권한이 있는 token
+- `GITLAB_REGISTRY_USERNAME` - 서비스 이미지 프로젝트에 접근하는 Registry username
+- `GITLAB_REGISTRY_TOKEN` - 서비스 이미지 프로젝트에 `read_registry` 권한이 있는 token
 - `ATMO_API_DEV_DB_ENV`
 - `ATMO_API_DEV_JWT_ENV`
 - `ATMO_API_DEV_OAUTH_ENV`

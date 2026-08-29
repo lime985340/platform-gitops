@@ -54,9 +54,10 @@ branch CI 설정이 로드되었는지 확인합니다.
 참고합니다. 주요 변수는 다음과 같습니다.
 
 - `SEALED_SECRETS_CERT`: Controller 공개 인증서 전체 PEM, `File` 타입
-- `GITLAB_REGISTRY_USERNAME`: 두 서비스 이미지에 접근할 Registry username, 일반 `Variable`
-- `GITLAB_REGISTRY_TOKEN`: 두 서비스 이미지에 `read_registry` 권한이 있는 token, 일반 `Variable`
+- `GITLAB_REGISTRY_USERNAME`: 서비스 이미지 프로젝트에 접근할 Registry username, 일반 `Variable`
+- `GITLAB_REGISTRY_TOKEN`: 서비스 이미지 프로젝트에 `read_registry` 권한이 있는 token, 일반 `Variable`
 - `ATMO_API_DEV_*`, `ATMO_API_PROD_*`: `KEY=VALUE` 형식의 API 환경별 `File` 변수
+- `NEOPLE_API_DEV_ENV`, `NEOPLE_API_PROD_ENV`: `KEY=VALUE` 형식의 Neople Worker 환경별 `File` 변수
 
 CI가 Registry username/token으로 Docker 인증 JSON과 `auth` 값을 내부에서 생성하므로,
 `GITLAB_REGISTRY_DOCKER_CONFIG` File 변수나 수동 Base64 계산은 사용하지 않습니다.

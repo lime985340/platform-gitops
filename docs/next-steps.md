@@ -1,8 +1,9 @@
 # 다음 작업 계획
 
 현재 GitOps 구성과 Sealed Secrets Controller 설치는 완료되어 있습니다.
-다만 실제 서비스 Secret 값은 아직 입력하지 않았으므로 API와 Web workload는
-`Degraded` 상태로 남아 있습니다. Secret 값 입력은 별도 작업으로 보류합니다.
+실제 운영 Secret이 아직 모두 봉인되지 않았다면 API/Web과 Worker 상태는
+클러스터 동기화 결과에 따라 달라집니다. 임시 Neople API 키는 실제 키로
+교체하기 전까지 운영 수집에 사용하지 않습니다.
 
 ## 보류한 작업
 
@@ -12,8 +13,8 @@
 에서 등록합니다. Secret 값 자체는 이 문서나 Git에 기록하지 않습니다.
 
 - `SEALED_SECRETS_CERT` - `kubeseal --fetch-cert`로 받은 공개 인증서, `File` 변수
-- `GITLAB_REGISTRY_USERNAME` - 두 서비스 이미지에 접근하는 Registry username, 일반 `Variable`
-- `GITLAB_REGISTRY_TOKEN` - 두 서비스 이미지에 `read_registry` 권한이 있는 token, 일반 `Variable`
+- `GITLAB_REGISTRY_USERNAME` - 현재 `gitops` 프로젝트의 Registry username, 일반 `Variable`
+- `GITLAB_REGISTRY_TOKEN` - 현재 `gitops` 프로젝트의 `read_registry` token, 일반 `Variable`
 - `ATMO_API_DEV_DB_ENV`
 - `ATMO_API_DEV_JWT_ENV`
 - `ATMO_API_DEV_OAUTH_ENV`
@@ -22,6 +23,8 @@
 - `ATMO_API_PROD_JWT_ENV`
 - `ATMO_API_PROD_OAUTH_ENV`
 - `ATMO_API_PROD_PUBLICDATA_ENV`
+- `NEOPLE_API_DEV_ENV`
+- `NEOPLE_API_PROD_ENV`
 
 이 GitOps 프로젝트의 sealing Job은 별도 Push token 대신 GitLab이 자동 제공하는
 `CI_JOB_TOKEN`을 사용합니다. GitLab 프로젝트의 Job token repository push 허용
@@ -59,13 +62,18 @@ feature 브랜치의 CI 설정이 반영되었는지 확인합니다. Pipeline �
 합니다. 그렇지 않으면 변수는 Job에 전달되지 않습니다. 현재 feature 브랜치는
 sealing 실행을 위해 Protected로 관리합니다.
 
-생성되는 파일은 다음 네 개입니다.
+Sealing Job은 각 서비스의 환경별 `sealed-secrets.yaml`을 갱신합니다. Atmo의
+대표 경로는 다음과 같고, Neople·Ontology 경로도 같은 방식으로 함께 갱신됩니다.
 
 ```text
 workloads/atmo/api/environments/dev/sealed-secrets.yaml
 workloads/atmo/api/environments/prod/sealed-secrets.yaml
 workloads/atmo/web/environments/dev/sealed-secrets.yaml
 workloads/atmo/web/environments/prod/sealed-secrets.yaml
+workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml
+workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml
+workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
+workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
 ```
 
 `encryptedData: {}` 상태의 파일은 임시 Placeholder이므로 운영 Secret으로
@@ -88,8 +96,8 @@ Controller Private Key 백업은 Git 저장소 밖의 암호화되고 접근이 
   `feature/clean-gitops-layout` 브랜치에 반영했습니다. 두 저장소는
   `lime985340` Group에서 상속한 `GITOPS_PUSH_TOKEN`,
   `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH`를 사용합니다.
-- Feature 브랜치 참조를 `main`으로 변경: Feature 브랜치 검증을 위해 현재 상태 유지
-- 실제 Secret 값의 GitLab 등록: 값 준비 후 수동으로 진행
+- GitOps 대상 브랜치를 `main`으로 변경: `feature/clean-gitops-layout` 병합 후 Group Variable 한 곳만 변경
+- 임시 Neople Secret 값을 실제 API 키로 교체한 뒤 sealing 실행
 - GitOps sealing Job은 `CI_JOB_TOKEN` repository push 설정과 Protected branch를
   사용하며, 서비스 image update용 Group token과 분리됩니다.
 - 서비스 저장소의 image update CI에는 Group의

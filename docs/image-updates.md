@@ -40,7 +40,7 @@ Ontology ASAL Agent uses the same script for its split API and Web repositories:
 APPLICATION=ontology-asal-agent \
 WORKLOAD=web \
 ENVIRONMENT=dev \
-IMAGE_TAG=feature-abc1234 \
+IMAGE_TAG=abc1234567890abcdef1234567890abcdef123456 \
 sh ci/update-image-tag.sh
 ~~~
 
@@ -78,8 +78,10 @@ Worker share one image, so the Neople application has two physical image
 repositories: API/Worker and Web.
 
 The Ontology ASAL Agent API and Web repositories follow the same `main` and
-`feature/*` flow as Neople: feature branches update the `dev` overlays, while
-semantic release tags update the `prod` overlays.
+`feature/*` flow as Neople: feature branches run tests only; a `main` commit
+builds once with the full commit SHA and updates the matching `dev` overlay;
+semantic release tags promote that existing SHA image without rebuilding and
+update the matching `prod` overlay. The API migration Job reuses the API image.
 
 ## Current Atmo service CI flow
 

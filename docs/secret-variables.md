@@ -28,6 +28,11 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 
 다음 원칙으로 등록합니다.
 
+기존 `lime985340` Group Variable에 이미 등록된 공통 값은 각 프로젝트에 다시
+만들지 않습니다. Neople Game Analytics에서 새로 필요한 값은 아래의
+`NEOPLE_GAME_ANALYTICS_API_DEV_ENV`와 `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` 두
+File Variable입니다.
+
 - `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`처럼
   Job에 파일 경로로 전달되는 값은 내용이 한 줄이어도 `Type: File`로 등록
 - `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`처럼 한 줄로 전달되는 값은

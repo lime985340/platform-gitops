@@ -318,8 +318,9 @@ workloads/neople-game-analytics/web  -> React + TypeScript static dashboard
 ```
 
 The API repository publishes
-`registry.gitlab.com/lime985340/neople-game-analytics-api` and its Worker image
-under the `/worker` image path. The Web repository publishes
+`registry.gitlab.com/lime985340/neople-game-analytics-api`. Its API Deployment
+and daily Worker CronJob intentionally reuse that one image; the Worker changes
+only the container command to `python -m src.pipeline`. The Web repository publishes
 `registry.gitlab.com/lime985340/neople-game-analytics-web`.
 
 The API and Worker share the `neople-game-analytics-api-config` ConfigMap and

@@ -7,6 +7,7 @@ The reusable script updates one environment file and does not commit or push
 by itself:
 
 ~~~bash
+APPLICATION=atmo \
 WORKLOAD=api \
 ENVIRONMENT=dev \
 IMAGE_TAG=abc1234567890abcdef1234567890abcdef123456 \
@@ -184,13 +185,13 @@ git -c credential.helper= -c http.followRedirects=false \
   https://gitlab.com/lime985340/gitops.git gitops
 
 cd gitops
-WORKLOAD=api ENVIRONMENT=dev IMAGE_TAG="$CI_COMMIT_SHORT_SHA" \
+APPLICATION=atmo WORKLOAD=api ENVIRONMENT=dev IMAGE_TAG="$CI_COMMIT_SHA" \
   sh ci/update-image-tag.sh
 
 git config user.name "gitlab-ci[bot]"
 git config user.email "gitlab-ci[bot]@users.noreply.gitlab.com"
 git add workloads/atmo/api/environments/dev/kustomization.yaml
-git commit -m "chore: deploy atmo-api ${CI_COMMIT_SHORT_SHA} [skip ci]"
+git commit -m "chore: deploy atmo-api ${CI_COMMIT_SHA} [skip ci]"
 git -c credential.helper= -c http.followRedirects=false \
   push origin "HEAD:$GITOPS_BRANCH"
 ~~~

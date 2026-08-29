@@ -34,7 +34,8 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
   `Type: Variable`로 등록
 - `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`은 `lime985340` Group의
   CI/CD Variables에 한 번만 등록합니다. `atmo-api`, `atmo-web`,
-  `neople-game-analytics-api`, `neople-game-analytics-web`, GitOps 프로젝트에
+  `neople-game-analytics-api`, `neople-game-analytics-web`,
+  `ontology-asal-agent-api`, `ontology-asal-agent-web`, GitOps 프로젝트에
   같은 이름의 프로젝트 변수를 반복해서 만들지 않습니다.
 - 이 GitOps 프로젝트의 sealing Job은 별도 Push token이 아니라 GitLab 사전 정의
   `CI_JOB_TOKEN`을 사용합니다. GitLab 프로젝트에서 Job token의 repository push를
@@ -320,6 +321,7 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
 | `ONTOLOGY_ASAL_AGENT_DEV_ENV` | `ontology-asal-agent-api-dev` | `ontology-asal-agent-secrets` |
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
+| `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Ontology ASAL Agent API/Web 각 Namespace | `gitlab-regcred` |
 | `GRAPHDB_LICENSE_FILE` | `graphdb` | `graphdb-license` |
 
 생성되는 파일은 다음과 같습니다.
@@ -335,6 +337,8 @@ workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
 workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
 workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml
 workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml
+workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml
+workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml
 platform/graphdb/sealed-secret.yaml
 ```
 

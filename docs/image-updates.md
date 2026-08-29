@@ -23,6 +23,16 @@ IMAGE_TAG=dev-abc1234 \
 sh ci/update-image-tag.sh
 ~~~
 
+Ontology ASAL Agent uses the same script for its split API and Web repositories:
+
+~~~bash
+APPLICATION=ontology-asal-agent \
+WORKLOAD=web \
+ENVIRONMENT=dev \
+IMAGE_TAG=feature-abc1234 \
+sh ci/update-image-tag.sh
+~~~
+
 The supported paths are:
 
 ~~~text
@@ -34,6 +44,10 @@ workloads/neople-game-analytics/api/environments/dev/kustomization.yaml
 workloads/neople-game-analytics/api/environments/prod/kustomization.yaml
 workloads/neople-game-analytics/web/environments/dev/kustomization.yaml
 workloads/neople-game-analytics/web/environments/prod/kustomization.yaml
+workloads/ontology-asal-agent/api/environments/dev/kustomization.yaml
+workloads/ontology-asal-agent/api/environments/prod/kustomization.yaml
+workloads/ontology-asal-agent/web/environments/dev/kustomization.yaml
+workloads/ontology-asal-agent/web/environments/prod/kustomization.yaml
 ~~~
 
 ## Neople Game Analytics service branch flow
@@ -50,6 +64,10 @@ not use a service-repository `dev` branch.
 
 The `dev` path above is a Kubernetes environment, not a Git branch. Atmo's
 existing `dev` branch and its CI flow remain unchanged.
+
+The Ontology ASAL Agent API and Web repositories follow the same `main` and
+`feature/*` flow as Neople: feature branches update the `dev` overlays, while
+semantic release tags update the `prod` overlays.
 
 ## Current Atmo service CI flow
 

@@ -9,8 +9,15 @@ is managed under `workloads/ontology-asal-agent/api/environments/{dev,prod}`.
 GraphDB Helm Application
   -> asal-agent repository
   -> migration Job loads domain.ttl and shapes.ttl when a GraphDB license exists
-  -> ontology agent Deployments start in triplestore mode
+  -> ontology agent API Deployment starts in triplestore mode
+  -> the Web Deployment serves the static UI
   -> the prod route is exposed through Traefik
+
+The service is split into two repositories and images:
+
+- `ontology-asal-agent-api` publishes `registry.gitlab.com/lime985340/ontology-asal-agent-api`.
+- `ontology-asal-agent-web` publishes `registry.gitlab.com/lime985340/ontology-asal-agent-web`.
+- `/ontology-asal-agent` routes to Web and `/ontology-asal-agent/api` routes to API.
 ```
 
 The test cluster uses GraphDB without authentication so the data path can be
@@ -53,7 +60,8 @@ The provider must honor the `idempotency_key` sent in each delivery payload.
 ## URLs
 
 ```text
-Agent route:        /ontology-asal-agent
+Agent Web route:    /ontology-asal-agent
+Agent API route:    /ontology-asal-agent/api
 GraphDB query URL:  http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent
 GraphDB update URL: http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent/statements
 ```

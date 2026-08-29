@@ -27,7 +27,7 @@ spec:
         - name: gitlab-regcred
       containers:
         - name: agent
-          image: registry.gitlab.com/lime985340/ontology-asal-agent
+          image: registry.gitlab.com/lime985340/ontology-asal-agent-api
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

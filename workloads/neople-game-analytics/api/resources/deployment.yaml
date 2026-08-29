@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       annotations:
-        secret.reloader.stakater.com/reload: "neople-game-analytics-api-secret,gitlab-regcred"
+        secret.reloader.stakater.com/reload: "gitlab-regcred"
       labels:
         app: neople-game-analytics-api
         app.kubernetes.io/name: neople-game-analytics-api
@@ -34,9 +34,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: neople-game-analytics-api-config
-            - secretRef:
-                name: neople-game-analytics-api-secret
-                optional: true
           readinessProbe:
             httpGet:
               path: /healthz
@@ -49,3 +46,10 @@ spec:
               port: http
             initialDelaySeconds: 15
             periodSeconds: 20
+          volumeMounts:
+            - name: analytics-data
+              mountPath: /app/data
+      volumes:
+        - name: analytics-data
+          persistentVolumeClaim:
+            claimName: neople-game-analytics-data

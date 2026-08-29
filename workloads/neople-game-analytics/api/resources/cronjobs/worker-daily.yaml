@@ -27,14 +27,14 @@ spec:
             - name: gitlab-regcred
           containers:
             - name: worker
-              image: registry.gitlab.com/lime985340/neople-game-analytics-api/worker
+              image: registry.gitlab.com/lime985340/neople-game-analytics-api
               command: ["python", "-m", "src.pipeline"]
               envFrom:
                 - configMapRef:
                     name: neople-game-analytics-api-config
                 - secretRef:
                     name: neople-game-analytics-api-secret
-                    optional: true
+                    optional: false
               resources:
                 requests:
                   cpu: 100m
@@ -42,3 +42,10 @@ spec:
                 limits:
                   cpu: 1
                   memory: 1Gi
+              volumeMounts:
+                - name: analytics-data
+                  mountPath: /app/data
+          volumes:
+            - name: analytics-data
+              persistentVolumeClaim:
+                claimName: neople-game-analytics-data

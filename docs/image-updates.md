@@ -19,9 +19,20 @@ Neople Game Analytics uses the same script with an explicit application name:
 APPLICATION=neople-game-analytics \
 WORKLOAD=api \
 ENVIRONMENT=dev \
-IMAGE_TAG=dev-abc1234 \
+IMAGE_TAG=abc1234567890abcdef1234567890abcdef123456 \
+sh ci/update-image-tag.sh
+
+APPLICATION=neople-game-analytics \
+WORKLOAD=web \
+ENVIRONMENT=dev \
+IMAGE_TAG=abc1234567890abcdef1234567890abcdef123456 \
 sh ci/update-image-tag.sh
 ~~~
+
+The Neople API Deployment and its daily Worker CronJob intentionally reuse the
+same `neople-game-analytics-api` image. The Worker changes only the container
+command to `python -m src.pipeline`; it does not require a second `/worker`
+image repository or a second image tag entry.
 
 Ontology ASAL Agent uses the same script for its split API and Web repositories:
 
@@ -52,18 +63,19 @@ workloads/ontology-asal-agent/web/environments/prod/kustomization.yaml
 
 ## Neople Game Analytics service branch flow
 
-The Neople API and Web repositories use `main` and `feature/*` branches. They do
-not use a service-repository `dev` branch.
+The Neople service repository uses `main` and `feature/*` branches. It does not
+use a service-repository `dev` branch.
 
-- A `feature/*` branch publishes a `feature-<short-sha>` image and updates the
-  Neople `dev` overlay for cluster verification.
-- A `main` commit publishes a `main-<short-sha>` image without changing a
-  deployment overlay.
-- A semantic version tag such as `v0.2.5`, created from the release flow,
-  publishes the release image and updates the Neople `prod` overlay.
+- A `feature/*` branch runs tests only.
+- A `main` commit builds the API/Worker image and Web image once, pushes both
+  with the full commit SHA, and updates the Neople `dev` overlay.
+- A semantic version tag such as `v0.2.5` verifies that the tagged commit's
+  SHA images exist, adds the version tag to those existing image manifests
+  without rebuilding, and updates the Neople `prod` overlay.
 
-The `dev` path above is a Kubernetes environment, not a Git branch. Atmo's
-existing `dev` branch and its CI flow remain unchanged.
+The `dev` path above is a Kubernetes environment, not a Git branch. API and
+Worker share one image, so the Neople application has two physical image
+repositories: API/Worker and Web.
 
 The Ontology ASAL Agent API and Web repositories follow the same `main` and
 `feature/*` flow as Neople: feature branches update the `dev` overlays, while

@@ -252,10 +252,11 @@ Group 변수명:
 username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. 기존
 `GITLAB_REGISTRY_DOCKER_CONFIG` File 변수는 사용하지 않습니다.
 
-### Neople API/Worker
+### Neople Worker
 
-API Deployment와 일일 Worker CronJob은 같은 Secret을 공유합니다. 따라서 Dev와
-Prod에 각각 별도의 File 변수를 등록합니다.
+일일 Worker CronJob만 Neople API Key를 사용합니다. API Deployment와 Web
+Deployment에는 이 Secret을 주입하지 않습니다. 따라서 Dev와 Prod에 각각
+별도의 File 변수를 등록합니다.
 
 - `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` → `neople-game-analytics-api-dev`
 - `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` → `neople-game-analytics-api-prod`
@@ -278,10 +279,16 @@ CYPHERS_API_KEY=<CYPHERS_API_KEY>
 - `CYPHERS_*`, `PUBLIC_DASHBOARD_PATH`, `CORS_ALLOW_ORIGINS`: 비밀이 아닌
   애플리케이션 설정
 
-API/Worker는 `envFrom`으로 Secret과 ConfigMap을 함께 읽습니다. Worker가 생성한
-`data/public/dashboard.json`은 기본적으로 실행 컨테이너 내부 산출물이므로, 정적
-Web을 갱신하려면 검토 후 Web 저장소의 `public/data/dashboard.json`으로 전달하는
-별도 artifact/release 단계를 운영해야 합니다.
+Worker는 `envFrom`으로 Secret과 ConfigMap을 함께 읽습니다. API Deployment는
+ConfigMap만 읽습니다. Worker가 생성한
+`data/public/dashboard.json`은 API와 공유하는 PersistentVolume에 저장되며, API가
+`/api/dashboard`로 제공합니다. Web은 API 경로를 프록시하므로 Worker 실행 후 Web
+이미지를 다시 빌드하지 않아도 최신 공개 JSON을 표시합니다.
+
+`neople-game-analytics-data`는 현재 `ReadWriteOnce` 1Gi PVC입니다. API와 Worker가
+같은 노드에서 이 볼륨을 사용하도록 동작하며, 여러 노드에서 자유롭게 공유해야
+하는 클러스터라면 사용하는 StorageClass가 `ReadWriteMany`를 지원하는지 확인한
+뒤 access mode를 별도로 조정해야 합니다.
 
 ### Ontology ASAL Agent
 
@@ -346,7 +353,7 @@ platform/graphdb/sealed-secret.yaml
 SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같아야 합니다.
 
 `NEOPLE_GAME_ANALYTICS_API_*_ENV` File 변수의 전체 예시는 위의
-`Neople API/Worker` 절을 따릅니다. Secret이 아직 생성되지 않아도 API 컨테이너는
+`Neople Worker` 절을 따릅니다. Secret이 아직 생성되지 않아도 API 컨테이너는
 기동하지만, 필수 환경변수가 없으면 Worker 수집 작업이 실패할 수 있습니다.
 대시보드 API는 `/neople/api/dashboard`로 노출되며, Power BI Embed 설정은
 사용하지 않습니다.
@@ -361,7 +368,7 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 5. CI가 `kubeseal`로 YAML을 생성하고 현재 브랜치에 Push합니다.
 6. GitOps validation Job이 변경사항을 검증합니다.
 7. Argo CD가 변경된 SealedSecret을 동기화합니다.
-8. Controller가 일반 Kubernetes Secret을 생성하면 API/Web이 새 값을 사용합니다.
+8. Controller가 일반 Kubernetes Secret을 생성하면 Worker가 새 값을 사용합니다.
 
 Secret 값은 GitLab CI/CD Variables에만 저장하며 Pipeline 입력 화면에는 입력하지
 않습니다. 일반 `UPDATE_SECRETS` Pipeline 변수는 사용하지 않습니다.

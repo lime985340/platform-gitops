@@ -16,5 +16,3 @@ resources:
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-api
     newTag: dev-3598b7d3
-  - name: registry.gitlab.com/lime985340/neople-game-analytics-api/worker
-    newTag: dev-3598b7d3

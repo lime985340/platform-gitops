@@ -4,4 +4,5 @@ resources:
   - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - pvc.yaml
   - cronjobs/worker-daily.yaml

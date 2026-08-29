@@ -33,7 +33,8 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 `NEOPLE_GAME_ANALYTICS_API_DEV_ENV`와 `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` 두
 File Variable입니다.
 
-- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`처럼
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`,
+  `ONTOLOGY_ASAL_AGENT_*_ENV`처럼
   Job에 파일 경로로 전달되는 값은 내용이 한 줄이어도 `Type: File`로 등록
 - `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`처럼 한 줄로 전달되는 값은
   `Type: Variable`로 등록
@@ -314,6 +315,39 @@ TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
 
 - `GRAPHDB_LICENSE_FILE` → `graphdb` / `graphdb-license`
+
+#### 운영 보안 기준
+
+현재 `feature/clean-gitops-layout`의 GraphDB는 테스트 부트스트랩을 위해
+`security.enabled: false`, `service.type: ClusterIP`, `ingress.enabled: false`로
+구성되어 있습니다. 이 상태에서는 GraphDB username/password가 필요하지 않지만,
+운영 환경에서는 GraphDB 보안을 활성화하고 전용 계정을 사용해야 합니다.
+
+- GraphDB bootstrap/admin 계정은 초기 사용자 관리에만 사용하고 애플리케이션에
+  전달하지 않습니다.
+- API에는 `asal-agent` repository에 query/read 권한만 있는 환경별 reader 계정을
+  사용합니다.
+- 온톨로지 적재 Migration Job에는 reader와 분리된 writer 계정을 사용합니다.
+- Google/GitLab 로그인 비밀번호와 GitLab PAT를 GraphDB 비밀번호로 재사용하지
+  않습니다.
+- GraphDB license가 필요한 RDF transaction과 온톨로지 적재에는 실제
+  `GRAPHDB_LICENSE_FILE`을 등록합니다. placeholder는 운영값으로 간주하지 않습니다.
+
+운영 API File 변수에는 환경별 실제 값을 입력합니다.
+
+```env
+LLM_API_KEY=<실제 LLM provider API key>
+TRIPLESTORE_USERNAME=<환경별 GraphDB reader 계정>
+TRIPLESTORE_PASSWORD=<환경별 GraphDB reader 비밀번호>
+```
+
+현재 `ontology-asal-agent` Migration Job은 ConfigMap만 읽도록 되어 있으므로,
+GraphDB 보안을 활성화하기 전에 환경별 writer Secret을 Job에 연결해야 합니다.
+reader 비밀번호를 writer 용도로 재사용하거나 관리자 계정을 Job에 넣지 않습니다.
+
+GraphDB 보안 활성화, bootstrap Secret, reader/writer 분리, 클러스터 검증 절차의
+전체 내용은 [`ontology-asal-agent-security.md`](ontology-asal-agent-security.md)를
+참조합니다.
 
 ## 변수와 SealedSecret 매핑
 

@@ -15,4 +15,4 @@ resources:
   - sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-api
-    newTag: acb0c8bf736e6b3368eae03070acc580b22c6997
+    newTag: 9c880e47865606e9f76ff243e573004db8a67882

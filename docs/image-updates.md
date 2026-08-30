@@ -134,10 +134,12 @@ The service image-update variables are not Registry credentials, and Registry
 credentials are not used for Git pushes.
 
 The service repositories need no Kubernetes, kubeconfig, or Argo CD access for
-this flow. The generated GitOps commit uses `[skip ci]`, so it does not create a
-validation loop in the GitOps pipeline. Current image tags remain usable until
-a service publishes a replacement; no service image needs to be rebuilt merely
-because the GitOps feature branch exists.
+this flow. The generated GitOps commit intentionally runs the lightweight
+manifest validation pipeline, so a tag update cannot bypass Kustomize checks.
+The validation pipeline does not push changes and therefore cannot create a
+validation loop. Current image tags remain usable until a service publishes a
+replacement; no service image needs to be rebuilt merely because the GitOps
+feature branch exists.
 
 ## Manual service CI flow
 
@@ -191,7 +193,7 @@ APPLICATION=atmo WORKLOAD=api ENVIRONMENT=dev IMAGE_TAG="$CI_COMMIT_SHA" \
 git config user.name "gitlab-ci[bot]"
 git config user.email "gitlab-ci[bot]@users.noreply.gitlab.com"
 git add workloads/atmo/api/environments/dev/kustomization.yaml
-git commit -m "chore: deploy atmo-api ${CI_COMMIT_SHA} [skip ci]"
+git commit -m "chore: deploy atmo-api ${CI_COMMIT_SHA}"
 git -c credential.helper= -c http.followRedirects=false \
   push origin "HEAD:$GITOPS_BRANCH"
 ~~~

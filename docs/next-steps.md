@@ -23,8 +23,8 @@
 - `ATMO_API_PROD_JWT_ENV`
 - `ATMO_API_PROD_OAUTH_ENV`
 - `ATMO_API_PROD_PUBLICDATA_ENV`
-- `NEOPLE_API_DEV_ENV`
-- `NEOPLE_API_PROD_ENV`
+- `NEOPLE_GAME_ANALYTICS_API_DEV_ENV`
+- `NEOPLE_GAME_ANALYTICS_API_PROD_ENV`
 
 이 GitOps 프로젝트의 sealing Job은 별도 Push token 대신 GitLab이 자동 제공하는
 `CI_JOB_TOKEN`을 사용합니다. GitLab 프로젝트의 Job token repository push 허용
@@ -43,7 +43,7 @@ Registry JSON이나 `auth` 값은 직접 만들지 않으며, CI가 username/tok
 Secret 값을 입력한 뒤 다음 순서로 실행합니다.
 
 1. GitLab에서 `Build` → `Pipelines` → `New pipeline`을 선택합니다.
-2. 대상 브랜치로 `feature/clean-gitops-layout`을 선택합니다.
+2. 대상 브랜치로 `main`을 선택합니다.
 3. `Inputs`에서 boolean 입력 `update_secrets`를 `true`로 설정합니다.
 4. Pipeline을 실행한 뒤 수동 Job `seal:workload-secrets`를 실행합니다.
 5. CI가 `kubeseal`로 암호화된 YAML을 생성하고 현재 브랜치에 Push합니다.
@@ -93,16 +93,16 @@ Controller Private Key 백업은 Git 저장소 밖의 암호화되고 접근이 
 ## 현재 진행하지 않는 작업
 
 - 서비스 API/Web 저장소 CI 연동 코드는 각 저장소의
-  `feature/clean-gitops-layout` 브랜치에 반영했습니다. 두 저장소는
+  `main` 브랜치에 반영했습니다. 두 저장소는
   `lime985340` Group에서 상속한 `GITOPS_PUSH_TOKEN`,
   `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH`를 사용합니다.
-- GitOps 대상 브랜치를 `main`으로 변경: `feature/clean-gitops-layout` 병합 후 Group Variable 한 곳만 변경
+- GitOps 대상 브랜치를 `main`으로 변경했고 Group Variable도 `main`으로 설정했습니다.
 - 임시 Neople Secret 값을 실제 API 키로 교체한 뒤 sealing 실행
 - GitOps sealing Job은 `CI_JOB_TOKEN` repository push 설정과 Protected branch를
   사용하며, 서비스 image update용 Group token과 분리됩니다.
 - 서비스 저장소의 image update CI에는 Group의
   `GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH`가 필요하며,
-  현재 `GITOPS_BRANCH`는 `feature/clean-gitops-layout`로 설정합니다.
+  현재 `GITOPS_BRANCH`는 `main`으로 설정합니다.
 - 기존 `GITLAB_REGISTRY_DOCKER_CONFIG`는 사용하지 않으며, Registry JSON과
   `auth`는 CI가 생성합니다.
 - API release tag Pipeline을 사용할 때는 atmo-api의 `v*` Protected tag 정책도

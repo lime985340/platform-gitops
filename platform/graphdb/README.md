@@ -1,6 +1,6 @@
 # GraphDB test deployment
 
-The active `feature/clean-gitops-layout` cluster uses the official Ontotext
+The active `main` cluster uses the official Ontotext
 GraphDB Helm chart through `argocd/applications/graphdb.yaml`.
 
 The feature cluster intentionally starts with GraphDB security disabled so the

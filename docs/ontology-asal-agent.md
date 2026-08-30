@@ -3,7 +3,7 @@
 운영 보안, GraphDB 계정 분리, 실행 변수와 SealedSecret 절차는
 [`ontology-asal-agent-security.md`](ontology-asal-agent-security.md)를 참조합니다.
 
-The active test cluster follows `feature/clean-gitops-layout`, so this workload
+The active cluster follows `main`, so this workload
 is managed under `workloads/ontology-asal-agent/api/environments/{dev,prod}`.
 
 ## Current test flow

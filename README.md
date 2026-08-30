@@ -38,12 +38,12 @@ GitLab의 사전 정의 `CI_JOB_TOKEN`으로 Push하며, CI는 Kubernetes API에
 않으므로 `KUBECONFIG`가 필요하지 않습니다.
 
 Secret sealing은 일반 Pipeline 변수로 활성화하지 않습니다. `Build` →
-`Pipelines` → `New pipeline`에서 `feature/clean-gitops-layout`을 선택하고,
+`Pipelines` → `New pipeline`에서 `main`을 선택하고,
 `Inputs`의 boolean `update_secrets`를 `true`로 설정한 뒤 Pipeline을 실행하고
 `seal:workload-secrets` 수동 Job을 시작합니다. 입력의 기본값은 `false`이며,
 Secret 값은 Pipeline 화면이 아니라 GitLab CI/CD Variables에만 입력합니다.
 이 입력은 root `.gitlab-ci.yml`의 `spec:inputs`로 선언되므로, 일반 Pipeline
-변수 override 권한을 완화하지 않습니다. Inputs가 비어 있으면 최신 feature
+변수 override 권한을 완화하지 않습니다. Inputs가 비어 있으면 최신 `main`
 branch CI 설정이 로드되었는지 확인합니다.
 
 서비스 저장소의 image tag update Job은 이 sealing flow와 별개이며,
@@ -57,7 +57,7 @@ branch CI 설정이 로드되었는지 확인합니다.
 - `GITLAB_REGISTRY_USERNAME`: 서비스 이미지 프로젝트에 접근할 Registry username, 일반 `Variable`
 - `GITLAB_REGISTRY_TOKEN`: 서비스 이미지 프로젝트에 `read_registry` 권한이 있는 token, 일반 `Variable`
 - `ATMO_API_DEV_*`, `ATMO_API_PROD_*`: `KEY=VALUE` 형식의 API 환경별 `File` 변수
-- `NEOPLE_API_DEV_ENV`, `NEOPLE_API_PROD_ENV`: `KEY=VALUE` 형식의 Neople Worker 환경별 `File` 변수
+- `NEOPLE_GAME_ANALYTICS_API_DEV_ENV`, `NEOPLE_GAME_ANALYTICS_API_PROD_ENV`: `KEY=VALUE` 형식의 Neople API/Worker 환경별 `File` 변수
 
 CI가 Registry username/token으로 Docker 인증 JSON과 `auth` 값을 내부에서 생성하므로,
 `GITLAB_REGISTRY_DOCKER_CONFIG` File 변수나 수동 Base64 계산은 사용하지 않습니다.
@@ -296,13 +296,12 @@ validation does not require Secret values.
 
 ## Argo CD revision policy
 
-This feature branch intentionally keeps
-`refs/heads/feature/clean-gitops-layout` in the bootstrap and ApplicationSet
-sources so the branch can be tested before merging. The bootstrap source is the
-one-time entry point; the `platform` ApplicationSet owns the revision for its
-Git-backed platform Applications, and the `workloads` ApplicationSet owns the
-revision used for generated workload Applications. Change these revisions to
-`refs/heads/main` only as part of the merge or the first post-merge cleanup.
+The bootstrap and ApplicationSet sources use `refs/heads/main` as the active
+deployment revision. The bootstrap source is the one-time entry point; the
+`platform` ApplicationSet owns the revision for its Git-backed platform
+Applications, and the `workloads` ApplicationSet owns the revision used for
+generated workload Applications. The protected feature branch remains available
+for review, but is not the active cluster source.
 
 Do not enable shell tracing for the secret job and never commit `.env` files,
 plain Secret YAML, passwords, tokens, Controller Private Keys, or kubeconfig

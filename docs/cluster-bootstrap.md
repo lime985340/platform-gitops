@@ -42,10 +42,9 @@ creates the AppProjects, Applications, and ApplicationSets from Git.
 
 ## Branch selection
 
-The current feature environment points to
-`feature/clean-gitops-layout` in the bootstrap and ApplicationSet manifests.
-Before using this repository as a permanent environment, change those
-references to the release branch, normally `main`.
+The active environment points to `main` in the bootstrap and ApplicationSet
+manifests. The protected `feature/clean-gitops-layout` branch remains available
+for review but is not used as the cluster source.
 
 The cluster bootstrap file is intentionally kept separate from the Argo CD
 managed application tree. It is applied once by an operator or an external

@@ -10,7 +10,7 @@
 
 ## 1. 현재 테스트 구성과 운영 구성
 
-현재 `feature/clean-gitops-layout`의 GraphDB Application은 테스트 부트스트랩을
+현재 `main`의 GraphDB Application은 테스트 부트스트랩을
 위해 다음처럼 설정되어 있습니다.
 
 ```yaml
@@ -67,7 +67,7 @@ manager 등에서 충분히 긴 랜덤 값으로 생성합니다. Google 계정 
 
 | 변수 | 타입 | 목적 |
 | --- | --- | --- |
-| `GITOPS_BRANCH` | Variable | 현재 `feature/clean-gitops-layout` |
+| `GITOPS_BRANCH` | Variable | 현재 `main` |
 | `GITOPS_PUSH_TOKEN` | Variable | GitOps 저장소 `write_repository` 토큰 |
 | `GITOPS_PUSH_TOKEN_USER` | Variable | 해당 토큰의 사용자명 |
 
@@ -137,7 +137,7 @@ GraphDB를 노트북에서 별도로 실행하거나 Google 계정으로 로그�
 4. 초기 사용자 Secret, GraphDB license, API 런타임 File 변수를 평문이 아닌
    GitLab File Variable/승인된 Secret 저장소에 등록합니다.
 5. GitOps 프로젝트의 `Build` → `Pipelines` → `New pipeline`에서
-   `feature/clean-gitops-layout`을 선택하고 `update_secrets=true` 입력으로
+   `main`을 선택하고 `update_secrets=true` 입력으로
    수동 sealing job을 실행합니다.
 6. CI가 `kubeseal`로 대상 Namespace와 Secret 이름에 맞는 SealedSecret을
    생성하고, 암호화된 YAML만 GitOps 브랜치에 Push합니다.

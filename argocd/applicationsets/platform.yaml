@@ -27,7 +27,7 @@ spec:
       project: platform
       source:
         repoURL: https://gitlab.com/lime985340/gitops.git
-        targetRevision: refs/heads/feature/clean-gitops-layout
+        targetRevision: refs/heads/main
         path: '{{ .path }}'
       destination:
         server: https://kubernetes.default.svc

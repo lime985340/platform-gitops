@@ -97,9 +97,9 @@ The `atmo-api` and `atmo-web` repositories use the same CI contract as Neople:
 The CI job names are `build_images`, `promote_release`, `update_gitops_dev`,
 and `update_gitops_prod` in both service repositories.
 
-Both jobs use the GitOps branch from `GITOPS_BRANCH`, which currently defaults
-to `feature/clean-gitops-layout` while this branch is being tested. The
-variable can later be changed to `main` after the GitOps changes are merged.
+Both jobs use the GitOps branch from `GITOPS_BRANCH`, which is now set to
+`main`. The protected feature branch remains available for review, but is not
+the active deployment target.
 
 Each service repository inherits the following CI/CD variables from the
 `lime985340` Group:
@@ -115,10 +115,9 @@ only by the service repositories' cross-project image-update jobs. The GitOps
 repository's own `seal:workload-secrets` job uses the predefined `CI_JOB_TOKEN`
 instead and does not use these Group variables.
 
-While the GitOps feature branch is being tested, set the inherited
-`GITOPS_BRANCH` to `feature/clean-gitops-layout`; change this one Group Variable
-to `main` after the GitOps changes are merged. The service jobs allow only
-`feature/clean-gitops-layout` and `main` as target branches.
+The inherited `GITOPS_BRANCH` is set to `main`. The service jobs allow only
+`feature/clean-gitops-layout` and `main` as target branches so review pipelines
+can still be tested safely.
 
 The service variables are intentionally Group-level rather than duplicated in
 each service project. Keep the token protected with the selected service refs,

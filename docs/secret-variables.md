@@ -32,7 +32,7 @@ GitLab 프로젝트에서 다음 메뉴로 이동합니다.
 만들지 않습니다. Neople Game Analytics에서 사용하는 값은 아래의 두 File
 Variable입니다.
 
-- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_API_*_ENV`,
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`,
   `ONTOLOGY_ASAL_AGENT_*_ENV`처럼
   Job에 파일 경로로 전달되는 값은 내용이 한 줄이어도 `Type: File`로 등록
 - `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`처럼 한 줄로 전달되는 값은
@@ -53,7 +53,7 @@ Variable입니다.
 - `GITLAB_REGISTRY_TOKEN`은 `atmo`, `neople-game-analytics`,
   `ontology-asal-agent` 이미지 프로젝트를 읽을 수 있는 `read_registry` 권한만
   부여한 credential을 사용
-- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_API_*_ENV`는
+- `SEALED_SECRETS_CERT`, `ATMO_API_*_ENV`, `NEOPLE_GAME_ANALYTICS_API_*_ENV`는
   multiline File 변수이므로 Masked를 요구하지 않음; 대신 Protected, scope, 접근
   권한과 로그 미출력으로 보호
 - `GITLAB_REGISTRY_USERNAME`은 일반 Variable로 등록하고, `GITLAB_REGISTRY_TOKEN`은
@@ -95,7 +95,8 @@ branch 정책은 그대로 적용됩니다. 이 설정을 켜도 Job token이 Pr
 `GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`, `GITOPS_BRANCH` 계약을 사용합니다.
 
 Protected 변수는 Protected ref에서만 Job에 전달됩니다. 현재 sealing 대상인
-`feature/clean-gitops-layout` 브랜치는 Protected로 관리합니다.
+`main` 브랜치는 Protected로 관리합니다. `feature/clean-gitops-layout`은 검토용
+Protected 브랜치로 유지합니다.
 
 ### API DB/Redis
 
@@ -263,8 +264,8 @@ username/token은 로그, 채팅, Git, artifact에 출력하지 않습니다. �
 Deployment에는 이 Secret을 주입하지 않습니다. 따라서 Dev와 Prod에 각각
 별도의 File 변수를 등록합니다.
 
-- `NEOPLE_API_DEV_ENV` → `neople-game-analytics-api-dev`
-- `NEOPLE_API_PROD_ENV` → `neople-game-analytics-api-prod`
+- `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` → `neople-game-analytics-api-dev`
+- `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` → `neople-game-analytics-api-prod`
 
 두 File 변수의 기본 형식은 다음과 같습니다.
 
@@ -317,7 +318,7 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 
 #### 운영 보안 기준
 
-현재 `feature/clean-gitops-layout`의 GraphDB는 테스트 부트스트랩을 위해
+현재 `main`의 GraphDB는 테스트 부트스트랩을 위해
 `security.enabled: false`, `service.type: ClusterIP`, `ingress.enabled: false`로
 구성되어 있습니다. 이 상태에서는 GraphDB username/password가 필요하지 않지만,
 운영 환경에서는 GraphDB 보안을 활성화하고 전용 계정을 사용해야 합니다.
@@ -361,8 +362,8 @@ GraphDB 보안 활성화, bootstrap Secret, reader/writer 분리, 클러스터 �
 | `ATMO_API_PROD_OAUTH_ENV` | `atmo-api-prod` | `atmo-oauth-secret` |
 | `ATMO_API_PROD_PUBLICDATA_ENV` | `atmo-api-prod` | `atmo-publicdata-secret` |
 | `gitops` 프로젝트의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
-| `NEOPLE_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
-| `NEOPLE_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
+| `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
+| `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
 | `gitops` 프로젝트의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
 | `ONTOLOGY_ASAL_AGENT_DEV_ENV` | `ontology-asal-agent-api-dev` | `ontology-asal-agent-secrets` |
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
@@ -390,7 +391,7 @@ platform/graphdb/sealed-secret.yaml
 파일 안에는 `encryptedData`만 저장되며 실제 값은 저장되지 않습니다.
 SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같아야 합니다.
 
-`NEOPLE_API_*_ENV` File 변수의 전체 예시는 위의
+`NEOPLE_GAME_ANALYTICS_API_*_ENV` File 변수의 전체 예시는 위의
 `Neople Worker` 절을 따릅니다. Secret이 아직 생성되지 않아도 API 컨테이너는
 기동하지만, 필수 환경변수가 없으면 Worker 수집 작업이 실패할 수 있습니다.
 대시보드 API는 `/neople/api/dashboard`로 노출되며, Power BI Embed 설정은
@@ -400,7 +401,7 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 
 1. 위 GitLab 변수를 등록하거나 수정합니다.
 2. `Build` → `Pipelines` → `New pipeline`에서
-   `feature/clean-gitops-layout`을 선택합니다.
+   `main`을 선택합니다.
 3. `Inputs`의 boolean `update_secrets`를 `true`로 설정하고 Pipeline을 실행합니다.
 4. 수동 작업 `seal:workload-secrets`를 실행합니다.
 5. CI가 `kubeseal`로 YAML을 생성하고 현재 브랜치에 Push합니다.

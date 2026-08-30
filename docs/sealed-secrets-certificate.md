@@ -349,7 +349,7 @@ GitOps 저장소 자체에 대한 CI Push는 GitLab 사전 정의 `CI_JOB_TOKEN`
 뒤에만 sealing을 실행합니다.
 
 Sealing 실행은 일반 Pipeline 변수 `UPDATE_SECRETS`를 사용하지 않습니다. GitLab의
-`Build` → `Pipelines` → `New pipeline`에서 `feature/clean-gitops-layout`을
+`Build` → `Pipelines` → `New pipeline`에서 `main`을
 선택하고 `Inputs`의 boolean `update_secrets`를 `true`로 설정한 뒤 Pipeline을
 실행하고 `seal:workload-secrets` 수동 Job을 시작합니다. Secret 값은 Pipeline
 입력 화면이 아니라 GitLab CI/CD Variables에만 둡니다. `spec:inputs`가 반영된

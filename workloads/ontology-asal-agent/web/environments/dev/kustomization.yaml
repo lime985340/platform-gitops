@@ -15,4 +15,4 @@ resources:
   - sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/ontology-asal-agent-web
-    newTag: 5fea3ecea4bd24773dc48b8a639e98c1bdf32641
+    newTag: dfe1cde6757d8a3e5f5d1316928f8c6b9a2ec783

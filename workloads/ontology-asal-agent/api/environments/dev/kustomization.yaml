@@ -19,8 +19,8 @@ images:
 configMapGenerator:
   - name: ontology-asal-agent-config
     literals:
-      - LLM_BASE_URL=https://api.openai.com/v1/chat/completions
-      - LLM_MODEL=gpt-4o-mini
+      - LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions
+      - LLM_MODEL=openrouter/free
       - ONTOLOGY_SOURCE=triplestore
       - TRIPLESTORE_QUERY_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent
       - TRIPLESTORE_UPDATE_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent/statements

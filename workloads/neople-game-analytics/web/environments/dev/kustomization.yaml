@@ -17,4 +17,4 @@ patches:
   - path: api-upstream-patch.yaml
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-web
-    newTag: 3add19b0c24d96c1ae683450b8b74d54588ae083
+    newTag: c21f54ab845cb7479cbb72409a3cbafdf1a20b37

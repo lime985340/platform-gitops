@@ -1,9 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - atmo-api-dev.yaml
-  - atmo-api-prod.yaml
-  - gameplatform-api-dev.yaml
-  - gameplatform-api-prod.yaml
-  - mimir-api-dev.yaml
-  - mimir-api-prod.yaml

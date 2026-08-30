@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workloads
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: https://gitlab.com/lime985340/gitops.git
+        revision: refs/heads/main
+        directories:
+          - path: workloads/*/*/environments/*
+  template:
+    metadata:
+      name: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'
+    spec:
+      project: workloads
+      source:
+        repoURL: https://gitlab.com/lime985340/gitops.git
+        targetRevision: refs/heads/main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}-{{ index .path.segments 4 }}'
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jqPathExpressions:
+            - .spec.template.metadata.annotations["reloader.stakater.com/last-reloaded-from"]
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true

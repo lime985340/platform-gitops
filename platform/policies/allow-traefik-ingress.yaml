@@ -1,0 +1,37 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-traefik-ingress
+spec:
+  description: Allow Cloudflared traffic, Prometheus metrics, and node health checks to Traefik.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: traefik
+      k8s:app.kubernetes.io/name: traefik
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cloudflared
+            k8s:app.kubernetes.io/name: cloudflared
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            k8s:app.kubernetes.io/name: prometheus
+            k8s:app.kubernetes.io/component: server
+      toPorts:
+        - ports:
+            - port: "9100"
+              protocol: TCP
+    - fromEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

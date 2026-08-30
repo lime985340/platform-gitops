@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: workloads
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-20'
+spec:
+  description: 'Business workloads (all environments: dev, staging, prod)'
+  sourceRepos:
+    - https://gitlab.com/lime985340/gitops.git
+  destinations:
+    - namespace: '*-dev'
+      server: https://kubernetes.default.svc
+    - namespace: '*-staging'
+      server: https://kubernetes.default.svc
+    - namespace: '*-prod'
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ServiceAccount
+    - group: ''
+      kind: PersistentVolumeClaim
+    - group: apps
+      kind: Deployment
+    - group: apps
+      kind: StatefulSet
+    - group: batch
+      kind: CronJob
+    - group: batch
+      kind: Job
+    - group: bitnami.com
+      kind: SealedSecret
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: traefik.io
+      kind: Middleware

@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: neople-game-analytics-worker-daily
+  labels:
+    app: neople-game-analytics-api
+    app.kubernetes.io/name: neople-game-analytics-worker
+    app.kubernetes.io/component: worker
+spec:
+  schedule: "0 3 * * *"
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: neople-game-analytics-api
+            app.kubernetes.io/name: neople-game-analytics-worker
+            app.kubernetes.io/component: worker
+        spec:
+          restartPolicy: OnFailure
+          imagePullSecrets:
+            - name: gitlab-regcred
+          containers:
+            - name: worker
+              image: registry.gitlab.com/lime985340/neople-game-analytics-api
+              command: ["python", "-m", "src.pipeline"]
+              envFrom:
+                - configMapRef:
+                    name: neople-game-analytics-api-config
+                - secretRef:
+                    name: neople-game-analytics-api-secret
+                    optional: false
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 1
+                  memory: 1Gi
+              volumeMounts:
+                - name: analytics-data
+                  mountPath: /app/data
+          volumes:
+            - name: analytics-data
+              persistentVolumeClaim:
+                claimName: neople-game-analytics-data

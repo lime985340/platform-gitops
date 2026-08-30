@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: platform-redis
-  annotations:
-    argocd.argoproj.io/sync-wave: '-30'
-  labels:
-    managed-by: gitops
-    tier: infrastructure

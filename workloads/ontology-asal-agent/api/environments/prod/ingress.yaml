@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ontology-asal-agent-prod
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: ontology-asal-agent-api-prod-ontology-asal-agent-api-strip-prefix@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /ontology-asal-agent/api
+            pathType: Prefix
+            backend:
+              service:
+                name: ontology-asal-agent
+                port:
+                  number: 80

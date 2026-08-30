@@ -1,0 +1,8 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ontology-asal-agent-web-strip-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /ontology-asal-agent

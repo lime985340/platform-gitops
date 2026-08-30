@@ -1,0 +1,16 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-neople-api-https-egress
+spec:
+  description: Allow Neople API pods to call Power BI and Microsoft Entra over HTTPS.
+  endpointSelector:
+    matchLabels:
+      k8s:app.kubernetes.io/name: neople-game-analytics-api
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

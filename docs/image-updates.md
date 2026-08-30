@@ -141,6 +141,11 @@ validation loop. Current image tags remain usable until a service publishes a
 replacement; no service image needs to be rebuilt merely because the GitOps
 feature branch exists.
 
+The CI jobs retry the clone, tag update, and push sequence up to three times
+when another service updates the same GitOps branch concurrently. Each retry
+starts from the latest remote branch so updates to different workloads are not
+lost.
+
 ## Manual service CI flow
 
 The service repository can clone this repository after publishing its image,

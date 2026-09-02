@@ -114,9 +114,21 @@ spec:
       annotations:
         argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
         argocd-image-updater.argoproj.io/write-back-target: kustomization
-        argocd-image-updater.argoproj.io/image-list: ontology-asal-agent=registry.gitlab.com/lime985340/ontology-asal-agent
-        argocd-image-updater.argoproj.io/ontology-asal-agent.kustomize.image-name: registry.gitlab.com/lime985340/ontology-asal-agent
-        argocd-image-updater.argoproj.io/ontology-asal-agent.update-strategy: newest-build
-        argocd-image-updater.argoproj.io/ontology-asal-agent.allow-tags: regexp:^[0-9a-f]{40}$
-        argocd-image-updater.argoproj.io/ontology-asal-agent.force-update: "true"
+        argocd-image-updater.argoproj.io/image-list: ontology-asal-agent-api=registry.gitlab.com/lime985340/ontology-asal-agent-api
+        argocd-image-updater.argoproj.io/ontology-asal-agent-api.kustomize.image-name: registry.gitlab.com/lime985340/ontology-asal-agent-api
+        argocd-image-updater.argoproj.io/ontology-asal-agent-api.update-strategy: newest-build
+        argocd-image-updater.argoproj.io/ontology-asal-agent-api.allow-tags: regexp:^[0-9a-f]{40}$
+        argocd-image-updater.argoproj.io/ontology-asal-agent-api.force-update: "true"
+    {{- end }}
+
+    {{- if and (eq $product "ontology-asal-agent") (eq $service "web") }}
+    metadata:
+      annotations:
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git
+        argocd-image-updater.argoproj.io/write-back-target: kustomization
+        argocd-image-updater.argoproj.io/image-list: ontology-asal-agent-web=registry.gitlab.com/lime985340/ontology-asal-agent-web
+        argocd-image-updater.argoproj.io/ontology-asal-agent-web.kustomize.image-name: registry.gitlab.com/lime985340/ontology-asal-agent-web
+        argocd-image-updater.argoproj.io/ontology-asal-agent-web.update-strategy: newest-build
+        argocd-image-updater.argoproj.io/ontology-asal-agent-web.allow-tags: regexp:^[0-9a-f]{40}$
+        argocd-image-updater.argoproj.io/ontology-asal-agent-web.force-update: "true"
     {{- end }}

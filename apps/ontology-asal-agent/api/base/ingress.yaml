@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ontology-asal-agent
+  name: ontology-asal-agent-api
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
@@ -18,10 +18,10 @@ spec:
     - host: ontology-asal-agent.lime.dedyn.io
       http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
-                name: ontology-asal-agent
+                name: ontology-asal-agent-api
                 port:
                   number: 80

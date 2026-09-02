@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ontology-asal-agent-api-dev
+labels:
+  - pairs:
+      app.kubernetes.io/instance: ontology-asal-agent-api-dev
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/name: ontology-asal-agent
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../common
+  - externalsecret-runtime.yaml
+images:
+  - name: registry.gitlab.com/lime985340/ontology-asal-agent-api
+    newTag: 199e8718f2c209ee8cb7626db1225554ca53033f
+configMapGenerator:
+  - name: ontology-asal-agent-config
+    literals:
+      - LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions
+      - LLM_MODEL=openrouter/free
+      - ONTOLOGY_SOURCE=triplestore
+      - TRIPLESTORE_QUERY_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent
+      - TRIPLESTORE_UPDATE_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent/statements
+      - TRIPLESTORE_ONTOLOGY_GRAPH=https://example.org/asal-agent/graph/ontology
+      - TRIPLESTORE_SHAPES_GRAPH=https://example.org/asal-agent/graph/shapes
+      - TRIPLESTORE_TIMEOUT_SECONDS=30
+      - TRIPLESTORE_ALLOW_LOCAL_FALLBACK=true
+      - NOTIFICATION_GATEWAY=local
+      - NOTIFICATION_WEBHOOK_URL=
+      - NOTIFICATION_TIMEOUT_SECONDS=30
+generatorOptions:
+  disableNameSuffixHash: true

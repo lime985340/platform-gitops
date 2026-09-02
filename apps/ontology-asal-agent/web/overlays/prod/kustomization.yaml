@@ -1,0 +1,57 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ontology-asal-agent-web-prod
+labels:
+  - pairs:
+      app.kubernetes.io/instance: ontology-asal-agent-web-prod
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/name: ontology-asal-agent-web
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../common
+images:
+  - name: registry.gitlab.com/lime985340/ontology-asal-agent-web
+    newTag: 3c996dceb8b4c9e93ce2f536e0ce6b7c29a00305
+configMapGenerator:
+  - name: ingress-env
+    literals:
+      - ingressClass=nginx-public
+      - host=ontology-asal-agent.lime.dedyn.io
+      - tlsSecret=ontology-asal-agent-prod-tls
+replacements:
+  - source:
+      kind: ConfigMap
+      name: ingress-env
+      fieldPath: data.ingressClass
+    targets:
+      - select:
+          kind: Ingress
+          name: ontology-asal-agent-web
+        fieldPaths:
+          - spec.ingressClassName
+  - source:
+      kind: ConfigMap
+      name: ingress-env
+      fieldPath: data.host
+    targets:
+      - select:
+          kind: Ingress
+          name: ontology-asal-agent-web
+        fieldPaths:
+          - spec.rules.0.host
+          - spec.tls.0.hosts.0
+  - source:
+      kind: ConfigMap
+      name: ingress-env
+      fieldPath: data.tlsSecret
+    targets:
+      - select:
+          kind: Ingress
+          name: ontology-asal-agent-web
+        fieldPaths:
+          - spec.tls.0.secretName
+generatorOptions:
+  disableNameSuffixHash: true

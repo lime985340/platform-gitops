@@ -22,7 +22,7 @@ spec:
         - name: gitlab-regcred
       containers:
         - name: publish-ontology
-          image: registry.gitlab.com/lime985340/ontology-asal-agent
+          image: registry.gitlab.com/lime985340/ontology-asal-agent-api
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh

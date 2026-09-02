@@ -4,7 +4,7 @@
 [`ontology-asal-agent-security.md`](ontology-asal-agent-security.md)를 참조합니다.
 
 The active cluster follows `main`, so this workload
-is managed under `workloads/ontology-asal-agent/api/environments/{dev,prod}`.
+is managed under `workloads/ontology-asal-agent/{api,web}/environments/{dev,prod}`.
 
 ## Current test flow
 
@@ -16,9 +16,9 @@ GraphDB Helm Application
   -> the Web Deployment serves the static UI
   -> the prod route is exposed through Traefik
 
-The service is split into two repositories and images:
+The service is split into API and Web workloads from the same application repository:
 
-- `ontology-asal-agent-api` publishes `registry.gitlab.com/lime985340/ontology-asal-agent-api`.
+- `ontology-asal-agent` publishes `registry.gitlab.com/lime985340/ontology-asal-agent` for the API and migration Job.
 - `ontology-asal-agent-web` publishes `registry.gitlab.com/lime985340/ontology-asal-agent-web`.
 - `/ontology-asal-agent` routes to Web and `/ontology-asal-agent/api` routes to API.
 ```
@@ -60,6 +60,10 @@ the application outbox. To enable an external provider, set
 ConfigMap, and provide `NOTIFICATION_WEBHOOK_API_KEY` through the workload Secret.
 The provider must honor the `idempotency_key` sent in each delivery payload.
 
+The Web deployment has no runtime application secret. It only uses the shared
+GitLab registry pull credential generated for the Web namespace. The API keeps
+its existing runtime Secret contract independently.
+
 ## URLs
 
 ```text
@@ -68,3 +72,8 @@ Agent API route:    /ontology-asal-agent/api
 GraphDB query URL:  http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent
 GraphDB update URL: http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent/statements
 ```
+
+The Web and API are separate Deployments. The Web container serves the React
+build through Nginx, while the API Ingress owns only `/ontology-asal-agent/api`.
+The Web uses the same browser origin and resolves API requests to that prefixed
+path, so no cross-origin configuration is required.

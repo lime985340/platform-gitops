@@ -4,6 +4,9 @@ metadata:
   name: ontology-asal-agent-web-prod
   annotations:
     traefik.ingress.kubernetes.io/router.middlewares: ontology-asal-agent-web-prod-ontology-asal-agent-web-strip-prefix@kubernetescrd
+  labels:
+    app.kubernetes.io/name: ontology-asal-agent
+    app.kubernetes.io/component: web-ingress
 spec:
   ingressClassName: traefik
   rules:

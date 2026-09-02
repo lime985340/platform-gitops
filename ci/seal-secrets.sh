@@ -253,6 +253,9 @@ seal_env_secret_if_configured \
   "${ONTOLOGY_ASAL_AGENT_DEV_ENV:-}"
 seal_registry_secret "$dev_ontology_agent_output" ontology-asal-agent-api-dev
 
+: > "$dev_ontology_agent_web_output"
+seal_registry_secret "$dev_ontology_agent_web_output" ontology-asal-agent-web-dev
+
 : > "$prod_ontology_agent_output"
 seal_env_secret_if_configured \
   "$prod_ontology_agent_output" \
@@ -260,9 +263,6 @@ seal_env_secret_if_configured \
   ontology-asal-agent-secrets \
   "${ONTOLOGY_ASAL_AGENT_PROD_ENV:-}"
 seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
-
-: > "$dev_ontology_agent_web_output"
-seal_registry_secret "$dev_ontology_agent_web_output" ontology-asal-agent-web-dev
 
 : > "$prod_ontology_agent_web_output"
 seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-prod

@@ -13,7 +13,8 @@ labels:
 resources:
   - ../../resources
   - ingress.yaml
+  - middleware.yaml
   - sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/ontology-asal-agent-web
-    newTag: 0428918429f0236a1f8597f0d9ca7420ee0ea80d
+    newTag: 67f2a2501bb22d8eea7fae0f31d5c6fada6a82e9

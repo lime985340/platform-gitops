@@ -13,6 +13,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: ontology-asal-agent
+                name: ontology-asal-agent-api
                 port:
                   number: 80

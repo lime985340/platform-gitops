@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ontology-asal-agent
+  name: ontology-asal-agent-api
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: ontology-asal-agent
+      app: ontology-asal-agent-api
   template:
     metadata:
       annotations:
         secret.reloader.stakater.com/reload: "ontology-asal-agent-secrets,gitlab-regcred"
       labels:
-        app: ontology-asal-agent
+        app: ontology-asal-agent-api
         app.kubernetes.io/name: ontology-asal-agent
         app.kubernetes.io/component: api
     spec:
@@ -26,7 +26,7 @@ spec:
       imagePullSecrets:
         - name: gitlab-regcred
       containers:
-        - name: agent
+        - name: api
           image: registry.gitlab.com/lime985340/ontology-asal-agent
           imagePullPolicy: IfNotPresent
           ports:

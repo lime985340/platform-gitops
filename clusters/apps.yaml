@@ -116,9 +116,15 @@ spec:
         argocd-image-updater.argoproj.io/write-back-target: kustomization
         argocd-image-updater.argoproj.io/image-list: ontology-asal-agent-api=registry.gitlab.com/lime985340/ontology-asal-agent-api
         argocd-image-updater.argoproj.io/ontology-asal-agent-api.kustomize.image-name: registry.gitlab.com/lime985340/ontology-asal-agent-api
+        {{- if eq $env "dev" }}
         argocd-image-updater.argoproj.io/ontology-asal-agent-api.update-strategy: newest-build
         argocd-image-updater.argoproj.io/ontology-asal-agent-api.allow-tags: regexp:^[0-9a-f]{40}$
         argocd-image-updater.argoproj.io/ontology-asal-agent-api.force-update: "true"
+        {{- else if eq $env "prod" }}
+        argocd-image-updater.argoproj.io/ontology-asal-agent-api.update-strategy: semver
+        argocd-image-updater.argoproj.io/ontology-asal-agent-api.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+        argocd-image-updater.argoproj.io/ontology-asal-agent-api.force-update: "true"
+        {{- end }}
     {{- end }}
 
     {{- if and (eq $product "ontology-asal-agent") (eq $service "web") }}
@@ -128,7 +134,13 @@ spec:
         argocd-image-updater.argoproj.io/write-back-target: kustomization
         argocd-image-updater.argoproj.io/image-list: ontology-asal-agent-web=registry.gitlab.com/lime985340/ontology-asal-agent-web
         argocd-image-updater.argoproj.io/ontology-asal-agent-web.kustomize.image-name: registry.gitlab.com/lime985340/ontology-asal-agent-web
+        {{- if eq $env "dev" }}
         argocd-image-updater.argoproj.io/ontology-asal-agent-web.update-strategy: newest-build
         argocd-image-updater.argoproj.io/ontology-asal-agent-web.allow-tags: regexp:^[0-9a-f]{40}$
         argocd-image-updater.argoproj.io/ontology-asal-agent-web.force-update: "true"
+        {{- else if eq $env "prod" }}
+        argocd-image-updater.argoproj.io/ontology-asal-agent-web.update-strategy: semver
+        argocd-image-updater.argoproj.io/ontology-asal-agent-web.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+        argocd-image-updater.argoproj.io/ontology-asal-agent-web.force-update: "true"
+        {{- end }}
     {{- end }}

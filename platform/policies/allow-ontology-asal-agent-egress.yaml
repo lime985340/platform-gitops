@@ -1,0 +1,30 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-ontology-asal-agent-egress
+spec:
+  description: Allow the ontology agent to call OpenRouter and the internal GraphDB service.
+  endpointSelector:
+    matchLabels:
+      k8s:app.kubernetes.io/name: ontology-asal-agent
+    matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: In
+        values:
+          - ontology-asal-agent-api-dev
+          - ontology-asal-agent-api-prod
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: graphdb
+            k8s:app.kubernetes.io/name: graphdb
+      toPorts:
+        - ports:
+            - port: "7200"
+              protocol: TCP

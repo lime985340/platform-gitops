@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: platform
+  source:
+    chart: grafana
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 9.4.5
+    helm:
+      values: |
+        fullnameOverride: grafana
+
+        ingress:
+          enabled: false
+
+        persistence:
+          # Keep Grafana lightweight for this small k3s environment.
+          # If you need durable state (users/settings), re-enable and increase size.
+          enabled: false
+          size: 1Gi
+
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+
+        # Reduce background work and feature surface for dev/small clusters.
+        env:
+          GF_ANALYTICS_REPORTING_ENABLED: "false"
+          GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+          GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+          GF_UNIFIED_ALERTING_ENABLED: "false"
+          GF_ALERTING_ENABLED: "false"
+
+        sidecar:
+          dashboards:
+            enabled: true
+            label: grafana_dashboard
+            labelValue: "1"
+            folderAnnotation: grafana_folder
+            searchNamespace: monitoring
+            provider:
+              foldersFromFilesStructure: true
+              disableDelete: true
+              allowUiUpdates: false
+
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: Prometheus
+                type: prometheus
+                access: proxy
+                url: http://prometheus-server.monitoring.svc.cluster.local
+                isDefault: true
+              - name: Loki
+                type: loki
+                access: proxy
+                url: http://loki.monitoring.svc.cluster.local:3100
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

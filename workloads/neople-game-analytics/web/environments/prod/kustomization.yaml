@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: neople-game-analytics-web-prod
+labels:
+  - pairs:
+      app.kubernetes.io/instance: neople-game-analytics-web-prod
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/name: neople-game-analytics-web
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../../resources
+  - ingress.yaml
+  - middleware.yaml
+  - sealed-secrets.yaml
+patches:
+  - path: api-upstream-patch.yaml
+images:
+  - name: registry.gitlab.com/lime985340/neople-game-analytics-web
+    newTag: v0.1.1

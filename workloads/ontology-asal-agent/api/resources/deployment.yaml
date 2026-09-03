@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ontology-asal-agent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ontology-asal-agent
+  template:
+    metadata:
+      annotations:
+        secret.reloader.stakater.com/reload: "ontology-asal-agent-secrets,gitlab-regcred"
+      labels:
+        app: ontology-asal-agent
+        app.kubernetes.io/name: ontology-asal-agent
+        app.kubernetes.io/component: api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      imagePullSecrets:
+        - name: gitlab-regcred
+      containers:
+        - name: agent
+          image: registry.gitlab.com/lime985340/ontology-asal-agent-api
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8765
+          envFrom:
+            - configMapRef:
+                name: ontology-asal-agent-config
+            - secretRef:
+                name: ontology-asal-agent-secrets
+                optional: true
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ontology-asal-agent-data

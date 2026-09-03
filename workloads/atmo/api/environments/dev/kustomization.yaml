@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: atmo-api-dev
+labels:
+- pairs:
+    app.kubernetes.io/instance: atmo-api-dev
+  includeSelectors: true
+  includeTemplates: true
+- pairs:
+    app.kubernetes.io/name: atmo-api
+  includeSelectors: false
+  includeTemplates: true
+resources:
+- ../../resources
+- sealed-secrets.yaml
+images:
+- name: registry.gitlab.com/lime985340/atmo-api
+  newTag: 36c528b2097a18d63bba0f1ac0fab16b8f759065

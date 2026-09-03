@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-20'
+spec:
+  description: 'Platform infrastructure components (ingress, monitoring, etc.)'
+  sourceRepos:
+    - https://gitlab.com/lime985340/gitops.git
+    - https://traefik.github.io/charts
+    - https://grafana.github.io/helm-charts
+    - https://prometheus-community.github.io/helm-charts
+    - https://stakater.github.io/stakater-charts
+    - registry-1.docker.io/bitnamicharts
+    - https://maven.ontotext.com/repository/helm-public/
+  destinations:
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+    - namespace: cloudflared
+      server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+    - namespace: redis
+      server: https://kubernetes.default.svc
+    - namespace: traefik
+      server: https://kubernetes.default.svc
+    - namespace: sealed-secrets
+      server: https://kubernetes.default.svc
+    - namespace: reloader
+      server: https://kubernetes.default.svc
+    - namespace: graphdb
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+    - group: cilium.io
+      kind: CiliumClusterwideNetworkPolicy
+    - group: networking.k8s.io
+      kind: IngressClass
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

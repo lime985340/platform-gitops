@@ -1,0 +1,21 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-neople-web-api-egress
+spec:
+  description: Allow Neople Web to proxy API requests to the matching API environment.
+  endpointSelector:
+    matchLabels:
+      k8s:app.kubernetes.io/name: neople-game-analytics-web
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: neople-game-analytics-api-dev
+            k8s:app.kubernetes.io/name: neople-game-analytics-api
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: neople-game-analytics-api-prod
+            k8s:app.kubernetes.io/name: neople-game-analytics-api
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP

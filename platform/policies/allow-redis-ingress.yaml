@@ -1,0 +1,29 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-redis-ingress
+spec:
+  description: Allow only Atmo API pods and node health checks to reach Redis.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: redis
+      k8s:app.kubernetes.io/component: master
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: atmo-api-dev
+            k8s:app.kubernetes.io/component: api
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: atmo-api-prod
+            k8s:app.kubernetes.io/component: api
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - fromEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: atmo-web-prod
+labels:
+- pairs:
+    app.kubernetes.io/instance: atmo-web-prod
+  includeSelectors: true
+  includeTemplates: true
+- pairs:
+    app.kubernetes.io/name: atmo-web
+  includeSelectors: false
+  includeTemplates: true
+resources:
+- ../../resources
+- ingress.yaml
+- middleware.yaml
+- sealed-secrets.yaml
+images:
+- name: registry.gitlab.com/lime985340/atmo-web
+  newTag: v0.2.0

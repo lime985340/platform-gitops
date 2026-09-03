@@ -1,0 +1,24 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-graphdb-ingress
+spec:
+  description: Allow the ontology agent and GraphDB provisioning jobs to query GraphDB.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: graphdb
+      k8s:app.kubernetes.io/name: graphdb
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-dev
+            k8s:app.kubernetes.io/name: ontology-asal-agent
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-prod
+            k8s:app.kubernetes.io/name: ontology-asal-agent
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: graphdb
+      toPorts:
+        - ports:
+            - port: "7200"
+              protocol: TCP

@@ -15,7 +15,7 @@ resources:
   - ingress.yaml
   - sealed-secrets.yaml
 images:
-  - name: registry.gitlab.com/lime985340/ontology-asal-agent
+  - name: registry.gitlab.com/lime985340/ontology-asal-agent-api
     newTag: 1797f1f9923f2c22a23b1a6b4a7b7e72972296df
 configMapGenerator:
   - name: ontology-asal-agent-config

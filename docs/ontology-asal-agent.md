@@ -23,6 +23,11 @@ The service is split into API and Web workloads from the same application reposi
 - `/ontology-asal-agent` routes to Web and `/ontology-asal-agent/api` routes to API.
 ```
 
+The agent uses OpenRouter's OpenAI-compatible Chat Completions endpoint by
+default. `openrouter/free` automatically selects an available free model. Free
+models are suitable for portfolio demonstrations and development, but their
+rate limits, latency, availability, and output quality can vary.
+
 The test cluster uses GraphDB without authentication so the data path can be
 verified before the SealedSecret values are prepared. Until a valid
 `graphdb.license` is sealed, the repository can be listed but RDF queries and
@@ -37,9 +42,18 @@ When the runtime values are ready, create separate GitLab File variables named
 `KEY=VALUE` per line:
 
 ```text
-LLM_API_KEY=<provider key>
+LLM_API_KEY=<OpenRouter API key>
 TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
+```
+
+Create the OpenRouter key at <https://openrouter.ai/settings/keys>. The key is
+used only by the API Deployment; it must not be placed in the Web image or
+committed to Git. The current ConfigMap already sets:
+
+```text
+LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions
+LLM_MODEL=openrouter/free
 ```
 
 The GitOps sealing job encrypts this file with the Sealed Secrets controller

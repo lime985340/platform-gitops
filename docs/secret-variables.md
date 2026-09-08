@@ -307,7 +307,7 @@ Dev와 Prod는 서로 다른 Namespace와 SealedSecret을 사용하므로 Agent 
 두 File 변수의 형식은 다음과 같습니다.
 
 ```env
-LLM_API_KEY=<provider key>
+LLM_API_KEY=<OpenRouter API key>
 TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 ```
@@ -336,10 +336,21 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 운영 API File 변수에는 환경별 실제 값을 입력합니다.
 
 ```env
-LLM_API_KEY=<실제 LLM provider API key>
+LLM_API_KEY=<실제 OpenRouter API key>
 TRIPLESTORE_USERNAME=<환경별 GraphDB reader 계정>
 TRIPLESTORE_PASSWORD=<환경별 GraphDB reader 비밀번호>
 ```
+
+현재 Agent의 기본 LLM 설정은 OpenRouter입니다.
+
+```env
+LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions
+LLM_MODEL=openrouter/free
+```
+
+OpenRouter API 키는 <https://openrouter.ai/settings/keys>에서 발급합니다.
+ChatGPT Plus/Codex 로그인 정보는 API 키 대신 사용할 수 없습니다. 무료 모델은
+요청량과 가용성 제한이 있으므로 데모·개발 용도로 사용합니다.
 
 현재 `ontology-asal-agent` Migration Job은 ConfigMap만 읽도록 되어 있으므로,
 GraphDB 보안을 활성화하기 전에 환경별 writer Secret을 Job에 연결해야 합니다.

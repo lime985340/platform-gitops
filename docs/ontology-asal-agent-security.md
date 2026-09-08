@@ -100,10 +100,22 @@ GitOps 프로젝트의 Job Token repository push 허용 설정과 대상 Protect
 Dev와 Prod File 변수에는 환경별 실제 값을 한 줄에 하나씩 입력합니다.
 
 ```env
-LLM_API_KEY=<실제 LLM provider API key>
+LLM_API_KEY=<실제 OpenRouter API key>
 TRIPLESTORE_USERNAME=<해당 환경의 GraphDB reader 계정>
 TRIPLESTORE_PASSWORD=<해당 환경의 GraphDB reader 비밀번호>
 ```
+
+현재 API는 OpenRouter의 OpenAI-compatible Chat Completions endpoint와
+무료 모델 라우터를 사용합니다.
+
+- `LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions`
+- `LLM_MODEL=openrouter/free`
+- OpenRouter 키 발급: <https://openrouter.ai/settings/keys>
+- ChatGPT Plus 구독이나 Codex 로그인 정보는 이 변수에 넣지 않습니다.
+
+`openrouter/free`는 무료이지만 요청량·가용성·지연시간 제한이 있으므로
+포트폴리오/개발 용도로 사용하고, 운영 안정성이 필요하면 유료 모델이나
+클러스터 내부 Ollama/vLLM 모델을 별도로 검토합니다.
 
 현재 API ConfigMap에서 다음 값들은 이미 관리하므로 런타임 File 변수에 반복해서
 넣지 않습니다.

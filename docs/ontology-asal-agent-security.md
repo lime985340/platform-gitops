@@ -85,6 +85,8 @@ GitOps 프로젝트의 수동 `seal:workload-secrets` job은 다음 값을 사�
 | `GITLAB_REGISTRY_TOKEN` | Variable | 필수 | API/Web 이미지 `read_registry` 토큰 |
 | `ONTOLOGY_ASAL_AGENT_DEV_ENV` | File | Dev 배포 시 필수 | Dev API 런타임 Secret |
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | File | Prod 배포 시 필수 | Prod API 런타임 Secret |
+| `CLI_PROXY_API_DEV_ENV` | File | Dev LLM 사용 시 필수 | Dev CLIProxyAPI 접근 Secret |
+| `CLI_PROXY_API_PROD_ENV` | File | Prod LLM 사용 시 필수 | Prod CLIProxyAPI 접근 Secret |
 | `GRAPHDB_LICENSE_FILE` | File | RDF 쓰기 시 필수 | GraphDB license 파일 |
 
 `GITLAB_REGISTRY_USERNAME`과 `GITLAB_REGISTRY_TOKEN`은 `lime985340` Group에
@@ -100,22 +102,22 @@ GitOps 프로젝트의 Job Token repository push 허용 설정과 대상 Protect
 Dev와 Prod File 변수에는 환경별 실제 값을 한 줄에 하나씩 입력합니다.
 
 ```env
-LLM_API_KEY=<실제 OpenRouter API key>
+LLM_API_KEY=<CLIProxyAPI client key>
 TRIPLESTORE_USERNAME=<해당 환경의 GraphDB reader 계정>
 TRIPLESTORE_PASSWORD=<해당 환경의 GraphDB reader 비밀번호>
 ```
 
-현재 API는 OpenRouter의 OpenAI-compatible Chat Completions endpoint와
-무료 모델 라우터를 사용합니다.
+현재 클러스터 Feature 구성에서 API는 CLIProxyAPI의 OpenAI-compatible Chat
+Completions endpoint와 Codex OAuth 인증을 사용합니다. `LLM_API_KEY`는
+`CLI_PROXY_API_DEV_ENV` 또는 `CLI_PROXY_API_PROD_ENV`의 `PROXY_API_KEY`와
+동일한 값입니다.
 
-- `LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions`
-- `LLM_MODEL=openrouter/free`
-- OpenRouter 키 발급: <https://openrouter.ai/settings/keys>
-- ChatGPT Plus 구독이나 Codex 로그인 정보는 이 변수에 넣지 않습니다.
+- `LLM_BASE_URL`은 환경별 CLIProxyAPI Service DNS를 ConfigMap에서 설정합니다.
+- `LLM_MODEL`은 Proxy의 `/v1/models`에 표시되는 모델 alias를 ConfigMap에서 설정합니다.
+- ChatGPT Plus/Codex OAuth 원본 토큰은 이 변수나 GitLab CI에 넣지 않습니다.
 
-`openrouter/free`는 무료이지만 요청량·가용성·지연시간 제한이 있으므로
-포트폴리오/개발 용도로 사용하고, 운영 안정성이 필요하면 유료 모델이나
-클러스터 내부 Ollama/vLLM 모델을 별도로 검토합니다.
+OpenRouter 설정은 로컬에서 Proxy 없이 API를 단독 실행할 때만 사용할 수 있는
+fallback이며, 현재 Feature의 클러스터 운영 설정에는 사용하지 않습니다.
 
 현재 API ConfigMap에서 다음 값들은 이미 관리하므로 런타임 File 변수에 반복해서
 넣지 않습니다.

@@ -336,24 +336,28 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 - GraphDB license가 필요한 RDF transaction과 온톨로지 적재에는 실제
   `GRAPHDB_LICENSE_FILE`을 등록합니다. placeholder는 운영값으로 간주하지 않습니다.
 
-운영 API File 변수에는 환경별 실제 값을 입력합니다.
+운영 API File 변수에는 환경별 실제 값을 입력합니다. 현재 Feature 클러스터는
+CLIProxyAPI를 사용하므로 `LLM_API_KEY`에는 OpenRouter 키가 아닌 Proxy 접근 키를
+입력합니다.
 
 ```env
-LLM_API_KEY=<실제 OpenRouter API key>
+LLM_API_KEY=<CLIProxyAPI client key>
 TRIPLESTORE_USERNAME=<환경별 GraphDB reader 계정>
 TRIPLESTORE_PASSWORD=<환경별 GraphDB reader 비밀번호>
 ```
 
-현재 Agent의 기본 LLM 설정은 OpenRouter입니다.
+현재 Agent의 클러스터 LLM 설정은 CLIProxyAPI입니다.
 
 ```env
-LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions
-LLM_MODEL=openrouter/free
+LLM_PROVIDER=codex_proxy
+LLM_BASE_URL=http://cli-proxy-api.<proxy-namespace>.svc.cluster.local:8317/v1
+LLM_MODEL=<proxy model alias>
 ```
 
-OpenRouter API 키는 <https://openrouter.ai/settings/keys>에서 발급합니다.
-ChatGPT Plus/Codex 로그인 정보는 API 키 대신 사용할 수 없습니다. 무료 모델은
-요청량과 가용성 제한이 있으므로 데모·개발 용도로 사용합니다.
+위 값들은 GitOps 환경별 ConfigMap이 관리하므로 File 변수에 반복해서 넣지
+않습니다. ChatGPT Plus/Codex OAuth 원본 토큰은 GitLab CI나 이 File 변수에
+넣지 않고 Proxy의 환경별 PVC에 저장합니다. OpenRouter 값은 Proxy 없이 API를
+로컬 단독 실행할 때만 사용하는 fallback입니다.
 
 현재 `ontology-asal-agent` Migration Job은 ConfigMap만 읽도록 되어 있으므로,
 GraphDB 보안을 활성화하기 전에 환경별 writer Secret을 Job에 연결해야 합니다.

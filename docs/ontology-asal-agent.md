@@ -18,15 +18,19 @@ GraphDB Helm Application
 
 The service is split into API and Web workloads from the same application repository:
 
-- `ontology-asal-agent` publishes `registry.gitlab.com/lime985340/ontology-asal-agent` for the API and migration Job.
+- `ontology-asal-agent-api` publishes `registry.gitlab.com/lime985340/ontology-asal-agent-api` for the API and migration Job.
 - `ontology-asal-agent-web` publishes `registry.gitlab.com/lime985340/ontology-asal-agent-web`.
 - `/ontology-asal-agent` routes to Web and `/ontology-asal-agent/api` routes to API.
 ```
 
-The agent uses OpenRouter's OpenAI-compatible Chat Completions endpoint by
-default. `openrouter/free` automatically selects an available free model. Free
-models are suitable for portfolio demonstrations and development, but their
-rate limits, latency, availability, and output quality can vary.
+The cluster Feature configuration routes the agent through the generic
+`cli-proxy-api` workload. It uses the Proxy's OpenAI-compatible Chat Completions
+endpoint and Codex OAuth credentials stored on the Proxy PVC. The API only
+receives a Proxy client key through its runtime Secret; it never receives the
+Codex OAuth token.
+
+OpenRouter remains a local standalone fallback only. It is not the active
+cluster configuration after the GitOps Feature is promoted.
 
 The test cluster uses GraphDB without authentication so the data path can be
 verified before the SealedSecret values are prepared. Until a valid
@@ -42,21 +46,23 @@ When the runtime values are ready, create separate GitLab File variables named
 `KEY=VALUE` per line:
 
 ```text
-LLM_API_KEY=<OpenRouter API key>
+LLM_API_KEY=<CLIProxyAPI client key>
 TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 ```
 
-Create the OpenRouter key at <https://openrouter.ai/settings/keys>. The key is
-used only by the API Deployment; it must not be placed in the Web image or
-committed to Git. The current ConfigMap already sets:
+The key must match `PROXY_API_KEY` in the corresponding
+`CLI_PROXY_API_DEV_ENV` or `CLI_PROXY_API_PROD_ENV` File variable. It is used
+only by the API Deployment; it must not be placed in the Web image or committed
+to Git. The current Feature ConfigMap sets:
 
 ```text
-LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions
-LLM_MODEL=openrouter/free
+LLM_PROVIDER=codex_proxy
+LLM_BASE_URL=http://cli-proxy-api.<proxy-namespace>.svc.cluster.local:8317/v1
+LLM_MODEL=<proxy model alias>
 ```
 
-The GitOps sealing job encrypts this file with the Sealed Secrets controller
+The GitOps sealing job encrypts both the API file and the Proxy file with the Sealed Secrets controller
 certificate and writes only encrypted data to
 `workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml`.
 The Dev variable writes to the corresponding `environments/dev` path. The shared

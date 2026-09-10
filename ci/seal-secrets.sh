@@ -201,8 +201,6 @@ dev_ontology_agent_output="workloads/ontology-asal-agent/api/environments/dev/se
 prod_ontology_agent_output="workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml"
 dev_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml"
 prod_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml"
-dev_cli_proxy_api_output="workloads/platform/cli-proxy-api/environments/dev/sealed-secrets.yaml"
-prod_cli_proxy_api_output="workloads/platform/cli-proxy-api/environments/prod/sealed-secrets.yaml"
 graphdb_license_output="platform/graphdb/sealed-secret.yaml"
 
 : > "$dev_api_output"
@@ -268,20 +266,6 @@ seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
 
 : > "$prod_ontology_agent_web_output"
 seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-prod
-
-: > "$dev_cli_proxy_api_output"
-seal_env_secret \
-  "$dev_cli_proxy_api_output" \
-  platform-cli-proxy-api-dev \
-  cli-proxy-api-secrets \
-  "${CLI_PROXY_API_DEV_ENV:-}"
-
-: > "$prod_cli_proxy_api_output"
-seal_env_secret \
-  "$prod_cli_proxy_api_output" \
-  platform-cli-proxy-api-prod \
-  cli-proxy-api-secrets \
-  "${CLI_PROXY_API_PROD_ENV:-}"
 
 seal_file_secret_if_configured \
   "$graphdb_license_output" \

@@ -12,4 +12,3 @@ labels:
     includeTemplates: true
 resources:
   - ../../resources
-  - sealed-secrets.yaml

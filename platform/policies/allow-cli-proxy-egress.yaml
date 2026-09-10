@@ -1,0 +1,16 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-cli-proxy-egress
+spec:
+  description: Allow CLIProxyAPI to reach Codex authentication and upstream APIs over HTTPS.
+  endpointSelector:
+    matchLabels:
+      k8s:app.kubernetes.io/name: cli-proxy-api
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

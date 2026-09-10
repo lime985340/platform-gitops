@@ -1,24 +1,49 @@
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
-  name: ccnp-allow-ontology-asal-agent-egress
+  name: ccnp-allow-ontology-asal-agent-dev-egress
 spec:
-  description: Allow the ontology agent to call OpenRouter and the internal GraphDB service.
+  description: Allow the ontology agent to call only its internal CLIProxyAPI and GraphDB services.
   endpointSelector:
     matchLabels:
-      k8s:app.kubernetes.io/name: ontology-asal-agent
-    matchExpressions:
-      - key: k8s:io.kubernetes.pod.namespace
-        operator: In
-        values:
-          - ontology-asal-agent-api-dev
-          - ontology-asal-agent-api-prod
+      k8s:app: ontology-asal-agent-api
+      k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-dev
   egress:
-    - toEntities:
-        - world
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: platform-cli-proxy-api-dev
+            k8s:app.kubernetes.io/name: cli-proxy-api
       toPorts:
         - ports:
-            - port: "443"
+            - port: "8317"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: graphdb
+            k8s:app.kubernetes.io/name: graphdb
+      toPorts:
+        - ports:
+            - port: "7200"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-ontology-asal-agent-prod-egress
+spec:
+  description: Allow the ontology agent to call only its internal CLIProxyAPI and GraphDB services.
+  endpointSelector:
+    matchLabels:
+      k8s:app: ontology-asal-agent-api
+      k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-prod
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: platform-cli-proxy-api-prod
+            k8s:app.kubernetes.io/name: cli-proxy-api
+      toPorts:
+        - ports:
+            - port: "8317"
               protocol: TCP
     - toEndpoints:
         - matchLabels:

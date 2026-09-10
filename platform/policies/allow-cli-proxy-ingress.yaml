@@ -1,0 +1,29 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-cli-proxy-ingress
+spec:
+  description: Allow only the matching ontology API environment to call CLIProxyAPI.
+  endpointSelector:
+    matchLabels:
+      k8s:app.kubernetes.io/name: cli-proxy-api
+  enableDefaultDeny:
+    ingress: true
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-dev
+            k8s:app: ontology-asal-agent-api
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ontology-asal-agent-api-prod
+            k8s:app: ontology-asal-agent-api
+      toPorts:
+        - ports:
+            - port: "8317"
+              protocol: TCP
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8317"
+              protocol: TCP

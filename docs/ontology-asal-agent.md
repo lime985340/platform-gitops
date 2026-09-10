@@ -25,9 +25,9 @@ The service is split into API and Web workloads from the same application reposi
 
 The cluster Feature configuration routes the agent through the generic
 `cli-proxy-api` workload. It uses the Proxy's OpenAI-compatible Chat Completions
-endpoint and Codex OAuth credentials stored on the Proxy PVC. The API only
-receives a Proxy client key through its runtime Secret; it never receives the
-Codex OAuth token.
+endpoint and Codex OAuth credentials stored on the Proxy PVC. Cilium permits only
+the matching ontology API environment to reach the Proxy; the API does not receive
+a Proxy client key or the Codex OAuth token.
 
 OpenRouter remains a local standalone fallback only. It is not the active
 cluster configuration after the GitOps Feature is promoted.
@@ -37,7 +37,7 @@ verified before the SealedSecret values are prepared. Until a valid
 `graphdb.license` is sealed, the repository can be listed but RDF queries and
 writes fail with HTTP 500, so the migration Job skips cleanly. The application is configured with an explicit
 development-only local TTL fallback, so `/api/health` is available while
-`/api/ready` remains 503 until an LLM key is provided.
+`/api/ready` remains 503 until the Proxy is reachable and the ontology store is ready.
 
 ## Secret input
 
@@ -46,15 +46,11 @@ When the runtime values are ready, create separate GitLab File variables named
 `KEY=VALUE` per line:
 
 ```text
-LLM_API_KEY=<CLIProxyAPI client key>
 TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 ```
 
-The key must match `PROXY_API_KEY` in the corresponding
-`CLI_PROXY_API_DEV_ENV` or `CLI_PROXY_API_PROD_ENV` File variable. It is used
-only by the API Deployment; it must not be placed in the Web image or committed
-to Git. The current Feature ConfigMap sets:
+The current Feature ConfigMap sets:
 
 ```text
 LLM_PROVIDER=codex_proxy
@@ -62,12 +58,11 @@ LLM_BASE_URL=http://cli-proxy-api.<proxy-namespace>.svc.cluster.local:8317/v1
 LLM_MODEL=<proxy model alias>
 ```
 
-The GitOps sealing job encrypts both the API file and the Proxy file with the Sealed Secrets controller
-certificate and writes only encrypted data to
-`workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml`.
-The Dev variable writes to the corresponding `environments/dev` path. The shared
-group registry variables continue to create `gitlab-regcred` for both agent
-Namespaces.
+The GitOps sealing job encrypts only the API runtime values that still require a
+Secret, such as GraphDB reader credentials, with the Sealed Secrets controller
+certificate. Cilium policies in `platform/policies` provide the Proxy access
+allow-list. The shared group registry variables continue to create
+`gitlab-regcred` for both agent Namespaces.
 
 For a protected environment, GraphDB bootstrap credentials must be sealed
 separately from the agent runtime credentials. The agent receives only the

@@ -97,8 +97,6 @@ seal:workload-secrets:
         workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml \
         workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml \
         workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml \
-        workloads/platform/cli-proxy-api/environments/dev/sealed-secrets.yaml \
-        workloads/platform/cli-proxy-api/environments/prod/sealed-secrets.yaml \
         platform/graphdb/sealed-secret.yaml
 
       if git diff --cached --quiet; then

@@ -307,13 +307,12 @@ Dev와 Prod는 서로 다른 Namespace와 SealedSecret을 사용하므로 Agent 
 두 File 변수의 형식은 다음과 같습니다.
 
 ```env
-LLM_API_KEY=<CLIProxyAPI client key>
 TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 ```
 
-`LLM_API_KEY`에는 OpenRouter 키가 아니라 `CLI_PROXY_API_DEV_ENV` 또는
-`CLI_PROXY_API_PROD_ENV`의 `PROXY_API_KEY`와 동일한 값을 입력합니다.
+CLIProxyAPI 접근은 Cilium 정책으로 제한하므로 `LLM_API_KEY`는 입력하지
+않습니다. `LLM_PROVIDER=codex_proxy`인 API는 빈 키로 내부 Proxy를 호출합니다.
 
 GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
 
@@ -336,12 +335,11 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 - GraphDB license가 필요한 RDF transaction과 온톨로지 적재에는 실제
   `GRAPHDB_LICENSE_FILE`을 등록합니다. placeholder는 운영값으로 간주하지 않습니다.
 
-운영 API File 변수에는 환경별 실제 값을 입력합니다. 현재 Feature 클러스터는
-CLIProxyAPI를 사용하므로 `LLM_API_KEY`에는 OpenRouter 키가 아닌 Proxy 접근 키를
-입력합니다.
+운영 API File 변수에는 환경별 GraphDB 인증값 등 실제 Secret 값만 입력합니다.
+현재 Feature 클러스터의 CLIProxyAPI 접근은 Cilium 정책으로 제한하므로 Proxy
+접근용 키를 별도로 입력하지 않습니다.
 
 ```env
-LLM_API_KEY=<CLIProxyAPI client key>
 TRIPLESTORE_USERNAME=<환경별 GraphDB reader 계정>
 TRIPLESTORE_PASSWORD=<환경별 GraphDB reader 비밀번호>
 ```
@@ -373,29 +371,10 @@ CLIProxyAPI는 온톨로지에 종속되지 않는 공용 Proxy입니다. 온톨
 OpenAI-compatible API를 사용할 다른 서비스가 같은 환경의 Proxy Service를
 호출할 수 있습니다.
 
-변수명:
-
-- `CLI_PROXY_API_DEV_ENV` → `platform-cli-proxy-api-dev`
-- `CLI_PROXY_API_PROD_ENV` → `platform-cli-proxy-api-prod`
-
-두 변수는 `File` 타입으로 등록하고 다음 한 줄만 입력합니다.
-
-```env
-PROXY_API_KEY=<long-random-proxy-client-key>
-```
-
-이 키는 CLIProxyAPI 설정의 `api-keys`에 사용되며, 온톨로지 API의
-`ONTOLOGY_ASAL_AGENT_*_ENV` File 변수에는 같은 값을 `LLM_API_KEY`로 입력합니다.
-Proxy 키는 Codex OAuth 토큰이 아니며, 실제 OAuth 인증정보는 GitLab CI나 Git에
-넣지 않습니다.
-
-GitLab Pipeline은 이 File 변수를 `kubeseal`로 암호화하여 다음 SealedSecret을
-생성합니다.
-
-```text
-platform-cli-proxy-api-dev/cli-proxy-api-secrets
-platform-cli-proxy-api-prod/cli-proxy-api-secrets
-```
+별도의 CLIProxyAPI Secret 변수는 사용하지 않습니다. Proxy는 외부에 공개하지
+않고 `platform/policies`의 Cilium 정책에서 온톨로지 API Pod만 환경별
+`8317/TCP`로 접근하도록 제한합니다. Proxy의 Codex OAuth 인증정보는
+`cli-proxy-api-auth` PVC에 저장하며 GitLab CI나 Git에 넣지 않습니다.
 
 CLIProxyAPI의 Codex OAuth 로그인은 Secret sealing Pipeline이 대신 수행하지
 않습니다. Argo CD가 Proxy Deployment와 `cli-proxy-api-auth` PVC를 생성한 뒤
@@ -422,8 +401,6 @@ PVC에 저장되므로 Pod 재생성마다 다시 로그인하지 않습니다.
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-dev` / `ontology-asal-agent-web-dev` | `gitlab-regcred` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-prod` / `ontology-asal-agent-web-prod` | `gitlab-regcred` |
-| `CLI_PROXY_API_DEV_ENV` | `platform-cli-proxy-api-dev` | `cli-proxy-api-secrets` |
-| `CLI_PROXY_API_PROD_ENV` | `platform-cli-proxy-api-prod` | `cli-proxy-api-secrets` |
 | `GRAPHDB_LICENSE_FILE` | `graphdb` | `graphdb-license` |
 
 생성되는 파일은 다음과 같습니다.
@@ -441,8 +418,6 @@ workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml
 workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml
 workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml
 workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml
-workloads/platform/cli-proxy-api/environments/dev/sealed-secrets.yaml
-workloads/platform/cli-proxy-api/environments/prod/sealed-secrets.yaml
 platform/graphdb/sealed-secret.yaml
 ```
 

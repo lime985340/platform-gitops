@@ -11,45 +11,12 @@ spec:
       app: cli-proxy-api
   template:
     metadata:
-      annotations:
-        secret.reloader.stakater.com/reload: "cli-proxy-api-secrets"
       labels:
         app: cli-proxy-api
         app.kubernetes.io/name: cli-proxy-api
         app.kubernetes.io/component: llm-proxy
     spec:
       automountServiceAccountToken: false
-      initContainers:
-        - name: render-config
-          image: alpine:3.20
-          imagePullPolicy: IfNotPresent
-          command:
-            - /bin/sh
-            - -ec
-          args:
-            - |
-              test -n "${PROXY_API_KEY:-}" || {
-                echo "PROXY_API_KEY is required" >&2
-                exit 1
-              }
-              cat > /etc/cli-proxy-api/config.yaml <<EOF
-              port: 8317
-              auth-dir: /root/.cli-proxy-api
-              api-keys:
-                - ${PROXY_API_KEY}
-              remote-management:
-                allow-remote: false
-              EOF
-              chmod 0600 /etc/cli-proxy-api/config.yaml
-          env:
-            - name: PROXY_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: cli-proxy-api-secrets
-                  key: PROXY_API_KEY
-          volumeMounts:
-            - name: config
-              mountPath: /etc/cli-proxy-api
       containers:
         - name: cli-proxy-api
           image: eceasy/cli-proxy-api:v7.2.154
@@ -62,7 +29,8 @@ spec:
               containerPort: 8317
           volumeMounts:
             - name: config
-              mountPath: /etc/cli-proxy-api
+              mountPath: /etc/cli-proxy-api/config.yaml
+              subPath: config.yaml
               readOnly: true
             - name: auth
               mountPath: /root/.cli-proxy-api
@@ -85,7 +53,11 @@ spec:
               memory: 512Mi
       volumes:
         - name: config
-          emptyDir: {}
+          configMap:
+            name: cli-proxy-api-config
+            items:
+              - key: config.yaml
+                path: config.yaml
         - name: auth
           persistentVolumeClaim:
             claimName: cli-proxy-api-auth

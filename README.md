@@ -38,7 +38,7 @@ GitLab의 사전 정의 `CI_JOB_TOKEN`으로 Push하며, CI는 Kubernetes API에
 않으므로 `KUBECONFIG`가 필요하지 않습니다.
 
 Secret sealing은 일반 Pipeline 변수로 활성화하지 않습니다. `Build` →
-`Pipelines` → `New pipeline`에서 `main`을 선택하고,
+`Pipelines` → `New pipeline`에서 현재 작업 중인 Feature 브랜치를 선택하고,
 `Inputs`의 boolean `update_secrets`를 `true`로 설정한 뒤 Pipeline을 실행하고
 `seal:workload-secrets` 수동 Job을 시작합니다. 입력의 기본값은 `false`이며,
 Secret 값은 Pipeline 화면이 아니라 GitLab CI/CD Variables에만 입력합니다.
@@ -49,6 +49,12 @@ branch CI 설정이 로드되었는지 확인합니다.
 서비스 저장소의 image tag update Job은 이 sealing flow와 별개이며,
 `lime985340` Group에서 상속한 `GITOPS_PUSH_TOKEN`, `GITOPS_PUSH_TOKEN_USER`,
 `GITOPS_BRANCH`를 사용합니다.
+
+온톨로지 API와 공용 `cli-proxy-api`의 Secret도 같은 sealing flow를 사용합니다.
+`CLI_PROXY_API_DEV_ENV`와 `CLI_PROXY_API_PROD_ENV`는 `PROXY_API_KEY=...` 한 줄을
+담은 File Variable이며, 생성된 Proxy Secret은 Feature 브랜치에서 검증한 뒤
+Merge Request로 `main`에 병합합니다. Codex OAuth 인증정보는 이 Pipeline에 넣지
+않고 Proxy의 환경별 PVC에 저장합니다.
 
 각 변수의 입력 형식은 [Secret Variables 입력 가이드](docs/secret-variables.md)를
 참고합니다. 주요 변수는 다음과 같습니다.

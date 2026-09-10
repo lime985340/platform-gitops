@@ -307,10 +307,13 @@ Dev와 Prod는 서로 다른 Namespace와 SealedSecret을 사용하므로 Agent 
 두 File 변수의 형식은 다음과 같습니다.
 
 ```env
-LLM_API_KEY=<OpenRouter API key>
+LLM_API_KEY=<CLIProxyAPI client key>
 TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 ```
+
+`LLM_API_KEY`에는 OpenRouter 키가 아니라 `CLI_PROXY_API_DEV_ENV` 또는
+`CLI_PROXY_API_PROD_ENV`의 `PROXY_API_KEY`와 동일한 값을 입력합니다.
 
 GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
 
@@ -360,6 +363,41 @@ GraphDB 보안 활성화, bootstrap Secret, reader/writer 분리, 클러스터 �
 전체 내용은 [`ontology-asal-agent-security.md`](ontology-asal-agent-security.md)를
 참조합니다.
 
+### CLIProxyAPI
+
+CLIProxyAPI는 온톨로지에 종속되지 않는 공용 Proxy입니다. 온톨로지 API 외에도
+OpenAI-compatible API를 사용할 다른 서비스가 같은 환경의 Proxy Service를
+호출할 수 있습니다.
+
+변수명:
+
+- `CLI_PROXY_API_DEV_ENV` → `platform-cli-proxy-api-dev`
+- `CLI_PROXY_API_PROD_ENV` → `platform-cli-proxy-api-prod`
+
+두 변수는 `File` 타입으로 등록하고 다음 한 줄만 입력합니다.
+
+```env
+PROXY_API_KEY=<long-random-proxy-client-key>
+```
+
+이 키는 CLIProxyAPI 설정의 `api-keys`에 사용되며, 온톨로지 API의
+`ONTOLOGY_ASAL_AGENT_*_ENV` File 변수에는 같은 값을 `LLM_API_KEY`로 입력합니다.
+Proxy 키는 Codex OAuth 토큰이 아니며, 실제 OAuth 인증정보는 GitLab CI나 Git에
+넣지 않습니다.
+
+GitLab Pipeline은 이 File 변수를 `kubeseal`로 암호화하여 다음 SealedSecret을
+생성합니다.
+
+```text
+platform-cli-proxy-api-dev/cli-proxy-api-secrets
+platform-cli-proxy-api-prod/cli-proxy-api-secrets
+```
+
+CLIProxyAPI의 Codex OAuth 로그인은 Secret sealing Pipeline이 대신 수행하지
+않습니다. Argo CD가 Proxy Deployment와 `cli-proxy-api-auth` PVC를 생성한 뒤
+환경별로 한 번만 `kubectl exec deploy/cli-proxy-api`를 실행합니다. 로그인 결과는
+PVC에 저장되므로 Pod 재생성마다 다시 로그인하지 않습니다.
+
 ## 변수와 SealedSecret 매핑
 
 | GitLab Variable | Namespace | SealedSecret |
@@ -380,6 +418,8 @@ GraphDB 보안 활성화, bootstrap Secret, reader/writer 분리, 클러스터 �
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-dev` / `ontology-asal-agent-web-dev` | `gitlab-regcred` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-prod` / `ontology-asal-agent-web-prod` | `gitlab-regcred` |
+| `CLI_PROXY_API_DEV_ENV` | `platform-cli-proxy-api-dev` | `cli-proxy-api-secrets` |
+| `CLI_PROXY_API_PROD_ENV` | `platform-cli-proxy-api-prod` | `cli-proxy-api-secrets` |
 | `GRAPHDB_LICENSE_FILE` | `graphdb` | `graphdb-license` |
 
 생성되는 파일은 다음과 같습니다.
@@ -397,6 +437,8 @@ workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml
 workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml
 workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml
 workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml
+workloads/platform/cli-proxy-api/environments/dev/sealed-secrets.yaml
+workloads/platform/cli-proxy-api/environments/prod/sealed-secrets.yaml
 platform/graphdb/sealed-secret.yaml
 ```
 
@@ -413,16 +455,40 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 
 1. 위 GitLab 변수를 등록하거나 수정합니다.
 2. `Build` → `Pipelines` → `New pipeline`에서
-   `main`을 선택합니다.
+   현재 작업 중인 Feature 브랜치(현재는 `feature/clean-gitops-layout`)를 선택합니다.
 3. `Inputs`의 boolean `update_secrets`를 `true`로 설정하고 Pipeline을 실행합니다.
 4. 수동 작업 `seal:workload-secrets`를 실행합니다.
-5. CI가 `kubeseal`로 YAML을 생성하고 현재 브랜치에 Push합니다.
+5. CI가 `kubeseal`로 YAML을 생성하고 같은 Feature 브랜치에 Push합니다.
 6. GitOps validation Job이 변경사항을 검증합니다.
-7. Argo CD가 변경된 SealedSecret을 동기화합니다.
-8. Controller가 일반 Kubernetes Secret을 생성하면 Worker가 새 값을 사용합니다.
+7. Feature 브랜치의 Merge Request를 검토하고 `main`에 병합합니다.
+8. Argo CD가 `main`의 변경된 SealedSecret을 동기화합니다.
+9. Controller가 일반 Kubernetes Secret을 생성하면 각 서비스가 새 값을 사용합니다.
 
 Secret 값은 GitLab CI/CD Variables에만 저장하며 Pipeline 입력 화면에는 입력하지
 않습니다. 일반 `UPDATE_SECRETS` Pipeline 변수는 사용하지 않습니다.
+
+### Codex 최초 로그인
+
+Proxy Deployment와 PVC가 Argo CD로 생성되고 Secret이 동기화된 뒤, 환경별로 한
+번만 다음 명령을 실행합니다. 두 명령을 모두 실행하지 말고 첫 번째가 성공하면
+종료합니다.
+
+```bash
+kubectl -n platform-cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
+  ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-device-login
+```
+
+Device Login을 사용할 수 없는 경우에만 일반 OAuth 방식을 사용합니다.
+
+```bash
+kubectl -n platform-cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
+  ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-login -no-browser
+```
+
+첫 번째 방식이 성공하면 Codex OAuth 인증정보는
+`/root/.cli-proxy-api`에 마운트된 `cli-proxy-api-auth` PVC에 저장됩니다. 이후
+Pod가 교체되어도 같은 PVC를 재사용하므로 다시 로그인하지 않습니다. PVC 삭제,
+OAuth 세션 폐기, refresh 인증 만료 때만 재로그인이 필요합니다.
 
 ## Pipeline trigger
 

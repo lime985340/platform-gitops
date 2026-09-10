@@ -16,12 +16,13 @@ resources:
   - sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/ontology-asal-agent-api
-    newTag: 1797f1f9923f2c22a23b1a6b4a7b7e72972296df
+    newTag: 45c4b28c1f295eb51e5bd795c02828675b8a165e
 configMapGenerator:
   - name: ontology-asal-agent-config
     literals:
-      - LLM_BASE_URL=https://openrouter.ai/api/v1/chat/completions
-      - LLM_MODEL=openrouter/free
+      - LLM_PROVIDER=codex_proxy
+      - LLM_BASE_URL=http://cli-proxy-api.platform-cli-proxy-api-prod.svc.cluster.local:8317/v1
+      - LLM_MODEL=gpt-5-codex
       - ONTOLOGY_SOURCE=triplestore
       - TRIPLESTORE_QUERY_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent
       - TRIPLESTORE_UPDATE_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent/statements

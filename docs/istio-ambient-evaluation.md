@@ -22,7 +22,7 @@ Ambient는 노드당 L4 `ztunnel`을 사용해 mTLS, workload identity, L4 인�
 - `argocd/applicationsets/workloads.yaml`은 `main`의
   `workloads/*/*/environments/*`만 동기화합니다.
 - `platform/policies`는 Cilium `CiliumClusterwideNetworkPolicy`를 사용합니다.
-- `workloads/platform/cli-proxy-api`는 공용 플랫폼 workload이고,
+- `workloads/cli-proxy/api`는 공용 CLI Proxy API workload이고,
   `workloads/ontology-asal-agent/api`는 애플리케이션 workload입니다.
 
 따라서 현재 Feature의 Istio 검토는 설치 변경이 아니라 도입 조건과 영향 분석
@@ -62,7 +62,7 @@ Platform 영역에 별도 Helm Application을 추가하는 작업입니다.
 3. `base`, `istiod(profile=ambient)`, `cni(profile=ambient)`, `ztunnel`을
    별도 Argo CD Application 또는 검증 가능한 상위 구성으로 관리합니다.
 4. Dev의 `ontology-asal-agent-api-dev`와
-   `platform-cli-proxy-api-dev`부터 `istio.io/dataplane-mode=ambient`를
+  `cli-proxy-api-dev`부터 `istio.io/dataplane-mode=ambient`를
    적용합니다.
 5. mTLS와 L4 `AuthorizationPolicy`만 먼저 검증합니다.
 6. HTTP 경로·헤더 기반 정책, HTTP telemetry, retries 또는 traffic routing이

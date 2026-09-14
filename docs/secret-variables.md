@@ -453,14 +453,14 @@ Proxy Deployment와 PVC가 Argo CD로 생성되고 Secret이 동기화된 뒤, �
 종료합니다.
 
 ```bash
-kubectl -n platform-cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
+kubectl -n cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
   ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-device-login
 ```
 
 Device Login을 사용할 수 없는 경우에만 일반 OAuth 방식을 사용합니다.
 
 ```bash
-kubectl -n platform-cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
+kubectl -n cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
   ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-login -no-browser
 ```
 

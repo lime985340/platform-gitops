@@ -21,7 +21,7 @@ configMapGenerator:
   - name: ontology-asal-agent-config
     literals:
       - LLM_PROVIDER=codex_proxy
-      - LLM_BASE_URL=http://cli-proxy-api.platform-cli-proxy-api-prod.svc.cluster.local:8317/v1
+      - LLM_BASE_URL=http://cli-proxy-api.cli-proxy-api-prod.svc.cluster.local:8317/v1
       - LLM_MODEL=gpt-5-codex
       - ONTOLOGY_SOURCE=triplestore
       - TRIPLESTORE_QUERY_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent

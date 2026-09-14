@@ -11,7 +11,7 @@ spec:
   egress:
     - toEndpoints:
         - matchLabels:
-            k8s:io.kubernetes.pod.namespace: platform-cli-proxy-api-dev
+            k8s:io.kubernetes.pod.namespace: cli-proxy-api-dev
             k8s:app.kubernetes.io/name: cli-proxy-api
       toPorts:
         - ports:
@@ -39,7 +39,7 @@ spec:
   egress:
     - toEndpoints:
         - matchLabels:
-            k8s:io.kubernetes.pod.namespace: platform-cli-proxy-api-prod
+            k8s:io.kubernetes.pod.namespace: cli-proxy-api-prod
             k8s:app.kubernetes.io/name: cli-proxy-api
       toPorts:
         - ports:

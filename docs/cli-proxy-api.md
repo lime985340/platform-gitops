@@ -9,16 +9,16 @@
 고정 버전, Deployment, Service, PVC, ConfigMap을 관리합니다.
 
 ```text
-workloads/platform/cli-proxy-api/resources/
-workloads/platform/cli-proxy-api/environments/dev/
-workloads/platform/cli-proxy-api/environments/prod/
+workloads/cli-proxy/api/resources/
+workloads/cli-proxy/api/environments/dev/
+workloads/cli-proxy/api/environments/prod/
 ```
 
 환경별 Service DNS는 다음과 같습니다.
 
 ```text
-http://cli-proxy-api.platform-cli-proxy-api-dev.svc.cluster.local:8317/v1
-http://cli-proxy-api.platform-cli-proxy-api-prod.svc.cluster.local:8317/v1
+http://cli-proxy-api.cli-proxy-api-dev.svc.cluster.local:8317/v1
+http://cli-proxy-api.cli-proxy-api-prod.svc.cluster.local:8317/v1
 ```
 
 Proxy는 `ClusterIP`로만 노출합니다. 관리 API와 OAuth callback 포트는 Ingress나
@@ -49,14 +49,14 @@ PVC를 생성하고 Secret을 동기화한 뒤, 환경별로 한 번만 로그�
 Device Login을 먼저 시도합니다.
 
 ```bash
-kubectl -n platform-cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
+kubectl -n cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
   ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-device-login
 ```
 
 Device Login이 지원되지 않거나 실패한 경우에만 일반 OAuth 로그인으로 진행합니다.
 
 ```bash
-kubectl -n platform-cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
+kubectl -n cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
   ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-login -no-browser
 ```
 
@@ -66,7 +66,7 @@ kubectl -n platform-cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
 이후 Pod가 재생성되어도 같은 PVC를 다시 마운트하므로 재로그인하지 않습니다.
 PVC 삭제, OAuth 세션 폐기, refresh 인증 만료 때만 다시 로그인합니다.
 
-Prod도 동일한 절차를 `platform-cli-proxy-api-prod` Namespace에서 수행합니다.
+Prod도 동일한 절차를 `cli-proxy-api-prod` Namespace에서 수행합니다.
 Dev와 Prod는 서로 다른 OAuth PVC를 사용하므로 인증 세션은 환경별로 분리됩니다.
 
 ## 클라이언트 설정
@@ -75,7 +75,7 @@ Dev와 Prod는 서로 다른 OAuth PVC를 사용하므로 인증 세션은 환�
 
 ```env
 LLM_PROVIDER=codex_proxy
-LLM_BASE_URL=http://cli-proxy-api.platform-cli-proxy-api-dev.svc.cluster.local:8317/v1
+LLM_BASE_URL=http://cli-proxy-api.cli-proxy-api-dev.svc.cluster.local:8317/v1
 LLM_MODEL=<cli-proxy-api의 /v1/models에 표시된 모델명>
 ```
 

@@ -1,0 +1,26 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-kiali-operator-egress
+spec:
+  description: Allow the Kiali operator to watch and reconcile resources through the Kubernetes API.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: kiali-operator
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

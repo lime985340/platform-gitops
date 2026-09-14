@@ -31,6 +31,9 @@ Ambient는 노드당 L4 `ztunnel`을 사용해 mTLS, workload identity, L4 인�
 - CLI Proxy API에는 Dev/Prod 모두 `PeerAuthentication(STRICT)`와
   `AuthorizationPolicy`가 추가되어 해당 환경의 Ontology API ServiceAccount만
   포트 `8317`로 호출할 수 있게 했습니다.
+- `kiali-operator` Helm Application과 `istio-system`의 Kiali CR을 추가해
+  읽기 전용 Token 인증 기반의 웹 대시보드를 제공합니다. Kiali는 기존
+  Prometheus와 Grafana를 클러스터 내부 주소로 사용합니다.
 
 Istio의 `base` Chart가 CRD를 설치하고, `istiod`·Istio CNI·`ztunnel`이 순서대로
 배포됩니다. Gateway와 waypoint는 아직 추가하지 않았으므로 외부 진입은 기존
@@ -104,3 +107,23 @@ Namespace 라벨을 확인하고, Dev의 Ontology API → CLI Proxy API 호출 �
 probe를 검증해야 합니다. 클러스터에 kube-proxy가 없으면 Cilium의
 `kubeProxyReplacement=true`, `socketLB.hostNamespaceOnly=true`를 별도로 맞춰야
 하며, Cilium과 Istio CNI의 chaining을 위해 `cni.exclusive=false`가 필요합니다.
+
+## Kiali 접속
+
+Kiali는 외부 Ingress를 만들지 않고 `istio-system`의 Service로만 배포합니다.
+병합 및 동기화 후 다음처럼 로컬 포트 포워딩으로 접속합니다.
+
+```bash
+kubectl -n istio-system port-forward svc/kiali 20001:20001
+```
+
+브라우저에서 `http://localhost:20001/kiali`로 접속한 뒤 Kubernetes Token으로
+로그인합니다. ServiceAccount 이름은 클러스터에서 확인할 수 있습니다.
+
+```bash
+kubectl -n istio-system get serviceaccount -l app=kiali
+kubectl -n istio-system create token <KIALI_SERVICE_ACCOUNT>
+```
+
+Kiali는 공식 권장 방식인 Operator와 Kiali CR 조합으로 배포하며, 현재 CR은
+`view_only_mode=true`로 Istio 리소스를 변경하지 못하도록 했습니다.

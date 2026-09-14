@@ -1,0 +1,30 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-kiali
+spec:
+  description: Allow the read-only Kiali dashboard to access mesh data sources.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: istio-system
+      k8s:app: kiali
+  ingress:
+    - fromEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "20001"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "3000"
+              protocol: TCP
+            - port: "9090"
+              protocol: TCP

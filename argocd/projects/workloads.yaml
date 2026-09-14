@@ -44,3 +44,7 @@ spec:
       kind: Ingress
     - group: traefik.io
       kind: Middleware
+    - group: security.istio.io
+      kind: AuthorizationPolicy
+    - group: security.istio.io
+      kind: PeerAuthentication

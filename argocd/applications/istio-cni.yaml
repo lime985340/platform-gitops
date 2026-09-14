@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-cni
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-20"
+spec:
+  project: platform
+  source:
+    repoURL: https://blob.istio.io/istio-release/charts
+    chart: cni
+    targetRevision: 1.29.5
+    helm:
+      releaseName: istio-cni
+      parameters:
+        - name: profile
+          value: ambient
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -11,7 +11,7 @@ be installed as the cluster CNI.
 
 ```powershell
 kind create cluster --name cilium-gitops-test --config .\kind-config.yaml
-cilium install --version <CILIUM_VERSION>
+cilium install --version <CILIUM_VERSION> --set cni.exclusive=false
 cilium status --wait
 ```
 
@@ -21,6 +21,14 @@ The kind configuration must include:
 networking:
   disableDefaultCNI: true
 ```
+
+Istio Ambient uses the Istio CNI alongside Cilium. Keep Cilium's CNI
+configuration non-exclusive. If kube-proxy is removed and Cilium replaces it,
+also set kubeProxyReplacement=true and
+socketLB.hostNamespaceOnly=true; with kube-proxy present, keep the default
+kubeProxyReplacement=false unless the cluster operator has chosen otherwise.
+Do not enable bpf.masquerade=true for this Ambient setup because Istio uses a
+link-local address for kubelet probes.
 
 The exact Cilium version should match the version used for the test cluster.
 Do not apply the GitOps network policies before Cilium is ready.

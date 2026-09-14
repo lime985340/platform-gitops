@@ -2,9 +2,9 @@
 
 ## 결론
 
-현재 GitOps의 CLIProxyAPI 접근 제어 목적만 보면 Cilium 정책으로 충분합니다.
-Istio Ambient를 지금 전체 클러스터에 추가하기보다는, 운영 트래픽을 안정화한 뒤
-Dev Namespace에서 단계적으로 검증하는 것을 권장합니다.
+현재 GitOps에는 Istio Ambient의 공통 기반을 추가하고, 생성되는 애플리케이션
+Namespace를 Ambient에 자동 등록하도록 구성했습니다. 다만 실제 클러스터 반영은
+이 Feature 브랜치를 `main`에 병합한 뒤에 시작됩니다.
 
 Ambient는 노드당 L4 `ztunnel`을 사용해 mTLS, workload identity, L4 인가와
 텔레메트리를 제공하고, HTTP 라우팅·L7 인가·HTTP 관측이 필요할 때만 Namespace
@@ -16,17 +16,25 @@ Ambient는 노드당 L4 `ztunnel`을 사용해 mTLS, workload identity, L4 인�
 
 ## 현재 GitOps 상태
 
-- Istio Helm Application, `istiod`, `istio-cni`, `ztunnel`, Gateway 리소스가 없습니다.
+- `argocd/applications` 아래에 `istio-base`, `istiod`, `istio-cni`, `ztunnel`을
+  공식 Istio Helm Chart `1.29.5`로 관리하는 Application이 있습니다.
 - `argocd/applicationsets/platform.yaml`의 Platform ApplicationSet은
   `platform/policies`와 Cloudflare 경로만 생성합니다.
 - `argocd/applicationsets/workloads.yaml`은 `main`의
-  `workloads/*/*/environments/*`만 동기화합니다.
-- `platform/policies`는 Cilium `CiliumClusterwideNetworkPolicy`를 사용합니다.
+  `workloads/*/*/environments/*`를 동기화하며, `managedNamespaceMetadata`로
+  각 생성 Namespace에 `istio.io/dataplane-mode=ambient`를 붙입니다.
+- `platform/policies`는 Cilium `CiliumClusterwideNetworkPolicy`를 사용하고,
+  Ambient HBONE 포트·kubelet health probe·Istio control plane 통신 예외를
+  별도 정책으로 관리합니다.
 - `workloads/cli-proxy/api`는 공용 CLI Proxy API workload이고,
   `workloads/ontology-asal-agent/api`는 애플리케이션 workload입니다.
+- CLI Proxy API에는 Dev/Prod 모두 `PeerAuthentication(STRICT)`와
+  `AuthorizationPolicy`가 추가되어 해당 환경의 Ontology API ServiceAccount만
+  포트 `8317`로 호출할 수 있게 했습니다.
 
-따라서 현재 Feature의 Istio 검토는 설치 변경이 아니라 도입 조건과 영향 분석
-단계입니다. Feature가 `main`에 병합되기 전까지는 실제 클러스터에 적용되지 않습니다.
+Istio의 `base` Chart가 CRD를 설치하고, `istiod`·Istio CNI·`ztunnel`이 순서대로
+배포됩니다. Gateway와 waypoint는 아직 추가하지 않았으므로 외부 진입은 기존
+Traefik 구성을 유지하고, 현재 범위는 workload 간 Ambient 보안 통신입니다.
 
 ## Cilium과의 관계
 
@@ -52,19 +60,21 @@ health probe 예외를 확인하도록 안내합니다. Cilium 공식 통합 문
 참고: [Ambient and Kubernetes NetworkPolicy](https://istio.io/latest/docs/ambient/usage/networkpolicy/),
 [Istio and Cilium integration](https://docs.cilium.io/en/latest/network/servicemesh/istio/)
 
-## 도입 시 GitOps 변경 범위
+## 현재 적용한 GitOps 변경 범위
 
 Istio Ambient는 CLIProxyAPI workload 안에 sidecar를 넣는 방식이 아닙니다. GitOps의
 Platform 영역에 별도 Helm Application을 추가하는 작업입니다.
 
-1. `istio-system` Namespace와 Platform AppProject 허용 범위를 추가합니다.
-2. 공식 Helm Chart를 고정 버전으로 등록합니다.
+1. `istio-system` Namespace와 Platform AppProject 허용 범위를 추가했습니다.
+2. 공식 Helm Chart를 `1.29.5`로 고정했습니다. CI가 대상으로 삼는 Kubernetes
+   `1.31`과의 호환성을 고려한 선택이며, 실제 클러스터 버전은 병합 전에 확인해야
+   합니다.
 3. `base`, `istiod(profile=ambient)`, `cni(profile=ambient)`, `ztunnel`을
-   별도 Argo CD Application 또는 검증 가능한 상위 구성으로 관리합니다.
-4. Dev의 `ontology-asal-agent-api-dev`와
-  `cli-proxy-api-dev`부터 `istio.io/dataplane-mode=ambient`를
-   적용합니다.
-5. mTLS와 L4 `AuthorizationPolicy`만 먼저 검증합니다.
+   각각 Argo CD Application으로 관리합니다.
+4. Workload ApplicationSet이 생성하는 모든 애플리케이션 Namespace를
+   `istio.io/dataplane-mode=ambient`로 자동 등록합니다.
+5. CLI Proxy API에는 mTLS `STRICT`와 Ontology API ServiceAccount 기반 L4
+   `AuthorizationPolicy`를 우선 적용합니다.
 6. HTTP 경로·헤더 기반 정책, HTTP telemetry, retries 또는 traffic routing이
    필요할 때만 waypoint를 추가합니다.
 
@@ -79,17 +89,18 @@ Application 구성이 필요합니다.
 
 ## 권장 결정
 
-현재 단계에서는 다음과 같이 결정합니다.
+현재 Feature에서는 다음과 같이 결정했습니다.
 
 - CLIProxyAPI 접근 제어: 현재 구현한 Cilium L3/L4 정책 유지
-- Istio 설치: 지금은 추가하지 않음
-- 도입 시점: Cilium 설정과 실제 클러스터 상태를 확인한 뒤 Dev에서 시범 적용
-- 초기 범위: API와 Proxy의 mTLS/L4 identity 검증
+- Istio 설치: `1.29.5` Ambient Helm Application을 GitOps에 추가
+- Namespace 등록: Workload ApplicationSet에서 생성 시 자동 등록
+- 초기 범위: 모든 애플리케이션 Namespace의 Ambient 연결과 CLI Proxy API의
+  mTLS/L4 identity 검증
 - Waypoint: L7 요구사항이 확인될 때만 추가
 - 정책 소유권: L3/L4 접근은 Cilium, Istio mTLS·Istio L7 정책은 Istio로 분리
 
-새 클러스터나 기존 Cilium Helm 값이 확인되지 않은 상태에서 Istio를 바로
-추가하면 CNI chaining, kube-proxy replacement, HBONE 포트, health probe 문제를
-동시에 디버깅해야 합니다. 먼저 현재 Cilium 설치값과 클러스터에서 Dev API와
-Proxy의 연결·readiness를 확인한 다음, 별도 Feature에서 Ambient pilot을 진행하는
-것이 안전합니다.
+병합 후에는 먼저 `istio-system`의 `istiod`, `istio-cni`, `ztunnel` 상태와
+Namespace 라벨을 확인하고, Dev의 Ontology API → CLI Proxy API 호출 및 health
+probe를 검증해야 합니다. 클러스터에 kube-proxy가 없으면 Cilium의
+`kubeProxyReplacement=true`, `socketLB.hostNamespaceOnly=true`를 별도로 맞춰야
+하며, Cilium과 Istio CNI의 chaining을 위해 `cni.exclusive=false`가 필요합니다.

@@ -1,0 +1,18 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-ontology-api
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cli-proxy-api
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/ontology-asal-agent-api-dev/sa/default
+      to:
+        - operation:
+            ports:
+              - "8317"

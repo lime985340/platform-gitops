@@ -15,6 +15,7 @@ spec:
     - https://stakater.github.io/stakater-charts
     - registry-1.docker.io/bitnamicharts
     - https://maven.ontotext.com/repository/helm-public/
+    - https://blob.istio.io/istio-release/charts
   destinations:
     - namespace: argocd
       server: https://kubernetes.default.svc
@@ -32,6 +33,8 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: graphdb
       server: https://kubernetes.default.svc
+    - namespace: istio-system
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace
@@ -45,6 +48,10 @@ spec:
       kind: ClusterRole
     - group: rbac.authorization.k8s.io
       kind: ClusterRoleBinding
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'

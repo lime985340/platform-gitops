@@ -12,3 +12,5 @@ labels:
     includeTemplates: true
 resources:
   - ../../resources
+  - peer-authentication.yaml
+  - authorization-policy.yaml

@@ -318,6 +318,13 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 
 - `GRAPHDB_LICENSE_FILE` → `graphdb` / `graphdb-license`
 
+`GRAPHDB_LICENSE_FILE`은 GitLab CI/CD Variable의 **Type을 File**로 선택한 뒤 실제
+`graphdb.license` 파일을 업로드해야 합니다. 일반 Variable에 라이선스 문자열을
+넣으면 CI에서 파일로 처리되지 않습니다. 이 변수는 온톨로지 RDF 쓰기에 필요한
+값이므로 누락되면 `seal:workload-secrets`가 실패하며 빈 GraphDB license Secret을
+생성하지 않습니다. `Protected`으로 설정한 경우에는 실행 대상
+`feature/clean-gitops-layout` 브랜치도 Protected ref여야 합니다.
+
 #### 운영 보안 기준
 
 현재 `main`의 GraphDB는 테스트 부트스트랩을 위해
@@ -445,6 +452,11 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
    운영 전환 시 검토가 끝난 변경사항을 `main`에 병합하고 운영 Argo CD를
    `main`에 연결합니다.
 9. Controller가 일반 Kubernetes Secret을 생성하면 각 서비스가 새 값을 사용합니다.
+
+GraphDB license 반영 성공 여부는 Job 로그의
+`Generated encrypted SealedSecret graphdb/graphdb-license` 메시지와
+`platform/graphdb/sealed-secret.yaml`의 비어 있지 않은 `encryptedData`로
+확인합니다. 암호문 외에 license 원문은 Git이나 로그에 남기지 않습니다.
 
 Secret 값은 GitLab CI/CD Variables에만 저장하며 Pipeline 입력 화면에는 입력하지
 않습니다. 일반 `UPDATE_SECRETS` Pipeline 변수는 사용하지 않습니다.

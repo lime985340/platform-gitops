@@ -151,7 +151,8 @@ GraphDB를 노트북에서 별도로 실행하거나 Google 계정으로 로그�
 4. 초기 사용자 Secret, GraphDB license, API 런타임 File 변수를 평문이 아닌
    GitLab File Variable/승인된 Secret 저장소에 등록합니다.
 5. GitOps 프로젝트의 `Build` → `Pipelines` → `New pipeline`에서
-   `main`을 선택하고 `update_secrets=true` 입력으로
+   현재 검증 브랜치인 `feature/clean-gitops-layout`을 선택하고
+   `update_secrets=true` 입력으로
    수동 sealing job을 실행합니다.
 6. CI가 `kubeseal`로 대상 Namespace와 Secret 이름에 맞는 SealedSecret을
    생성하고, 암호화된 YAML만 GitOps 브랜치에 Push합니다.
@@ -184,9 +185,22 @@ writer Secret 연결 없이 GraphDB 보안만 켜면 API query는 동작할 수 
 GraphDB UI와 repository 목록은 license가 없어도 일부 확인할 수 있지만, 현재
 구성에서는 RDF transaction과 온톨로지 적재에 유효한 license가 필요합니다.
 
-`GRAPHDB_LICENSE_FILE`은 실제 license 파일의 내용으로 등록하고, CI가 생성한
-암호화 결과만 `platform/graphdb/sealed-secret.yaml`에 저장합니다. Git에는 license
-원문을 저장하지 않습니다.
+`GRAPHDB_LICENSE_FILE`은 GitLab 프로젝트의 `Settings` → `CI/CD` → `Variables`에서
+**File 타입**으로 등록하고 실제 `graphdb.license` 파일을 업로드합니다. 일반
+Variable에 license 문자열을 입력하면 파일 경로가 아니므로 CI가 거부합니다.
+CI가 생성한 암호화 결과만 `platform/graphdb/sealed-secret.yaml`에 저장하며, Git에는
+license 원문을 저장하지 않습니다.
+
+`GRAPHDB_LICENSE_FILE`이 `Protected`이면 sealing을 실행할 브랜치도 Protected ref여야
+합니다. Feature 브랜치에서 변수가 전달되지 않는 경우에는 브랜치 보호 정책과
+변수의 Protected 설정을 먼저 맞춥니다. 변수 누락은 이제 성공으로 건너뛰지 않고
+sealing job을 실패시킵니다.
+
+라이선스를 반영하려면 `Build` → `Pipelines` → `New pipeline`에서
+`feature/clean-gitops-layout`을 선택하고 `update_secrets=true`로 Pipeline을 만든
+뒤, 수동 `seal:workload-secrets` job을 시작합니다. Job 로그에는
+`Generated encrypted SealedSecret graphdb/graphdb-license`가 표시되어야 하며,
+license 원문은 로그에 출력되지 않습니다.
 
 클러스터 내부 확인 예시는 다음과 같습니다.
 

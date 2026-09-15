@@ -26,6 +26,7 @@ command -v jq >/dev/null 2>&1 || {
 
 : "${GITLAB_REGISTRY_USERNAME:?GITLAB_REGISTRY_USERNAME is required}"
 : "${GITLAB_REGISTRY_TOKEN:?GITLAB_REGISTRY_TOKEN is required}"
+: "${GRAPHDB_LICENSE_FILE:?GRAPHDB_LICENSE_FILE is required as a GitLab File variable}"
 
 umask 077
 tmp_dir="$(mktemp -d)"
@@ -267,9 +268,10 @@ seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
 : > "$prod_ontology_agent_web_output"
 seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-prod
 
-seal_file_secret_if_configured \
+reject_placeholder_file "$GRAPHDB_LICENSE_FILE" graphdb/graphdb-license
+seal_file_secret \
   "$graphdb_license_output" \
   graphdb \
   graphdb-license \
   graphdb.license \
-  "${GRAPHDB_LICENSE_FILE:-}"
+  "$GRAPHDB_LICENSE_FILE"

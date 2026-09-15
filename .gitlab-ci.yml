@@ -3,7 +3,7 @@ spec:
     update_secrets:
       type: boolean
       default: false
-      description: Enable the manual Sealed Secrets update job.
+      description: Run the manual Sealed Secrets job for a web pipeline on the selected branch.
 ---
 
 stages:
@@ -32,6 +32,12 @@ validate:platform:
   script:
     - /kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.31.0 -summary platform argocd bootstrap
 
+validate:secret-contract:
+  image: alpine/k8s:1.31.4
+  stage: validate
+  script:
+    - sh ci/test-seal-secrets-contract.sh
+
 seal:workload-secrets:
   image: alpine/k8s:1.31.4
   stage: secrets
@@ -50,6 +56,8 @@ seal:workload-secrets:
       test -f "$SEALED_SECRETS_CERT" || (echo "SEALED_SECRETS_CERT does not point to a file" >&2; exit 1)
       test -n "${GITLAB_REGISTRY_USERNAME:-}" || (echo "GITLAB_REGISTRY_USERNAME is required" >&2; exit 1)
       test -n "${GITLAB_REGISTRY_TOKEN:-}" || (echo "GITLAB_REGISTRY_TOKEN is required" >&2; exit 1)
+      test -n "${GRAPHDB_LICENSE_FILE:-}" || (echo "GRAPHDB_LICENSE_FILE must be configured as a GitLab File variable" >&2; exit 1)
+      test -f "$GRAPHDB_LICENSE_FILE" || (echo "GRAPHDB_LICENSE_FILE does not point to a file; configure it as a GitLab File variable" >&2; exit 1)
       test -n "${CI_JOB_TOKEN:-}" || (echo "CI_JOB_TOKEN is required for the GitOps repository push" >&2; exit 1)
 
       apk add --no-cache curl git jq tar

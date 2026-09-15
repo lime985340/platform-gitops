@@ -30,3 +30,9 @@ spec:
         - ports:
             - port: "8765"
               protocol: TCP
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8765"
+              protocol: TCP

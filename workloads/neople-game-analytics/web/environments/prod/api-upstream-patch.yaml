@@ -9,4 +9,4 @@ spec:
         - name: web
           env:
             - name: API_UPSTREAM
-              value: neople-game-analytics-api.neople-game-analytics-api-prod.svc.cluster.local:8000
+              value: neople-game-analytics-api.neople-game-analytics-api-prod.svc.cluster.local

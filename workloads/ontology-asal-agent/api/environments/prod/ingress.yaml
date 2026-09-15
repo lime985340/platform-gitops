@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: ontology-asal-agent-prod
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: ontology-asal-agent-api-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: ontology-asal-agent-api-prod-ontology-asal-agent-api-strip-prefix@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:

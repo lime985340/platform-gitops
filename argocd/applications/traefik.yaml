@@ -32,6 +32,13 @@ spec:
             enabled: true
             publishedService:
               enabled: true
+            crossProviderNamespaces:
+              - atmo-api-prod
+              - atmo-web-prod
+              - neople-game-analytics-api-prod
+              - neople-game-analytics-web-prod
+              - ontology-asal-agent-api-prod
+              - ontology-asal-agent-web-prod
           kubernetesCRD:
             enabled: true
 

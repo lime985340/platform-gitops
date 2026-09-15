@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: prod-ingress
     app.kubernetes.io/part-of: neople-game-analytics
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: neople-api-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: neople-game-analytics-api-prod-neople-api-strip-prefix@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:

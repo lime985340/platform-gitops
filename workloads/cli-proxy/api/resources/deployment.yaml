@@ -11,6 +11,8 @@ spec:
       app: cli-proxy-api
   template:
     metadata:
+      annotations:
+        configmap.reloader.stakater.com/reload: cli-proxy-api-config
       labels:
         app: cli-proxy-api
         app.kubernetes.io/name: cli-proxy-api

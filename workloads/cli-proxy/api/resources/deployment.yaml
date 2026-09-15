@@ -21,6 +21,8 @@ spec:
         - name: cli-proxy-api
           image: eceasy/cli-proxy-api:v7.2.154
           imagePullPolicy: IfNotPresent
+          command:
+            - ./CLIProxyAPI
           args:
             - --config
             - /etc/cli-proxy-api/config.yaml

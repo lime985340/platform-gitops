@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: atmo-web-prod
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: atmo-web-prod-atmo-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: atmo-strip-prefix@kubernetescrd
   labels:
     app.kubernetes.io/name: atmo-web
     app.kubernetes.io/component: prod-ingress

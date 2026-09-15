@@ -20,3 +20,14 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: neople-game-analytics-api-dev
+            k8s:app.kubernetes.io/name: neople-game-analytics-api
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: neople-game-analytics-api-prod
+            k8s:app.kubernetes.io/name: neople-game-analytics-api
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP

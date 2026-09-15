@@ -16,6 +16,8 @@ spec:
       parameters:
         - name: profile
           value: ambient
+        - name: autoscaleEnabled
+          value: "false"
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system

@@ -341,6 +341,12 @@ awk '/^encryptedData:[[:space:]]*$/ { in_data=1; next } in_data && /^[^[:space:]
 - `ATMO_API_PROD_JWT_ENV`
 - `ATMO_API_PROD_OAUTH_ENV`
 - `ATMO_API_PROD_PUBLICDATA_ENV`
+- `GRAPHDB_LICENSE_FILE` - GraphDB license 파일 (**File 타입**, 온톨로지 RDF 쓰기 필수)
+
+`GRAPHDB_LICENSE_FILE`은 실제 `graphdb.license` 파일을 업로드한 GitLab File
+Variable이어야 합니다. 일반 Variable에 파일 내용을 문자열로 넣거나, Protected
+변수를 보호되지 않은 Feature 브랜치에서 실행하면 Job에 파일 경로가 전달되지
+않습니다.
 
 GitOps 저장소 자체에 대한 CI Push는 GitLab 사전 정의 `CI_JOB_TOKEN`을 사용하므로
 `GITOPS_PUSH_TOKEN`과 `GITOPS_PUSH_TOKEN_USER`는 이 Job에 등록하지 않습니다.
@@ -349,8 +355,9 @@ GitOps 저장소 자체에 대한 CI Push는 GitLab 사전 정의 `CI_JOB_TOKEN`
 뒤에만 sealing을 실행합니다.
 
 Sealing 실행은 일반 Pipeline 변수 `UPDATE_SECRETS`를 사용하지 않습니다. GitLab의
-`Build` → `Pipelines` → `New pipeline`에서 `main`을
-선택하고 `Inputs`의 boolean `update_secrets`를 `true`로 설정한 뒤 Pipeline을
+`Build` → `Pipelines` → `New pipeline`에서 현재 검증 브랜치
+`feature/clean-gitops-layout`을 선택하고 `Inputs`의 boolean `update_secrets`를
+`true`로 설정한 뒤 Pipeline을
 실행하고 `seal:workload-secrets` 수동 Job을 시작합니다. Secret 값은 Pipeline
 입력 화면이 아니라 GitLab CI/CD Variables에만 둡니다. `spec:inputs`가 반영된
 최신 CI 설정인데도 Inputs가 비어 있으면 feature branch의 YAML이 로드되었는지

@@ -9,7 +9,7 @@ spec:
   project: platform
   source:
     repoURL: https://gitlab.com/lime985340/gitops.git
-    targetRevision: refs/heads/main
+    targetRevision: refs/heads/feature/clean-gitops-layout
     path: platform/observability/kiali
   destination:
     server: https://kubernetes.default.svc

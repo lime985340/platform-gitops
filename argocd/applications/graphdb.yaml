@@ -103,7 +103,7 @@ spec:
                      ] .
 
     - repoURL: https://gitlab.com/lime985340/gitops.git
-      targetRevision: refs/heads/main
+      targetRevision: refs/heads/feature/clean-gitops-layout
       path: platform/graphdb
 
   destination:

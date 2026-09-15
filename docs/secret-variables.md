@@ -439,8 +439,11 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 4. 수동 작업 `seal:workload-secrets`를 실행합니다.
 5. CI가 `kubeseal`로 YAML을 생성하고 같은 Feature 브랜치에 Push합니다.
 6. GitOps validation Job이 변경사항을 검증합니다.
-7. Feature 브랜치의 Merge Request를 검토하고 `main`에 병합합니다.
-8. Argo CD가 `main`의 변경된 SealedSecret을 동기화합니다.
+7. Feature 브랜치의 Merge Request를 검토합니다.
+8. 현재 검증 클러스터에서는 Argo CD가
+   `feature/clean-gitops-layout`의 변경된 SealedSecret을 동기화합니다.
+   운영 전환 시 검토가 끝난 변경사항을 `main`에 병합하고 운영 Argo CD를
+   `main`에 연결합니다.
 9. Controller가 일반 Kubernetes Secret을 생성하면 각 서비스가 새 값을 사용합니다.
 
 Secret 값은 GitLab CI/CD Variables에만 저장하며 Pipeline 입력 화면에는 입력하지

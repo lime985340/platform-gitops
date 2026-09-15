@@ -3,8 +3,9 @@
 ## 결론
 
 현재 GitOps에는 Istio Ambient의 공통 기반을 추가하고, 생성되는 애플리케이션
-Namespace를 Ambient에 자동 등록하도록 구성했습니다. 다만 실제 클러스터 반영은
-이 Feature 브랜치를 `main`에 병합한 뒤에 시작됩니다.
+Namespace를 Ambient에 자동 등록하도록 구성했습니다. 검증 클러스터는
+`feature/clean-gitops-layout`을 직접 동기화하고, 운영 전환 시 검토 후 `main`에
+병합합니다.
 
 Ambient는 노드당 L4 `ztunnel`을 사용해 mTLS, workload identity, L4 인가와
 텔레메트리를 제공하고, HTTP 라우팅·L7 인가·HTTP 관측이 필요할 때만 Namespace
@@ -20,7 +21,8 @@ Ambient는 노드당 L4 `ztunnel`을 사용해 mTLS, workload identity, L4 인�
   공식 Istio Helm Chart `1.29.5`로 관리하는 Application이 있습니다.
 - `argocd/applicationsets/platform.yaml`의 Platform ApplicationSet은
   `platform/policies`와 Cloudflare 경로만 생성합니다.
-- `argocd/applicationsets/workloads.yaml`은 `main`의
+- `argocd/applicationsets/workloads.yaml`은
+  `feature/clean-gitops-layout`의
   `workloads/*/*/environments/*`를 동기화하며, `managedNamespaceMetadata`로
   각 생성 Namespace에 `istio.io/dataplane-mode=ambient`를 붙입니다.
 - `platform/policies`는 Cilium `CiliumClusterwideNetworkPolicy`를 사용하고,

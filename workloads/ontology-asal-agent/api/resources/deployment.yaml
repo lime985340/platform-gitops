@@ -38,6 +38,12 @@ spec:
             - secretRef:
                 name: ontology-asal-agent-secrets
                 optional: true
+          env:
+            - name: CLI_PROXY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ontology-asal-agent-proxy-secret
+                  key: CLI_PROXY_API_KEY
           volumeMounts:
             - name: data
               mountPath: /app/data

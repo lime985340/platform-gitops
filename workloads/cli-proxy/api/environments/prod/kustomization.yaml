@@ -14,3 +14,4 @@ resources:
   - ../../resources
   - peer-authentication.yaml
   - authorization-policy.yaml
+  - sealed-secrets.yaml

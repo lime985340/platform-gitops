@@ -122,6 +122,33 @@ seal_env_secret_if_configured() {
   seal_env_secret "$output" "$namespace" "$name" "$env_file"
 }
 
+seal_env_key_secret() {
+  output="$1"
+  namespace="$2"
+  name="$3"
+  env_file="$4"
+  key="$5"
+  key_env_file="$tmp_dir/${namespace}-${name}-${key}.env"
+
+  if [ -z "$env_file" ] || [ ! -f "$env_file" ]; then
+    echo "Missing GitLab File variable for ${namespace}/${name}" >&2
+    exit 1
+  fi
+
+  key_count="$(awk -F= -v expected_key="$key" \
+    '$1 == expected_key { count++ } END { print count + 0 }' \
+    "$env_file")"
+  if [ "$key_count" != "1" ]; then
+    echo "${env_file} must contain exactly one ${key}=... entry" >&2
+    exit 1
+  fi
+
+  awk -F= -v expected_key="$key" \
+    '$1 == expected_key { print }' "$env_file" > "$key_env_file"
+
+  seal_env_secret "$output" "$namespace" "$name" "$key_env_file"
+}
+
 seal_file_secret() {
   output="$1"
   namespace="$2"
@@ -183,6 +210,10 @@ dev_neople_web_output="workloads/neople-game-analytics/web/environments/dev/seal
 prod_neople_web_output="workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml"
 dev_ontology_agent_output="workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml"
 prod_ontology_agent_output="workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml"
+dev_cli_proxy_output="workloads/cli-proxy/api/environments/dev/sealed-secrets.yaml"
+prod_cli_proxy_output="workloads/cli-proxy/api/environments/prod/sealed-secrets.yaml"
+dev_ontology_proxy_output="workloads/ontology-asal-agent/api/environments/dev/proxy-sealed-secrets.yaml"
+prod_ontology_proxy_output="workloads/ontology-asal-agent/api/environments/prod/proxy-sealed-secrets.yaml"
 dev_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml"
 prod_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml"
 
@@ -236,6 +267,22 @@ seal_env_secret_if_configured \
   "${ONTOLOGY_ASAL_AGENT_DEV_ENV:-}"
 seal_registry_secret "$dev_ontology_agent_output" ontology-asal-agent-api-dev
 
+: > "$dev_cli_proxy_output"
+seal_env_key_secret \
+  "$dev_cli_proxy_output" \
+  cli-proxy-api-dev \
+  cli-proxy-api-secrets \
+  "${CLI_PROXY_API_DEV_ENV:-}" \
+  CLI_PROXY_API_KEY
+
+: > "$dev_ontology_proxy_output"
+seal_env_key_secret \
+  "$dev_ontology_proxy_output" \
+  ontology-asal-agent-api-dev \
+  ontology-asal-agent-proxy-secret \
+  "${CLI_PROXY_API_DEV_ENV:-}" \
+  CLI_PROXY_API_KEY
+
 : > "$dev_ontology_agent_web_output"
 seal_registry_secret "$dev_ontology_agent_web_output" ontology-asal-agent-web-dev
 
@@ -246,6 +293,22 @@ seal_env_secret_if_configured \
   ontology-asal-agent-secrets \
   "${ONTOLOGY_ASAL_AGENT_PROD_ENV:-}"
 seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
+
+: > "$prod_cli_proxy_output"
+seal_env_key_secret \
+  "$prod_cli_proxy_output" \
+  cli-proxy-api-prod \
+  cli-proxy-api-secrets \
+  "${CLI_PROXY_API_PROD_ENV:-}" \
+  CLI_PROXY_API_KEY
+
+: > "$prod_ontology_proxy_output"
+seal_env_key_secret \
+  "$prod_ontology_proxy_output" \
+  ontology-asal-agent-api-prod \
+  ontology-asal-agent-proxy-secret \
+  "${CLI_PROXY_API_PROD_ENV:-}" \
+  CLI_PROXY_API_KEY
 
 : > "$prod_ontology_agent_web_output"
 seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-prod

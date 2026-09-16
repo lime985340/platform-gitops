@@ -333,8 +333,25 @@ TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 ```
 
-CLIProxyAPI 접근은 Cilium 정책으로 제한하므로 `LLM_API_KEY`는 입력하지
-않습니다. `LLM_PROVIDER=codex_proxy`인 API는 빈 키로 내부 Proxy를 호출합니다.
+CLIProxyAPI 접근은 Cilium 정책과 내부 클라이언트 키로 제한합니다. 다음 두
+File 변수를 추가하고 각 변수에 한 줄만 입력합니다.
+
+`CLI_PROXY_API_DEV_ENV`:
+
+```env
+CLI_PROXY_API_KEY=<dev 전용 임의의 내부 키>
+```
+
+`CLI_PROXY_API_PROD_ENV`:
+
+```env
+CLI_PROXY_API_KEY=<prod 전용 임의의 내부 키>
+```
+
+Sealing Job이 같은 키를 `cli-proxy-api-secrets`와
+`ontology-asal-agent-proxy-secret`에 각각 암호화합니다. `LLM_API_KEY`는 현재
+Codex Proxy 구성에서 사용하지 않으며, Codex OAuth access/refresh token도 이
+변수에 넣지 않습니다.
 
 GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
 
@@ -491,14 +508,14 @@ Proxy Deployment와 PVC가 Argo CD로 생성되고 Secret이 동기화된 뒤, �
 
 ```bash
 kubectl -n cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
-  ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-device-login
+  ./CLIProxyAPI --config /etc/cli-proxy-api/config-base.yaml -codex-device-login
 ```
 
 Device Login을 사용할 수 없는 경우에만 일반 OAuth 방식을 사용합니다.
 
 ```bash
 kubectl -n cli-proxy-api-dev exec -it deploy/cli-proxy-api -- \
-  ./CLIProxyAPI --config /etc/cli-proxy-api/config.yaml -codex-login -no-browser
+  ./CLIProxyAPI --config /etc/cli-proxy-api/config-base.yaml -codex-login -no-browser
 ```
 
 첫 번째 방식이 성공하면 Codex OAuth 인증정보는

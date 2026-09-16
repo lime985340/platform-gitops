@@ -17,7 +17,7 @@ resources:
   - proxy-sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/ontology-asal-agent-api
-    newTag: a53be2d9b8accd203c9a21b003202235b9f8ce17
+    newTag: e62d39a2aea87f9fb569d58c378ded1d9fccf11f
 configMapGenerator:
   - name: ontology-asal-agent-config
     literals:

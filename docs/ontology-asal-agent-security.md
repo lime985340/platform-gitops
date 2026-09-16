@@ -108,10 +108,11 @@ TRIPLESTORE_PASSWORD=<해당 환경의 GraphDB reader 비밀번호>
 Completions endpoint와 Codex OAuth 인증을 사용합니다. Proxy 접근은 외부에
 공개하지 않고 Cilium 정책에서 API Pod와 Proxy 포트의 통신만 허용합니다.
 
-`LLM_API_KEY`는 현재 Codex Proxy 구성에서 사용하지 않습니다. 대신
-`CLI_PROXY_API_KEY`를 환경별 SealedSecret으로 API와 Proxy에 주입합니다.
-이 키는 Proxy 경계의 내부 클라이언트 인증용이며, CLIProxyAPI의 Codex OAuth
-인증정보는 Proxy 전용 PVC에만 보관합니다.
+`LLM_API_KEY`와 별도의 `CLI_PROXY_API_KEY`는 현재 Codex Proxy 구성에서
+사용하지 않습니다. Proxy는 외부에 공개하지 않고, Cilium 정책과 Istio
+Ambient의 `STRICT` mTLS 및 `AuthorizationPolicy`로 해당 환경의 Ontology API
+ServiceAccount만 접근하도록 제한합니다. CLIProxyAPI의 Codex OAuth 인증정보는
+Proxy 전용 PVC에만 보관합니다.
 
 - `LLM_BASE_URL`은 환경별 CLIProxyAPI Service DNS를 ConfigMap에서 설정합니다.
 - `LLM_MODEL`은 Proxy의 `/v1/models`에 표시되는 모델 alias를 ConfigMap에서 설정합니다.

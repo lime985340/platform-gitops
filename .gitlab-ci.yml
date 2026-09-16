@@ -127,12 +127,8 @@ seal:workload-secrets:
         workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml \
         workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml \
         workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml \
-        workloads/ontology-asal-agent/api/environments/dev/proxy-sealed-secrets.yaml \
-        workloads/ontology-asal-agent/api/environments/prod/proxy-sealed-secrets.yaml \
         workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml \
         workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml \
-        workloads/cli-proxy/api/environments/dev/sealed-secrets.yaml \
-        workloads/cli-proxy/api/environments/prod/sealed-secrets.yaml \
         platform/graphdb/sealed-secret.yaml
 
       if git diff --cached --quiet; then

@@ -27,25 +27,19 @@ Proxy는 `ClusterIP`로만 노출합니다. 관리 API와 OAuth callback 포트�
 ## Cilium 접근 제어
 
 CLIProxyAPI는 외부 Ingress 없이 `ClusterIP`로만 노출합니다. Cilium 정책으로
-접근 가능한 Pod와 포트를 제한하고, 별도의 내부 클라이언트 키도 요구합니다.
+접근 가능한 Pod와 포트를 제한하고, Istio Ambient의 mTLS와
+`AuthorizationPolicy`로 호출 주체를 검증합니다.
 
 - `ontology-asal-agent-api-dev`의 API Pod → Dev Proxy `8317/TCP`만 허용
 - `ontology-asal-agent-api-prod`의 API Pod → Prod Proxy `8317/TCP`만 허용
 - 그 외 Pod → CLIProxyAPI 차단
 - CLIProxyAPI → Codex 인증 및 upstream의 `443/TCP`만 허용
 
-`CLI_PROXY_API_DEV_ENV`와 `CLI_PROXY_API_PROD_ENV`는 각각 다음 한 줄만
-포함하는 GitLab File 변수입니다.
-
-```env
-CLI_PROXY_API_KEY=<환경별 내부 Proxy 클라이언트 키>
-```
-
-Sealing Job은 이 값을 `cli-proxy-api-secrets`와
-`ontology-asal-agent-proxy-secret`에 각각 암호화합니다. API는
-`CLI_PROXY_API_KEY`를 `Authorization: Bearer` 헤더로 보내고, Proxy는 같은
-값을 `api-keys` 설정으로 검증합니다. 이 값은 Codex OAuth access/refresh token이
-아니며, OAuth 원본 인증정보는 계속 Proxy PVC에만 보관합니다.
+별도 `CLI_PROXY_API_KEY`, Proxy용 SealedSecret, API용 Proxy Secret은 사용하지
+않습니다. Cilium은 네트워크 계층에서 환경별 API Pod와 Proxy 포트만 허용하고,
+Istio `PeerAuthentication(STRICT)`와 `AuthorizationPolicy`는 해당 환경의
+Ontology API ServiceAccount만 `8317` 포트로 허용합니다. OAuth 원본 인증정보는
+계속 Proxy PVC에만 보관합니다.
 
 ## Codex OAuth 최초 로그인
 
@@ -83,7 +77,7 @@ Dev와 Prod는 서로 다른 OAuth PVC를 사용하므로 인증 세션은 환�
 LLM_PROVIDER=codex_proxy
 LLM_BASE_URL=http://cli-proxy-api.cli-proxy-api-dev.svc.cluster.local:8317/v1
 LLM_MODEL=<cli-proxy-api의 /v1/models에 표시된 모델명>
-# API Secret에서 주입되는 CLI_PROXY_API_KEY를 사용합니다.
+# Proxy 접근은 Cilium과 Istio Ambient 정책이 제한합니다.
 ```
 
 모델명은 Proxy의 `/v1/models` 응답에서 확인합니다. Proxy 자체의 Codex OAuth
@@ -93,8 +87,8 @@ LLM_MODEL=<cli-proxy-api의 /v1/models에 표시된 모델명>
 
 - Proxy는 환경별 1개 Pod와 `ReadWriteOnce` PVC로 시작합니다.
 - OAuth 인증 디렉터리는 `emptyDir`에 저장하지 않습니다.
-- Proxy 키는 ConfigMap이나 Git에 넣지 않으며, SealedSecret에서 실행 시
-  `api-keys` 설정으로 조합합니다. OAuth 파일도 Git에 저장하지 않습니다.
+- Proxy API 키는 사용하지 않습니다. 접근 제어는 Cilium과 Istio Ambient
+  정책으로 관리하고, OAuth 파일은 Git에 저장하지 않습니다.
 - 이미지 버전은 `latest`가 아닌 고정 버전을 사용합니다.
 - 이미지 변경은 Argo Image Updater가 아니라 GitOps Merge Request로 진행합니다.
 - Cilium 정책을 우회하기 위해 Proxy Service를 외부에 공개하지 않습니다.

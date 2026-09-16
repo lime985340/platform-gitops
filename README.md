@@ -51,11 +51,10 @@ branch CI 설정이 로드되었는지 확인합니다.
 `GITOPS_BRANCH`를 사용합니다.
 
 온톨로지 API와 공용 `cli-proxy-api`의 접근 제어는 분리합니다. Proxy는
-외부에 공개하지 않고 Cilium 정책으로 온톨로지 API Pod만 접근하도록 제한하며,
-Proxy 클라이언트 인증 키는 환경별 `CLI_PROXY_API_DEV_ENV`와
-`CLI_PROXY_API_PROD_ENV` File 변수로 주입합니다. 이 키는 SealedSecret으로
-Proxy와 Ontology API Namespace에 각각 생성되며, Codex OAuth 인증정보는
-Pipeline에 넣지 않고 Proxy의 환경별 PVC에 저장합니다.
+외부에 공개하지 않고 Cilium 정책으로 환경별 Ontology API Pod만 접근하도록
+제한하며, Istio Ambient의 `STRICT` mTLS와 `AuthorizationPolicy`로 ServiceAccount
+기반 접근을 추가 검증합니다. 별도 Proxy 클라이언트 키나 OAuth Secret을
+Pipeline에 넣지 않으며, Codex OAuth 인증정보는 Proxy의 환경별 PVC에 저장합니다.
 
 각 변수의 입력 형식은 [Secret Variables 입력 가이드](docs/secret-variables.md)를
 참고합니다. 주요 변수는 다음과 같습니다.

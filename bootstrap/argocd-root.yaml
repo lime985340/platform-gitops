@@ -11,7 +11,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://gitlab.com/lime985340/gitops.git
+    repoURL: https://gitlab.com/lime985340/platform-gitops.git
     targetRevision: refs/heads/main
     path: argocd
     directory:

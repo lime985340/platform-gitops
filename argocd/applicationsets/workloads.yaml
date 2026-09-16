@@ -11,8 +11,8 @@ spec:
     - missingkey=error
   generators:
     - git:
-        repoURL: https://gitlab.com/lime985340/gitops.git
-        revision: refs/heads/feature/clean-gitops-layout
+        repoURL: https://gitlab.com/lime985340/platform-gitops.git
+        revision: refs/heads/main
         directories:
           - path: workloads/*/*/environments/*
   template:
@@ -21,8 +21,8 @@ spec:
     spec:
       project: workloads
       source:
-        repoURL: https://gitlab.com/lime985340/gitops.git
-        targetRevision: refs/heads/feature/clean-gitops-layout
+        repoURL: https://gitlab.com/lime985340/platform-gitops.git
+        targetRevision: refs/heads/main
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc

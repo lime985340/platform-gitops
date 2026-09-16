@@ -21,6 +21,9 @@ spec:
         - ports:
             - port: "8317"
               protocol: TCP
+            # Istio Ambient carries service traffic over HBONE.
+            - port: "15008"
+              protocol: TCP
     - fromEntities:
         - host
       toPorts:

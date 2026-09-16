@@ -85,7 +85,7 @@ GitOps 프로젝트의 수동 `seal:workload-secrets` job은 다음 값을 사�
 | `GITLAB_REGISTRY_TOKEN` | Variable | 필수 | API/Web 이미지 `read_registry` 토큰 |
 | `ONTOLOGY_ASAL_AGENT_DEV_ENV` | File | Dev 배포 시 필수 | Dev API 런타임 Secret |
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | File | Prod 배포 시 필수 | Prod API 런타임 Secret |
-| Secure File `graphdb.license` | Secure File | RDF 쓰기 시 필수 | GraphDB license 파일 |
+| Secure File `LIME_GRAPHDB_FREE_v11.3.license` | Secure File | RDF 쓰기 시 필수 | GraphDB license 파일 |
 
 `GITLAB_REGISTRY_USERNAME`과 `GITLAB_REGISTRY_TOKEN`은 `lime985340` Group에
 공통으로 등록하는 것을 권장합니다. 중복된 프로젝트 변수가 있으면 Group 값이
@@ -185,7 +185,7 @@ writer Secret 연결 없이 GraphDB 보안만 켜면 API query는 동작할 수 
 GraphDB UI와 repository 목록은 license가 없어도 일부 확인할 수 있지만, 현재
 구성에서는 RDF transaction과 온톨로지 적재에 유효한 license가 필요합니다.
 
-`graphdb.license`는 GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에서
+`LIME_GRAPHDB_FREE_v11.3.license`는 GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에서
 원본 파일로 업로드합니다. CI는 이 파일을 Job Token으로 다운로드해
 `kubectl create secret --from-file`에 직접 전달합니다. CI가 생성한 암호화 결과만
 `platform/graphdb/sealed-secret.yaml`에 저장하며, Git에는 license 원문이나

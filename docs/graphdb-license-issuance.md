@@ -8,7 +8,7 @@
 2. 서버 환경에 맞는 GraphDB 배포 패키지를 선택한다. 이 프로젝트는 Kubernetes에서 실행하므로 플랫폼 독립형 배포 패키지 기준으로 확인한다.
 3. 페이지의 `Request GraphDB License` 영역에서 Free 라이선스를 요청한다.
 4. 이메일 주소를 입력하고 제출한다.
-5. 받은 메일에서 라이선스 원문 또는 `graphdb.license` 파일을 확보한다. 스팸함도 확인한다.
+5. 받은 메일에서 라이선스 원문 또는 `LIME_GRAPHDB_FREE_v11.3.license` 파일을 확보한다. 스팸함도 확인한다.
 
 GraphDB Enterprise Edition 평가판 또는 상용 라이선스가 필요한 경우에는 GraphDB 공식 문의처로 요청한다.
 
@@ -34,7 +34,7 @@ GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files` → `Upload Fil
 원본 `.license` 파일을 업로드한다. Secure File 이름은 반드시 다음과 같이 한다.
 
 ```text
-graphdb.license
+LIME_GRAPHDB_FREE_v11.3.license
 ```
 
 Base64 변환이나 텍스트 변수 입력은 사용하지 않는다. GitLab Secure Files는

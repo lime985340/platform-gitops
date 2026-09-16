@@ -94,7 +94,7 @@ GraphDB 라이선스처럼 임의의 바이트를 포함할 수 있는 파일은
 
 | Secure File 이름 | Secret Namespace | Secret 이름 | Secret key |
 | --- | --- | --- | --- |
-| `graphdb.license` | `graphdb` | `graphdb-license` | `graphdb.license` |
+| `LIME_GRAPHDB_FREE_v11.3.license` | `graphdb` | `graphdb-license` | `graphdb.license` |
 
 Secure Files는 저장소 밖에 보관되므로 Git에 원본 또는 Base64 문자열이 들어가지
 않습니다. `seal:workload-secrets`는 Job Token으로 Secure Files를 다운로드하고,
@@ -338,9 +338,9 @@ CLIProxyAPI 접근은 Cilium 정책으로 제한하므로 `LLM_API_KEY`는 입�
 
 GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
 
-- Secure File `graphdb.license` → `graphdb` / `graphdb-license`
+- Secure File `LIME_GRAPHDB_FREE_v11.3.license` → `graphdb` / `graphdb-license`
 
-`graphdb.license` Secure File은 온톨로지 RDF 쓰기에 필요한 값이므로 누락되면
+`LIME_GRAPHDB_FREE_v11.3.license` Secure File은 온톨로지 RDF 쓰기에 필요한 값이므로 누락되면
 `seal:workload-secrets`가 실패하며 빈 GraphDB license Secret을 생성하지 않습니다.
 Secure File의 원본 바이트는 CI에서 Base64로 변환하거나 GraphDB 전용 예외로
 처리하지 않습니다. `Protected` 변수인 `SEALED_SECRETS_CERT`의 경우에는 실행
@@ -361,7 +361,7 @@ Secure File의 원본 바이트는 CI에서 Base64로 변환하거나 GraphDB �
 - Google/GitLab 로그인 비밀번호와 GitLab PAT를 GraphDB 비밀번호로 재사용하지
   않습니다.
 - GraphDB license가 필요한 RDF transaction과 온톨로지 적재에는 실제
-  `graphdb.license` Secure File을 등록합니다. placeholder는 운영값으로 간주하지
+  `LIME_GRAPHDB_FREE_v11.3.license` Secure File을 등록합니다. placeholder는 운영값으로 간주하지
   않습니다.
 
 운영 API File 변수에는 환경별 GraphDB 인증값 등 실제 Secret 값만 입력합니다.
@@ -430,7 +430,7 @@ PVC에 저장되므로 Pod 재생성마다 다시 로그인하지 않습니다.
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-dev` / `ontology-asal-agent-web-dev` | `gitlab-regcred` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-prod` / `ontology-asal-agent-web-prod` | `gitlab-regcred` |
-| Secure File `graphdb.license` | `graphdb` | `graphdb-license` |
+| Secure File `LIME_GRAPHDB_FREE_v11.3.license` | `graphdb` | `graphdb-license` |
 
 생성되는 파일은 다음과 같습니다.
 

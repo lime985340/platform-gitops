@@ -341,9 +341,9 @@ awk '/^encryptedData:[[:space:]]*$/ { in_data=1; next } in_data && /^[^[:space:]
 - `ATMO_API_PROD_JWT_ENV`
 - `ATMO_API_PROD_OAUTH_ENV`
 - `ATMO_API_PROD_PUBLICDATA_ENV`
-- Secure File `graphdb.license` - GraphDB license 파일 (온톨로지 RDF 쓰기 필수)
+- Secure File `LIME_GRAPHDB_FREE_v11.3.license` - GraphDB license 파일 (온톨로지 RDF 쓰기 필수)
 
-`graphdb.license`는 GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에
+`LIME_GRAPHDB_FREE_v11.3.license`는 GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에
 원본 파일로 업로드합니다. 일반 CI/CD Variable에 파일 내용을 문자열로 넣거나
 Base64로 변환하지 않습니다. CI는 `ci/secret-files.conf`의 선언을 기준으로
 Secure File을 다운로드하고, 모든 파일을 동일한 sealing 흐름으로 처리합니다.

@@ -43,8 +43,8 @@ Registry JSON이나 `auth` 값은 직접 만들지 않으며, CI가 username/tok
 Secret 값을 입력한 뒤 다음 순서로 실행합니다.
 
 1. GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에서 원본
-   `graphdb.license` 파일을 업로드합니다. 파일 이름은 `graphdb.license`로
-   유지하며, Base64 변환이나 CI/CD Variable 등록은 하지 않습니다.
+   `LIME_GRAPHDB_FREE_v11.3.license` 파일을 업로드합니다. 파일 이름은 원본과
+   동일하게 유지하며, Base64 변환이나 CI/CD Variable 등록은 하지 않습니다.
 2. `Build` → `Pipelines` → `New pipeline`에서 대상 브랜치로
    `feature/clean-gitops-layout`을 선택합니다.
 3. `Inputs`에서 boolean 입력 `update_secrets`를 `true`로 설정합니다.

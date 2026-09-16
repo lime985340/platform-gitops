@@ -2,7 +2,7 @@
 
 The current validation cluster uses the official Ontotext GraphDB Helm chart
 through `argocd/applications/graphdb.yaml` and synchronizes the GitOps
-companion manifests from `feature/clean-gitops-layout`.
+companion manifests from `main`.
 
 The feature cluster intentionally starts with GraphDB security disabled so the
 triplestore and ontology loading path can be verified before secret sealing. It
@@ -12,10 +12,12 @@ without `graphdb-license`, the repository can be listed but RDF `CONSTRUCT` and
 ontology publishing requests return HTTP 500 in this test cluster. The Helm
 values keep this Secret optional only for the initial test bootstrap.
 
-When a license is available, configure `GRAPHDB_LICENSE_FILE` as a protected
-GitLab File variable in the GitOps project and run the manual sealing job. The
-pipeline writes only the encrypted `graphdb-license` SealedSecret to this
-directory; the license contents never enter Git.
+When a license is available, upload
+`LIME_GRAPHDB_FREE_v11.3.license` as a GitLab project Secure File and run the
+manual sealing job. The pipeline writes only the encrypted `graphdb-license`
+SealedSecret to this directory; the license contents never enter Git. The
+ontology migration Job uses the GraphDB endpoint and does not require a copy
+of the license Secret in its own namespace.
 The repository endpoint is:
 
 ```text

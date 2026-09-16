@@ -11,7 +11,7 @@ is managed under `workloads/ontology-asal-agent/{api,web}/environments/{dev,prod
 ```text
 GraphDB Helm Application
   -> asal-agent repository
-  -> migration Job loads domain.ttl and shapes.ttl when a GraphDB license exists
+  -> migration Job loads domain.ttl and shapes.ttl after GraphDB is reachable
   -> ontology agent API Deployment starts in triplestore mode
   -> the Web Deployment serves the static UI
   -> the prod route is exposed through Traefik
@@ -34,10 +34,14 @@ cluster configuration after the GitOps Feature is promoted.
 
 The test cluster uses GraphDB without authentication so the data path can be
 verified before the SealedSecret values are prepared. Until a valid
-`graphdb.license` is sealed, the repository can be listed but RDF queries and
-writes fail with HTTP 500, so the migration Job skips cleanly. The application is configured with an explicit
-development-only local TTL fallback, so `/api/health` is available while
-`/api/ready` remains 503 until the Proxy is reachable and the ontology store is ready.
+`graphdb.license` is sealed in the `graphdb` namespace and mounted by the
+GraphDB chart. The migration Job does not duplicate that Secret into the API
+namespace; it waits for GraphDB and relies on the server-side license when it
+writes the ontology graphs. Without a valid license, the GraphDB write or
+verification step fails instead of being silently skipped. The application is
+configured with an explicit development-only local TTL fallback, so
+`/api/health` is available while `/api/ready` remains 503 until the Proxy is
+reachable and the ontology store is ready.
 
 ## Secret input
 

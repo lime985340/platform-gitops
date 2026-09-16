@@ -341,12 +341,12 @@ awk '/^encryptedData:[[:space:]]*$/ { in_data=1; next } in_data && /^[^[:space:]
 - `ATMO_API_PROD_JWT_ENV`
 - `ATMO_API_PROD_OAUTH_ENV`
 - `ATMO_API_PROD_PUBLICDATA_ENV`
-- `GRAPHDB_LICENSE_FILE` - GraphDB license 파일 (**File 타입**, 온톨로지 RDF 쓰기 필수)
+- Secure File `graphdb.license` - GraphDB license 파일 (온톨로지 RDF 쓰기 필수)
 
-`GRAPHDB_LICENSE_FILE`은 실제 `graphdb.license` 파일을 업로드한 GitLab File
-Variable이어야 합니다. 일반 Variable에 파일 내용을 문자열로 넣거나, Protected
-변수를 보호되지 않은 Feature 브랜치에서 실행하면 Job에 파일 경로가 전달되지
-않습니다.
+`graphdb.license`는 GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에
+원본 파일로 업로드합니다. 일반 CI/CD Variable에 파일 내용을 문자열로 넣거나
+Base64로 변환하지 않습니다. CI는 `ci/secret-files.conf`의 선언을 기준으로
+Secure File을 다운로드하고, 모든 파일을 동일한 sealing 흐름으로 처리합니다.
 
 GitOps 저장소 자체에 대한 CI Push는 GitLab 사전 정의 `CI_JOB_TOKEN`을 사용하므로
 `GITOPS_PUSH_TOKEN`과 `GITOPS_PUSH_TOKEN_USER`는 이 Job에 등록하지 않습니다.

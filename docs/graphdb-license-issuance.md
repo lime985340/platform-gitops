@@ -30,24 +30,21 @@ GraphDB Workbench에서 다음 경로로 등록한다.
 
 ## 4. 현재 Kubernetes/GitLab 구성에 등록
 
-GitLab 프로젝트 또는 그룹 CI/CD Variables에서 다음 변수를 사용한다.
+GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files` → `Upload File`에서
+원본 `.license` 파일을 업로드한다. Secure File 이름은 반드시 다음과 같이 한다.
 
 ```text
-Key: GRAPHDB_LICENSE_FILE
-Type: File
-Value: 원본 `.license` 파일의 Base64 인코딩 결과
+graphdb.license
 ```
 
-GitLab CI/CD 변수는 텍스트 기반이므로 바이너리 `.license` 파일은 Base64로 인코딩한
-내용을 `GRAPHDB_LICENSE_FILE`의 **File 타입** 변수에 넣는다. 줄바꿈은 포함해도 되며,
-변수명이나 설명 문구는 포함하지 않는다. 파이프라인이 Base64를 원본 바이트로 복원한
-뒤 `graphdb.license`라는 이름으로 SealedSecret을 생성한다.
+Base64 변환이나 텍스트 변수 입력은 사용하지 않는다. GitLab Secure Files는
+바이너리 파일을 원본 바이트 그대로 보관하며, 파이프라인은 `glab securefile`로
+다운로드한 파일을 `kubectl create secret --from-file`에 직접 전달한다.
+`ci/secret-files.conf`가 Secure File과 Kubernetes Secret의 매핑을 선언하므로,
+새 바이너리 파일을 추가할 때는 해당 manifest에 한 줄을 추가한다.
 
-PowerShell에서는 다음처럼 인코딩할 수 있다.
-
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes('.\\LIME_GRAPHDB_FREE_v11.3.license'))
-```
+Secure File은 Git 저장소에 포함되지 않으며, GitOps에는 `kubeseal`이 생성한
+암호문만 저장된다.
 
 배포 후에는 다음을 확인한다.
 

@@ -85,7 +85,7 @@ GitOps 프로젝트의 수동 `seal:workload-secrets` job은 다음 값을 사�
 | `GITLAB_REGISTRY_TOKEN` | Variable | 필수 | API/Web 이미지 `read_registry` 토큰 |
 | `ONTOLOGY_ASAL_AGENT_DEV_ENV` | File | Dev 배포 시 필수 | Dev API 런타임 Secret |
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | File | Prod 배포 시 필수 | Prod API 런타임 Secret |
-| `GRAPHDB_LICENSE_FILE` | File | RDF 쓰기 시 필수 | GraphDB license 파일 |
+| Secure File `graphdb.license` | Secure File | RDF 쓰기 시 필수 | GraphDB license 파일 |
 
 `GITLAB_REGISTRY_USERNAME`과 `GITLAB_REGISTRY_TOKEN`은 `lime985340` Group에
 공통으로 등록하는 것을 권장합니다. 중복된 프로젝트 변수가 있으면 Group 값이
@@ -185,18 +185,16 @@ writer Secret 연결 없이 GraphDB 보안만 켜면 API query는 동작할 수 
 GraphDB UI와 repository 목록은 license가 없어도 일부 확인할 수 있지만, 현재
 구성에서는 RDF transaction과 온톨로지 적재에 유효한 license가 필요합니다.
 
-`GRAPHDB_LICENSE_FILE`은 GitLab 프로젝트의 `Settings` → `CI/CD` → `Variables`에서
-**File 타입**으로 등록하고 실제 `graphdb.license` 파일을 업로드합니다. 일반
-Variable에 license 문자열을 입력하면 파일 경로가 아니므로 CI가 거부합니다.
-CI가 생성한 암호화 결과만 `platform/graphdb/sealed-secret.yaml`에 저장하며, Git에는
-license 원문을 저장하지 않습니다.
+`graphdb.license`는 GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에서
+원본 파일로 업로드합니다. CI는 이 파일을 Job Token으로 다운로드해
+`kubectl create secret --from-file`에 직접 전달합니다. CI가 생성한 암호화 결과만
+`platform/graphdb/sealed-secret.yaml`에 저장하며, Git에는 license 원문이나
+Base64 문자열을 저장하지 않습니다.
 
-`GRAPHDB_LICENSE_FILE`이 `Protected`이면 sealing을 실행할 브랜치도 Protected ref여야
-합니다. Feature 브랜치에서 변수가 전달되지 않는 경우에는 브랜치 보호 정책과
-변수의 Protected 설정을 먼저 맞춥니다. 변수 누락은 이제 성공으로 건너뛰지 않고
-sealing job을 실패시킵니다.
+Secure File이 없거나 다운로드되지 않으면 manifest 검증에서 sealing job이 실패합니다.
+Feature 브랜치에서도 GraphDB 전용 CI 변수나 Base64 복원 예외는 사용하지 않습니다.
 
-라이선스를 반영하려면 `Build` → `Pipelines` → `New pipeline`에서
+라이선스를 반영하려면 먼저 Secure Files에 파일을 업로드한 뒤, `Build` → `Pipelines` → `New pipeline`에서
 `feature/clean-gitops-layout`을 선택하고 `update_secrets=true`로 Pipeline을 만든
 뒤, 수동 `seal:workload-secrets` job을 시작합니다. Job 로그에는
 `Generated encrypted SealedSecret graphdb/graphdb-license`가 표시되어야 하며,

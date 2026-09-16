@@ -56,17 +56,16 @@ seal:workload-secrets:
       test -f "$SEALED_SECRETS_CERT" || (echo "SEALED_SECRETS_CERT does not point to a file" >&2; exit 1)
       test -n "${GITLAB_REGISTRY_USERNAME:-}" || (echo "GITLAB_REGISTRY_USERNAME is required" >&2; exit 1)
       test -n "${GITLAB_REGISTRY_TOKEN:-}" || (echo "GITLAB_REGISTRY_TOKEN is required" >&2; exit 1)
-      test -n "${GRAPHDB_LICENSE_FILE:-}" || (echo "GRAPHDB_LICENSE_FILE must be configured as a GitLab File variable" >&2; exit 1)
-      test -f "$GRAPHDB_LICENSE_FILE" || (echo "GRAPHDB_LICENSE_FILE does not point to a file; configure it as a GitLab File variable" >&2; exit 1)
       test -n "${CI_JOB_TOKEN:-}" || (echo "CI_JOB_TOKEN is required for the GitOps repository push" >&2; exit 1)
 
-      apk add --no-cache curl git jq tar
+      apk add --no-cache curl git glab jq tar
       kubeseal_version='0.38.1'
       kubeseal_archive="kubeseal-${kubeseal_version}-linux-amd64.tar.gz"
       kubeseal_sha256='71791ebf0c26675927153e7c2a4418ae769db27084931d24dee2ac58a3c76c2d'
       kubeseal_tmp_dir="$(mktemp -d)"
+      secure_files_dir="$(mktemp -d)"
       cleanup() {
-        rm -rf "$kubeseal_tmp_dir"
+        rm -rf "$kubeseal_tmp_dir" "$secure_files_dir"
         if [ -n "${askpass_file:-}" ]; then
           rm -f "$askpass_file"
         fi
@@ -79,6 +78,20 @@ seal:workload-secrets:
       printf '%s  %s\n' "$kubeseal_sha256" "$kubeseal_archive_path" | sha256sum -c -
       tar --extract --gzip --file "$kubeseal_archive_path" --directory /usr/local/bin kubeseal
       chmod 755 /usr/local/bin/kubeseal
+
+      glab auth login \
+        --job-token "$CI_JOB_TOKEN" \
+        --hostname "${CI_SERVER_FQDN:-$CI_SERVER_HOST}" \
+        --api-protocol "${CI_SERVER_PROTOCOL:-https}"
+      while IFS='|' read -r secure_file_name _namespace _secret_name _secret_key _output; do
+        case "$secure_file_name" in
+          ''|'#'*) continue ;;
+        esac
+        glab -R "$CI_PROJECT_PATH" securefile download \
+          --name "$secure_file_name" \
+          --path "$secure_files_dir/$secure_file_name"
+      done < ci/secret-files.conf
+      export SECURE_FILES_DIR="$secure_files_dir"
 
       sh ci/seal-secrets.sh
 

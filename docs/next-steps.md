@@ -42,10 +42,9 @@ Registry JSON이나 `auth` 값은 직접 만들지 않으며, CI가 username/tok
 
 Secret 값을 입력한 뒤 다음 순서로 실행합니다.
 
-1. GitLab 프로젝트의 `Settings` → `CI/CD` → `Variables`에서
-   `GRAPHDB_LICENSE_FILE`을 **File 타입**으로 추가하고 실제 `graphdb.license`
-   파일을 업로드합니다. 변수명은 대소문자까지 정확해야 하며, 일반 Variable에
-   라이선스 문자열을 넣으면 CI가 파일로 인식하지 못합니다.
+1. GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에서 원본
+   `graphdb.license` 파일을 업로드합니다. 파일 이름은 `graphdb.license`로
+   유지하며, Base64 변환이나 CI/CD Variable 등록은 하지 않습니다.
 2. `Build` → `Pipelines` → `New pipeline`에서 대상 브랜치로
    `feature/clean-gitops-layout`을 선택합니다.
 3. `Inputs`에서 boolean 입력 `update_secrets`를 `true`로 설정합니다.
@@ -62,10 +61,9 @@ feature 브랜치의 CI 설정이 반영되었는지 확인합니다. Pipeline �
 기본값은 `false`이므로 입력을 `true`로 선택한 웹 Pipeline에서만 sealing Job이
 생성됩니다. Push Pipeline에서는 생성되지 않습니다.
 
-`GRAPHDB_LICENSE_FILE`을 `Protected`으로 설정했다면 대상 브랜치도 GitLab의
-Protected ref여야 합니다. 그렇지 않으면 보안상 해당 File 변수가 Job에 전달되지
-않고, sealing job이 명확한 오류로 종료됩니다. Feature 브랜치에서 실행할 때는
-브랜치 보호 정책과 변수의 Protected 설정을 서로 맞춰야 합니다.
+Secure Files는 Job Token으로 다운로드되므로 대상 프로젝트의 Secure Files 접근
+권한과 Job Token 정책을 확인합니다. Feature 브랜치에서 실행할 때도 별도의
+Base64 변수나 브랜치별 예외 설정은 필요하지 않습니다.
 
 Sealing Job은 각 서비스의 환경별 `sealed-secrets.yaml`을 갱신합니다. Atmo의
 대표 경로는 다음과 같고, Neople·Ontology 경로도 같은 방식으로 함께 갱신됩니다.

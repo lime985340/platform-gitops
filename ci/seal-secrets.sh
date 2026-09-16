@@ -26,7 +26,7 @@ command -v jq >/dev/null 2>&1 || {
 
 : "${GITLAB_REGISTRY_USERNAME:?GITLAB_REGISTRY_USERNAME is required}"
 : "${GITLAB_REGISTRY_TOKEN:?GITLAB_REGISTRY_TOKEN is required}"
-: "${GRAPHDB_LICENSE_FILE:?GRAPHDB_LICENSE_FILE is required as a GitLab File variable}"
+: "${SECURE_FILES_DIR:?SECURE_FILES_DIR must point to the downloaded GitLab Secure Files directory}"
 
 umask 077
 tmp_dir="$(mktemp -d)"
@@ -151,46 +151,6 @@ seal_file_secret() {
   echo "Generated encrypted SealedSecret ${namespace}/${name}"
 }
 
-prepare_graphdb_license_file() {
-  source_path="$1"
-  destination_path="$2"
-  normalized_path="$tmp_dir/graphdb-license.normalized"
-
-  # GitLab CI/CD variables are UTF-8 text, while the GraphDB .license file
-  # supplied by Ontotext may be binary. Store the file as Base64 in the File
-  # variable and restore the original bytes before creating the Secret.
-  tr -d '[:space:]' < "$source_path" > "$normalized_path"
-  normalized_size=$(wc -c < "$normalized_path")
-
-  if [ "$normalized_size" -gt 0 ] && [ $((normalized_size % 4)) -eq 0 ] \
-    && grep -Eq '^[A-Za-z0-9+/]+={0,2}$' "$normalized_path" \
-    && base64 -d "$normalized_path" > "$destination_path" 2>/dev/null \
-    && [ -s "$destination_path" ]; then
-    echo "Decoded Base64 GraphDB license before sealing"
-    return 0
-  fi
-
-  rm -f "$destination_path"
-  cp "$source_path" "$destination_path"
-}
-
-seal_file_secret_if_configured() {
-  output="$1"
-  namespace="$2"
-  name="$3"
-  key="$4"
-  file_path="$5"
-
-  if [ -z "$file_path" ]; then
-    echo "Skipping optional SealedSecret ${namespace}/${name}"
-    return 0
-  fi
-
-  reject_placeholder_file "$file_path" "${namespace}/${name}"
-  : > "$output"
-  seal_file_secret "$output" "$namespace" "$name" "$key" "$file_path"
-}
-
 seal_registry_secret() {
   output="$1"
   namespace="$2"
@@ -225,7 +185,6 @@ dev_ontology_agent_output="workloads/ontology-asal-agent/api/environments/dev/se
 prod_ontology_agent_output="workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml"
 dev_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml"
 prod_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml"
-graphdb_license_output="platform/graphdb/sealed-secret.yaml"
 
 : > "$dev_api_output"
 seal_env_secret "$dev_api_output" atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB_ENV:-}"
@@ -291,13 +250,44 @@ seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
 : > "$prod_ontology_agent_web_output"
 seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-prod
 
-reject_placeholder_file "$GRAPHDB_LICENSE_FILE" graphdb/graphdb-license
-graphdb_license_path="$tmp_dir/graphdb.license"
-prepare_graphdb_license_file "$GRAPHDB_LICENSE_FILE" "$graphdb_license_path"
-reject_placeholder_file "$graphdb_license_path" graphdb/graphdb-license
-seal_file_secret \
-  "$graphdb_license_output" \
-  graphdb \
-  graphdb-license \
-  graphdb.license \
-  "$graphdb_license_path"
+secret_file_manifest="${SECRET_FILE_MANIFEST:-ci/secret-files.conf}"
+if [ ! -f "$secret_file_manifest" ]; then
+  echo "Missing Secure Files manifest: $secret_file_manifest" >&2
+  exit 1
+fi
+
+initialized_outputs=""
+while IFS='|' read -r secure_file_name namespace name key output; do
+  case "$secure_file_name" in
+    ''|'#'*) continue ;;
+  esac
+
+  if [ -z "$namespace" ] || [ -z "$name" ] || [ -z "$key" ] || [ -z "$output" ]; then
+    echo "Invalid Secure Files manifest row: $secure_file_name" >&2
+    exit 1
+  fi
+
+  case "$secure_file_name" in
+    */*|*\\*|*..*)
+      echo "Secure file names must be simple file names: $secure_file_name" >&2
+      exit 1
+      ;;
+  esac
+
+  file_path="$SECURE_FILES_DIR/$secure_file_name"
+  if [ ! -f "$file_path" ]; then
+    echo "Secure File was not downloaded: $secure_file_name" >&2
+    exit 1
+  fi
+
+  case " $initialized_outputs " in
+    *" $output "*) ;;
+    *)
+      : > "$output"
+      initialized_outputs="$initialized_outputs $output"
+      ;;
+  esac
+
+  reject_placeholder_file "$file_path" "$namespace/$name"
+  seal_file_secret "$output" "$namespace" "$name" "$key" "$file_path"
+done < "$secret_file_manifest"

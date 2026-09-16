@@ -62,6 +62,10 @@ Variable입니다.
 - 두 값은 로그에 출력하지 않으며, CI가 Job 내부의 임시 Docker config를 생성한 뒤 정리
 - `GITOPS_PUSH_TOKEN`과 `GITOPS_PUSH_TOKEN_USER`는 서비스 저장소가 별도 GitOps
   저장소로 Push하는 흐름에서만 사용하며, 이 프로젝트의 sealing Job에는 등록하지 않음
+- 바이너리 파일은 CI/CD Variable에 넣지 않고 `Settings` → `CI/CD` →
+  `Secure Files`에 원본 파일로 업로드합니다. 현재 목록은
+  [`ci/secret-files.conf`](../ci/secret-files.conf)가 관리하며, CI가 `glab securefile`
+  으로 다운로드한 뒤 선언된 매핑을 공통 sealing 함수로 처리합니다.
 
 `CI_JOB_TOKEN`은 GitLab이 Job 실행 중 자동으로 제공하는 값이며 GitLab 변수 목록에
 직접 생성하지 않습니다. Job token repository push 설정이 비활성화되어 있거나
@@ -81,6 +85,23 @@ env-file 형식으로 표현하지 않습니다.
 
 `kubeseal --fetch-cert`로 받은 Controller 공개 인증서 전체를 File 변수로
 등록합니다. Private Key는 입력하지 않습니다.
+
+### 바이너리 Secure Files
+
+GraphDB 라이선스처럼 임의의 바이트를 포함할 수 있는 파일은 GitLab 프로젝트의
+`Settings` → `CI/CD` → `Secure Files` → `Upload File`에서 원본 파일을 업로드합니다.
+현재 등록해야 하는 이름은 다음과 같습니다.
+
+| Secure File 이름 | Secret Namespace | Secret 이름 | Secret key |
+| --- | --- | --- | --- |
+| `graphdb.license` | `graphdb` | `graphdb-license` | `graphdb.license` |
+
+Secure Files는 저장소 밖에 보관되므로 Git에 원본 또는 Base64 문자열이 들어가지
+않습니다. `seal:workload-secrets`는 Job Token으로 Secure Files를 다운로드하고,
+`ci/secret-files.conf`의 선언을 순회하여 `kubectl create secret --from-file`과
+`kubeseal`을 실행합니다. 새 바이너리 Secret은 스크립트에 제품별 `if`를 추가하지
+않고 manifest에 한 줄만 추가합니다. Secure File 내용은 Job 로그에 출력하지
+않습니다.
 
 ### GitOps sealing Job의 Push 인증
 
@@ -316,15 +337,13 @@ CLIProxyAPI 접근은 Cilium 정책으로 제한하므로 `LLM_API_KEY`는 입�
 
 GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
 
-- `GRAPHDB_LICENSE_FILE` → `graphdb` / `graphdb-license`
+- Secure File `graphdb.license` → `graphdb` / `graphdb-license`
 
-`GRAPHDB_LICENSE_FILE`은 GitLab CI/CD Variable의 **Type을 File**로 선택하고 실제
-`.license` 파일의 Base64 인코딩 결과를 넣습니다. GitLab 변수는 텍스트 기반이므로
-바이너리 라이선스 원문을 그대로 붙여넣지 않습니다. 파이프라인이 Base64를 원본
-바이트로 복원한 뒤 `graphdb.license`로 봉인합니다. 이 변수는 온톨로지 RDF 쓰기에 필요한
-값이므로 누락되면 `seal:workload-secrets`가 실패하며 빈 GraphDB license Secret을
-생성하지 않습니다. `Protected`으로 설정한 경우에는 실행 대상
-`feature/clean-gitops-layout` 브랜치도 Protected ref여야 합니다.
+`graphdb.license` Secure File은 온톨로지 RDF 쓰기에 필요한 값이므로 누락되면
+`seal:workload-secrets`가 실패하며 빈 GraphDB license Secret을 생성하지 않습니다.
+Secure File의 원본 바이트는 CI에서 Base64로 변환하거나 GraphDB 전용 예외로
+처리하지 않습니다. `Protected` 변수인 `SEALED_SECRETS_CERT`의 경우에는 실행
+대상 브랜치도 Protected ref여야 합니다.
 
 #### 운영 보안 기준
 
@@ -341,7 +360,8 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 - Google/GitLab 로그인 비밀번호와 GitLab PAT를 GraphDB 비밀번호로 재사용하지
   않습니다.
 - GraphDB license가 필요한 RDF transaction과 온톨로지 적재에는 실제
-  `GRAPHDB_LICENSE_FILE`을 등록합니다. placeholder는 운영값으로 간주하지 않습니다.
+  `graphdb.license` Secure File을 등록합니다. placeholder는 운영값으로 간주하지
+  않습니다.
 
 운영 API File 변수에는 환경별 GraphDB 인증값 등 실제 Secret 값만 입력합니다.
 현재 Feature 클러스터의 CLIProxyAPI 접근은 Cilium 정책으로 제한하므로 Proxy
@@ -409,7 +429,7 @@ PVC에 저장되므로 Pod 재생성마다 다시 로그인하지 않습니다.
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-dev` / `ontology-asal-agent-web-dev` | `gitlab-regcred` |
 | `lime985340` Group의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | `ontology-asal-agent-api-prod` / `ontology-asal-agent-web-prod` | `gitlab-regcred` |
-| `GRAPHDB_LICENSE_FILE` | `graphdb` | `graphdb-license` |
+| Secure File `graphdb.license` | `graphdb` | `graphdb-license` |
 
 생성되는 파일은 다음과 같습니다.
 

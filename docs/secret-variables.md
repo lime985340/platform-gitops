@@ -294,11 +294,14 @@ Deployment에는 이 Secret을 주입하지 않습니다. 따라서 Dev와 Prod�
 ```env
 DNF_API_KEY=<DNF_API_KEY>
 CYPHERS_API_KEY=<CYPHERS_API_KEY>
+DATABASE_URL=postgresql://<user>:<password>@<pooled-host>/<database>?sslmode=require
 ```
 
 `DEV`와 `PROD`는 각각 게임별로 발급한 DNF API Key와 Cyphers API Key를
 입력합니다. 두 게임의 키를 하나의 값으로 합치거나 공통 `NEOPLE_API_KEY`로
-대체하지 않습니다.
+대체하지 않습니다. `DATABASE_URL`은 Neople 전용 Neon 프로젝트의 pooled
+connection string이며, 실제 비밀번호를 Git에 저장하지 않고 동일한 File 변수로
+관리합니다.
 
 다음 값은 Secret File 변수에 넣지 않습니다.
 

@@ -35,6 +35,9 @@ spec:
                 - secretRef:
                     name: neople-game-analytics-api-secret
                     optional: false
+                - secretRef:
+                    name: neople-game-analytics-api-db-secret
+                    optional: true
               resources:
                 requests:
                   cpu: 100m

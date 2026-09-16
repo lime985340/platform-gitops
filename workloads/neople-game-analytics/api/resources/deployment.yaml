@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       annotations:
-        secret.reloader.stakater.com/reload: "gitlab-regcred,neople-game-analytics-api-secret"
+        secret.reloader.stakater.com/reload: "gitlab-regcred,neople-game-analytics-api-secret,neople-game-analytics-api-db-secret"
       labels:
         app: neople-game-analytics-api
         app.kubernetes.io/name: neople-game-analytics-api
@@ -37,6 +37,9 @@ spec:
             - secretRef:
                 name: neople-game-analytics-api-secret
                 optional: false
+            - secretRef:
+                name: neople-game-analytics-api-db-secret
+                optional: true
           readinessProbe:
             httpGet:
               path: /readyz

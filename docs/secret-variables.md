@@ -288,20 +288,28 @@ Deployment에는 이 Secret을 주입하지 않습니다. 따라서 Dev와 Prod�
 
 - `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` → `neople-game-analytics-api-dev`
 - `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` → `neople-game-analytics-api-prod`
+- `NEOPLE_GAME_ANALYTICS_API_DEV_DB_ENV` → `neople-game-analytics-api-db-secret` (선택)
+- `NEOPLE_GAME_ANALYTICS_API_PROD_DB_ENV` → `neople-game-analytics-api-db-secret`
 
 두 File 변수의 기본 형식은 다음과 같습니다.
 
 ```env
 DNF_API_KEY=<DNF_API_KEY>
 CYPHERS_API_KEY=<CYPHERS_API_KEY>
-DATABASE_URL=postgresql://<user>:<password>@<pooled-host>/<database>?sslmode=require
 ```
 
 `DEV`와 `PROD`는 각각 게임별로 발급한 DNF API Key와 Cyphers API Key를
 입력합니다. 두 게임의 키를 하나의 값으로 합치거나 공통 `NEOPLE_API_KEY`로
-대체하지 않습니다. `DATABASE_URL`은 Neople 전용 Neon 프로젝트의 pooled
-connection string이며, 실제 비밀번호를 Git에 저장하지 않고 동일한 File 변수로
-관리합니다.
+대체하지 않습니다.
+
+DB File 변수 `NEOPLE_GAME_ANALYTICS_API_PROD_DB_ENV`에는 다음 한 줄만 입력합니다.
+
+```env
+DATABASE_URL=postgresql://<user>:<password>@<pooled-host>/<database>?sslmode=require
+```
+
+기존 API 키 File 변수와 분리해 관리하므로 API 키를 다시 입력하거나 덮어쓸 필요가
+없습니다. 실제 비밀번호는 Git에 저장하지 않습니다.
 
 다음 값은 Secret File 변수에 넣지 않습니다.
 
@@ -445,6 +453,8 @@ PVC에 저장되므로 Pod 재생성마다 다시 로그인하지 않습니다.
 | `gitops` 프로젝트의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Atmo API/Web 각 Namespace | `gitlab-regcred` |
 | `NEOPLE_GAME_ANALYTICS_API_DEV_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-secret` |
 | `NEOPLE_GAME_ANALYTICS_API_PROD_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-secret` |
+| `NEOPLE_GAME_ANALYTICS_API_DEV_DB_ENV` | `neople-game-analytics-api-dev` | `neople-game-analytics-api-db-secret` |
+| `NEOPLE_GAME_ANALYTICS_API_PROD_DB_ENV` | `neople-game-analytics-api-prod` | `neople-game-analytics-api-db-secret` |
 | `gitops` 프로젝트의 `GITLAB_REGISTRY_USERNAME` + `GITLAB_REGISTRY_TOKEN` | Neople API/Web 각 Namespace | `gitlab-regcred` |
 | `ONTOLOGY_ASAL_AGENT_DEV_ENV` | `ontology-asal-agent-api-dev` | `ontology-asal-agent-secrets` |
 | `ONTOLOGY_ASAL_AGENT_PROD_ENV` | `ontology-asal-agent-api-prod` | `ontology-asal-agent-secrets` |

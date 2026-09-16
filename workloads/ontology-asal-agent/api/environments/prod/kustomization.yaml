@@ -16,7 +16,7 @@ resources:
   - sealed-secrets.yaml
 images:
   - name: registry.gitlab.com/lime985340/ontology-asal-agent-api
-    newTag: 45c4b28c1f295eb51e5bd795c02828675b8a165e
+    newTag: 195955c8739184e184859294e542e19e0fd06ac2
 configMapGenerator:
   - name: ontology-asal-agent-config
     literals:
@@ -28,6 +28,7 @@ configMapGenerator:
       - TRIPLESTORE_UPDATE_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent/statements
       - TRIPLESTORE_ONTOLOGY_GRAPH=https://example.org/asal-agent/graph/ontology
       - TRIPLESTORE_SHAPES_GRAPH=https://example.org/asal-agent/graph/shapes
+      - TRIPLESTORE_EX_NAMESPACE=https://example.org/asal-agent#
       - TRIPLESTORE_TIMEOUT_SECONDS=30
       - TRIPLESTORE_ALLOW_LOCAL_FALLBACK=false
       - NOTIFICATION_GATEWAY=local

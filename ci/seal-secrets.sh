@@ -151,6 +151,29 @@ seal_file_secret() {
   echo "Generated encrypted SealedSecret ${namespace}/${name}"
 }
 
+prepare_graphdb_license_file() {
+  source_path="$1"
+  destination_path="$2"
+  normalized_path="$tmp_dir/graphdb-license.normalized"
+
+  # GitLab CI/CD variables are UTF-8 text, while the GraphDB .license file
+  # supplied by Ontotext may be binary. Store the file as Base64 in the File
+  # variable and restore the original bytes before creating the Secret.
+  tr -d '[:space:]' < "$source_path" > "$normalized_path"
+  normalized_size=$(wc -c < "$normalized_path")
+
+  if [ "$normalized_size" -gt 0 ] && [ $((normalized_size % 4)) -eq 0 ] \
+    && grep -Eq '^[A-Za-z0-9+/]+={0,2}$' "$normalized_path" \
+    && base64 -d "$normalized_path" > "$destination_path" 2>/dev/null \
+    && [ -s "$destination_path" ]; then
+    echo "Decoded Base64 GraphDB license before sealing"
+    return 0
+  fi
+
+  rm -f "$destination_path"
+  cp "$source_path" "$destination_path"
+}
+
 seal_file_secret_if_configured() {
   output="$1"
   namespace="$2"
@@ -269,9 +292,12 @@ seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
 seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-prod
 
 reject_placeholder_file "$GRAPHDB_LICENSE_FILE" graphdb/graphdb-license
+graphdb_license_path="$tmp_dir/graphdb.license"
+prepare_graphdb_license_file "$GRAPHDB_LICENSE_FILE" "$graphdb_license_path"
+reject_placeholder_file "$graphdb_license_path" graphdb/graphdb-license
 seal_file_secret \
   "$graphdb_license_output" \
   graphdb \
   graphdb-license \
   graphdb.license \
-  "$GRAPHDB_LICENSE_FILE"
+  "$graphdb_license_path"

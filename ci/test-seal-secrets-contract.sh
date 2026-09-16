@@ -21,6 +21,8 @@ require_text() {
 require_text "$ci_file" 'test -n "${GRAPHDB_LICENSE_FILE:-}"'
 require_text "$ci_file" 'test -f "$GRAPHDB_LICENSE_FILE"'
 require_text "$seal_script" ': "${GRAPHDB_LICENSE_FILE:?'
+require_text "$seal_script" 'prepare_graphdb_license_file'
+require_text "$seal_script" 'Decoded Base64 GraphDB license before sealing'
 require_text "$seal_script" 'seal_file_secret \'
 
 echo "Sealed Secrets contract: PASS"

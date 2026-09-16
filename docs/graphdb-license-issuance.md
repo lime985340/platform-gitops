@@ -35,10 +35,19 @@ GitLab 프로젝트 또는 그룹 CI/CD Variables에서 다음 변수를 사용�
 ```text
 Key: GRAPHDB_LICENSE_FILE
 Type: File
-Value: 공식 GraphDB 라이선스 원문 또는 원본 파일 내용
+Value: 원본 `.license` 파일의 Base64 인코딩 결과
 ```
 
-값에는 라이선스 원문만 넣고, 변수명이나 설명 문구는 포함하지 않는다. 현재 파이프라인은 파일의 존재 여부를 확인한 뒤 `graphdb.license`라는 이름으로 SealedSecret을 생성한다.
+GitLab CI/CD 변수는 텍스트 기반이므로 바이너리 `.license` 파일은 Base64로 인코딩한
+내용을 `GRAPHDB_LICENSE_FILE`의 **File 타입** 변수에 넣는다. 줄바꿈은 포함해도 되며,
+변수명이나 설명 문구는 포함하지 않는다. 파이프라인이 Base64를 원본 바이트로 복원한
+뒤 `graphdb.license`라는 이름으로 SealedSecret을 생성한다.
+
+PowerShell에서는 다음처럼 인코딩할 수 있다.
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes('.\\LIME_GRAPHDB_FREE_v11.3.license'))
+```
 
 배포 후에는 다음을 확인한다.
 

@@ -318,9 +318,10 @@ GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 
 
 - `GRAPHDB_LICENSE_FILE` → `graphdb` / `graphdb-license`
 
-`GRAPHDB_LICENSE_FILE`은 GitLab CI/CD Variable의 **Type을 File**로 선택한 뒤 실제
-`graphdb.license` 파일을 업로드해야 합니다. 일반 Variable에 라이선스 문자열을
-넣으면 CI에서 파일로 처리되지 않습니다. 이 변수는 온톨로지 RDF 쓰기에 필요한
+`GRAPHDB_LICENSE_FILE`은 GitLab CI/CD Variable의 **Type을 File**로 선택하고 실제
+`.license` 파일의 Base64 인코딩 결과를 넣습니다. GitLab 변수는 텍스트 기반이므로
+바이너리 라이선스 원문을 그대로 붙여넣지 않습니다. 파이프라인이 Base64를 원본
+바이트로 복원한 뒤 `graphdb.license`로 봉인합니다. 이 변수는 온톨로지 RDF 쓰기에 필요한
 값이므로 누락되면 `seal:workload-secrets`가 실패하며 빈 GraphDB license Secret을
 생성하지 않습니다. `Protected`으로 설정한 경우에는 실행 대상
 `feature/clean-gitops-layout` 브랜치도 Protected ref여야 합니다.

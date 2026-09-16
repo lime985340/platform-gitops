@@ -1,13 +1,13 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: neople-game-analytics-worker-daily
+  name: neople-game-analytics-worker-realtime
   labels:
     app: neople-game-analytics-api
     app.kubernetes.io/name: neople-game-analytics-worker
     app.kubernetes.io/component: worker
 spec:
-  schedule: "0 3 * * *"
+  schedule: "*/15 * * * *"
   timeZone: Asia/Seoul
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
@@ -35,6 +35,9 @@ spec:
                 - secretRef:
                     name: neople-game-analytics-api-secret
                     optional: false
+                - secretRef:
+                    name: neople-game-analytics-api-db-secret
+                    optional: true
               resources:
                 requests:
                   cpu: 100m

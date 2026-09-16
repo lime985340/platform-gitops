@@ -101,7 +101,8 @@ Secure Files는 저장소 밖에 보관되므로 Git에 원본 또는 Base64 문
 `ci/secret-files.conf`의 선언을 순회하여 `kubectl create secret --from-file`과
 `kubeseal`을 실행합니다. 새 바이너리 Secret은 스크립트에 제품별 `if`를 추가하지
 않고 manifest에 한 줄만 추가합니다. Secure File 내용은 Job 로그에 출력하지
-않습니다.
+않습니다. Secure File 업로드를 확인한 뒤 기존 `GRAPHDB_LICENSE_FILE` CI/CD
+변수는 삭제합니다. 새 파이프라인은 해당 변수를 읽지 않습니다.
 
 ### GitOps sealing Job의 Push 인증
 

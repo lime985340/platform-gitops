@@ -333,25 +333,10 @@ TRIPLESTORE_USERNAME=<reader username, when GraphDB security is enabled>
 TRIPLESTORE_PASSWORD=<reader password, when GraphDB security is enabled>
 ```
 
-CLIProxyAPI 접근은 Cilium 정책과 내부 클라이언트 키로 제한합니다. 다음 두
-File 변수를 추가하고 각 변수에 한 줄만 입력합니다.
-
-`CLI_PROXY_API_DEV_ENV`:
-
-```env
-CLI_PROXY_API_KEY=<dev 전용 임의의 내부 키>
-```
-
-`CLI_PROXY_API_PROD_ENV`:
-
-```env
-CLI_PROXY_API_KEY=<prod 전용 임의의 내부 키>
-```
-
-Sealing Job이 같은 키를 `cli-proxy-api-secrets`와
-`ontology-asal-agent-proxy-secret`에 각각 암호화합니다. `LLM_API_KEY`는 현재
-Codex Proxy 구성에서 사용하지 않으며, Codex OAuth access/refresh token도 이
-변수에 넣지 않습니다.
+CLIProxyAPI 접근은 Cilium 정책과 Istio Ambient 정책으로 제한합니다. 별도의
+`CLI_PROXY_API_DEV_ENV`, `CLI_PROXY_API_PROD_ENV` File 변수는 만들지 않습니다.
+`LLM_API_KEY`도 현재 Codex Proxy 구성에서는 사용하지 않으며, Codex OAuth
+access/refresh token은 GitLab 변수에 넣지 않습니다.
 
 GraphDB 라이선스는 Agent 환경별로 복제하지 않고 공용 플랫폼 Secret으로 관리합니다.
 
@@ -382,8 +367,9 @@ Secure File의 원본 바이트는 CI에서 Base64로 변환하거나 GraphDB �
   않습니다.
 
 운영 API File 변수에는 환경별 GraphDB 인증값 등 실제 Secret 값만 입력합니다.
-현재 Feature 클러스터의 CLIProxyAPI 접근은 Cilium 정책으로 제한하므로 Proxy
-접근용 키를 별도로 입력하지 않습니다.
+현재 Feature 클러스터의 CLIProxyAPI 접근은 Cilium 정책과 Istio Ambient의
+`STRICT` mTLS/`AuthorizationPolicy`로 제한하므로 Proxy 접근용 키를 별도로
+입력하지 않습니다.
 
 ```env
 TRIPLESTORE_USERNAME=<환경별 GraphDB reader 계정>

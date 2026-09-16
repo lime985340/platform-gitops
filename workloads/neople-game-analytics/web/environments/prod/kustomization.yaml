@@ -19,4 +19,16 @@ patches:
   - path: api-upstream-patch.yaml
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-web
+    newTag: v0.2.0
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../../resources
+  - ingress.yaml
+  - middleware.yaml
+  - sealed-secrets.yaml
+patches:
+  - path: api-upstream-patch.yaml
+images:
+  - name: registry.gitlab.com/lime985340/neople-game-analytics-web
     newTag: v0.1.1

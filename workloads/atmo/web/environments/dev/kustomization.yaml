@@ -15,4 +15,4 @@ resources:
 - sealed-secrets.yaml
 images:
 - name: registry.gitlab.com/lime985340/atmo-web
-  newTag: a28f5f4851081e20f0394f8632510a8c2d2984c1
+  newTag: 664c629578a96ffae31bfbd21d6d98f3dfca05a5

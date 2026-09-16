@@ -12,6 +12,7 @@ spec:
   template:
     metadata:
       annotations:
+        configmap.reloader.stakater.com/reload: "ontology-asal-agent-config"
         secret.reloader.stakater.com/reload: "ontology-asal-agent-secrets,gitlab-regcred"
       labels:
         app: ontology-asal-agent-api

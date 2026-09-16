@@ -64,8 +64,8 @@ Variable입니다.
   저장소로 Push하는 흐름에서만 사용하며, 이 프로젝트의 sealing Job에는 등록하지 않음
 - 바이너리 파일은 CI/CD Variable에 넣지 않고 `Settings` → `CI/CD` →
   `Secure Files`에 원본 파일로 업로드합니다. 현재 목록은
-  [`ci/secret-files.conf`](../ci/secret-files.conf)가 관리하며, CI가 `glab securefile`
-  으로 다운로드한 뒤 선언된 매핑을 공통 sealing 함수로 처리합니다.
+  [`ci/secret-files.conf`](../ci/secret-files.conf)가 관리하며, CI가 GitLab Secure Files API를
+  Job Token으로 호출해 다운로드한 뒤 선언된 매핑을 공통 sealing 함수로 처리합니다.
 
 `CI_JOB_TOKEN`은 GitLab이 Job 실행 중 자동으로 제공하는 값이며 GitLab 변수 목록에
 직접 생성하지 않습니다. Job token repository push 설정이 비활성화되어 있거나

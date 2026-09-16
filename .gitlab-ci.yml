@@ -58,7 +58,7 @@ seal:workload-secrets:
       test -n "${GITLAB_REGISTRY_TOKEN:-}" || (echo "GITLAB_REGISTRY_TOKEN is required" >&2; exit 1)
       test -n "${CI_JOB_TOKEN:-}" || (echo "CI_JOB_TOKEN is required for the GitOps repository push" >&2; exit 1)
 
-      apk add --no-cache curl git glab jq tar
+      apk add --no-cache curl git jq tar
       kubeseal_version='0.38.1'
       kubeseal_archive="kubeseal-${kubeseal_version}-linux-amd64.tar.gz"
       kubeseal_sha256='71791ebf0c26675927153e7c2a4418ae769db27084931d24dee2ac58a3c76c2d'
@@ -79,18 +79,29 @@ seal:workload-secrets:
       tar --extract --gzip --file "$kubeseal_archive_path" --directory /usr/local/bin kubeseal
       chmod 755 /usr/local/bin/kubeseal
 
-      glab auth login \
-        --job-token "$CI_JOB_TOKEN" \
-        --hostname "${CI_SERVER_FQDN:-$CI_SERVER_HOST}" \
-        --api-protocol "${CI_SERVER_PROTOCOL:-https}"
+      api_base="${CI_API_V4_URL:-${CI_SERVER_URL}/api/v4}"
+      secure_files_api="${api_base}/projects/${CI_PROJECT_ID}/secure_files"
+      secure_files_metadata="$secure_files_dir/.metadata.json"
+      curl --fail --silent --show-error \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        "$secure_files_api" > "$secure_files_metadata"
       while IFS='|' read -r secure_file_name _namespace _secret_name _secret_key _output; do
         case "$secure_file_name" in
           ''|'#'*) continue ;;
         esac
-        glab -R "$CI_PROJECT_PATH" securefile download \
-          --name "$secure_file_name" \
-          --path "$secure_files_dir/$secure_file_name"
+        secure_file_id="$(jq -r --arg name "$secure_file_name" \
+          '[.[] | select(.name == $name) | .id] | if length == 1 then .[0] else empty end' \
+          "$secure_files_metadata")"
+        if [ -z "$secure_file_id" ]; then
+          echo "Secure File was not found or is ambiguous: $secure_file_name" >&2
+          exit 1
+        fi
+        curl --fail --silent --show-error --location \
+          --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+          --output "$secure_files_dir/$secure_file_name" \
+          "$secure_files_api/$secure_file_id/download"
       done < ci/secret-files.conf
+      rm -f "$secure_files_metadata"
       export SECURE_FILES_DIR="$secure_files_dir"
 
       sh ci/seal-secrets.sh

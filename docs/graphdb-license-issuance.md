@@ -38,8 +38,8 @@ LIME_GRAPHDB_FREE_v11.3.license
 ```
 
 Base64 변환이나 텍스트 변수 입력은 사용하지 않는다. GitLab Secure Files는
-바이너리 파일을 원본 바이트 그대로 보관하며, 파이프라인은 `glab securefile`로
-다운로드한 파일을 `kubectl create secret --from-file`에 직접 전달한다.
+바이너리 파일을 원본 바이트 그대로 보관하며, 파이프라인은 GitLab Secure Files API를
+Job Token으로 호출해 다운로드한 파일을 `kubectl create secret --from-file`에 직접 전달한다.
 `ci/secret-files.conf`가 Secure File과 Kubernetes Secret의 매핑을 선언하므로,
 새 바이너리 파일을 추가할 때는 해당 manifest에 한 줄을 추가한다.
 

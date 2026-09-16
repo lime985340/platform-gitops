@@ -17,9 +17,10 @@ require_text() {
   fi
 }
 
-require_text "$ci_file" 'apk add --no-cache curl git glab jq tar'
-require_text "$ci_file" 'glab auth login'
-require_text "$ci_file" 'securefile download'
+require_text "$ci_file" 'apk add --no-cache curl git jq tar'
+require_text "$ci_file" 'secure_files_api='
+require_text "$ci_file" 'JOB-TOKEN: $CI_JOB_TOKEN'
+require_text "$ci_file" 'secure_files_api/$secure_file_id/download'
 require_text "$ci_file" 'done < ci/secret-files.conf'
 require_text "$seal_script" ': "${SECURE_FILES_DIR:?'
 require_text "$seal_script" 'secret_file_manifest="${SECRET_FILE_MANIFEST:-ci/secret-files.conf}"'

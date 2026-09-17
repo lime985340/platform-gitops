@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: neople-game-analytics-worker
     app.kubernetes.io/component: worker
 spec:
-  schedule: "*/15 * * * *"
+  schedule: "0 * * * *"
   timeZone: Asia/Seoul
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2

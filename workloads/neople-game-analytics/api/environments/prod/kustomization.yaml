@@ -18,6 +18,16 @@ resources:
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-api
     newTag: v0.1.2
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../../resources
+  - ingress.yaml
+  - middleware.yaml
+  - sealed-secrets.yaml
+images:
+  - name: registry.gitlab.com/lime985340/neople-game-analytics-api
+    newTag: v0.1.2
       app.kubernetes.io/name: neople-game-analytics-api
     includeSelectors: false
     includeTemplates: true

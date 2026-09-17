@@ -20,16 +20,3 @@ patches:
 images:
   - name: registry.gitlab.com/lime985340/neople-game-analytics-web
     newTag: v0.2.1
-      app.kubernetes.io/name: neople-game-analytics-web
-    includeSelectors: false
-    includeTemplates: true
-resources:
-  - ../../resources
-  - ingress.yaml
-  - middleware.yaml
-  - sealed-secrets.yaml
-patches:
-  - path: api-upstream-patch.yaml
-images:
-  - name: registry.gitlab.com/lime985340/neople-game-analytics-web
-    newTag: v0.2.0

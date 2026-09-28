@@ -36,6 +36,9 @@ an immediate restart. Its liveness probe allows short `/ready` response delays,
 while the readiness probe can temporarily remove the pod from service without
 restarting it. This reduces false restarts caused by transient probe timeouts;
 the Quick Tunnel URL can still change if the process or pod genuinely stops.
+The startup probe allows up to 150 seconds for startup, and the liveness probe
+allows six consecutive 5-second probe timeouts at 15-second intervals before a
+restart.
 
 The Cilium policy under `platform/policies` allows the tunnel's required
 outbound TCP and UDP traffic on port `7844` to the Cloudflare edge.

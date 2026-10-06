@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: atmo-api
     app.kubernetes.io/component: ingestion
 spec:
-  schedule: "10 * * * *"
+  schedule: "10 */2 * * *"
   timeZone: "Asia/Seoul"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 600
@@ -16,7 +16,7 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 3
-      activeDeadlineSeconds: 3600
+      activeDeadlineSeconds: 6900
       ttlSecondsAfterFinished: 86400
       template:
         metadata:

@@ -8,7 +8,7 @@ if [ ! -f "$SEALED_SECRETS_CERT" ]; then
   echo "SEALED_SECRETS_CERT does not point to a file" >&2
   exit 1
 fi
-
+printf 'SEALED_SECRETS_CERT_SHA256='; sha256sum "$SEALED_SECRETS_CERT" | awk '{print $1}'
 command -v kubectl >/dev/null 2>&1 || {
   echo "kubectl is required" >&2
   exit 1

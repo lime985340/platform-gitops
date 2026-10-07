@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/component: worker
 spec:
   schedule: "*/30 * * * *"
+  suspend: true
   timeZone: Asia/Seoul
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2

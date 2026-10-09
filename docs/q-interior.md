@@ -66,7 +66,17 @@ API File 변수 필수 항목은 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USE
 
 원격 변수 생성·권한 변경·production 배포는 이 로컬 작업에서 수행하지 않았습니다. GitLab 저장소가 public인 기존 운영 형태를 새 소스 저장소에 자동 적용하지 않습니다.
 
-## 모바일 Runner
+## 회원 인증 메일 설정
+
+API env File 변수에 `Q_INTERIOR_SMTP_HOST`, `Q_INTERIOR_SMTP_USERNAME`, `Q_INTERIOR_SMTP_PASSWORD`, `Q_INTERIOR_MAIL_FROM`, `Q_INTERIOR_PUBLIC_WEB_URL`을 추가합니다. 기존 envFrom·SealedSecret 구조를 그대로 사용하며 값을 소스 저장소에 넣지 않습니다.
+
+SMTP는 587 STARTTLS 필수·서버 인증서 hostname 검증을 사용합니다. 메일 서버 DNS 정책에는 GitOps 공개 변수 `Q_INTERIOR_SMTP_DEV_HOST` / `Q_INTERIOR_SMTP_PROD_HOST`를 설정합니다. env File의 SMTP_HOST와 일치해야 합니다. 배포 MR이 정확한 DNS hostname과 587 포트만 허용하며 기본값은 미설정 placeholder입니다.
+
+`Q_INTERIOR_PUBLIC_WEB_URL`은 HTTPS 웹 진입점 전체 주소입니다. 인증 토큰은 URL fragment `#verify=`에 담고, 웹은 읽은 뒤 주소에서 제거합니다. 운영 로그에 토큰·메일 본문·SMTP 비밀번호를 기록하지 않습니다.
+
+`Q_INTERIOR_REGISTRATION_ENABLED`는 기본 false입니다. 현재 동의 문서는 검토용 초안이므로 정식 문서 확정·메일 실수신 테스트·가입/로그인 abuse 방어·발송 실패 모니터링을 완료하기 전에 운영 가입을 활성화하지 않습니다. `local` 프로필과 개발용 메일함은 운영 manifest에 사용하지 않습니다.
+
+## 모바일 Runner 준비
 
 Android job은 Android SDK 35 이미지·Java 17·Node/Firebase CLI를 사용합니다. 서명 key가 없으면 unsigned 앱을 배포하는 대신 job이 실패합니다. APK artifact나 signing key를 공개 pipeline artifact로 올리지 않습니다.
 

@@ -33,4 +33,11 @@ for name in ("q:android", "q:ios"):
     assert 'CI_PIPELINE_SOURCE == "pipeline"' in jobs[name]["rules"][0]["if"]
     assert "artifacts" not in jobs[name], "Signing material must not become CI artifacts"
 
+for environment in ("dev", "prod"):
+    policy = yaml.safe_load((root / f"platform/policies/allow-q-interior-api-{environment}-mail-egress.yaml").read_text())
+    assert policy["spec"]["endpointSelector"]["matchLabels"]["k8s:io.kubernetes.pod.namespace"] == f"q-interior-api-{environment}"
+    mail = policy["spec"]["egress"][1]
+    assert mail["toPorts"][0]["ports"] == [{"port": "587", "protocol": "TCP"}]
+    assert "matchName" in mail["toFQDNs"][0] and "matchPattern" not in mail["toFQDNs"][0]
+
 print("Q Interior manifest and pipeline boundaries: PASS")

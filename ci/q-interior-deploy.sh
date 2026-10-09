@@ -19,6 +19,16 @@ if [ "$workload" = api ]; then
   policy="platform/policies/allow-q-interior-api-$Q_ENVIRONMENT-db-egress.yaml"
   sed -i -E "s/(matchName: ).*/\1$neon_host/" "$policy"
   git add "$policy"
+  case "$Q_ENVIRONMENT" in
+    dev) mail_host="${Q_INTERIOR_SMTP_DEV_HOST:-}" ;;
+    prod) mail_host="${Q_INTERIOR_SMTP_PROD_HOST:-}" ;;
+  esac
+  if [ -n "$mail_host" ]; then
+    printf '%s' "$mail_host" | grep -Eq '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$' || exit 1
+    mail_policy="platform/policies/allow-q-interior-api-$Q_ENVIRONMENT-mail-egress.yaml"
+    sed -i -E "s/(matchName: ).*/\1$mail_host/" "$mail_policy"
+    git add "$mail_policy"
+  fi
 fi
 APPLICATION=q-interior WORKLOAD="$workload" ENVIRONMENT="$Q_ENVIRONMENT" IMAGE_TAG="$image_tag" sh ci/update-image-tag.sh
 sed -i 's/count: 0/count: 1/' "$overlay/kustomization.yaml"

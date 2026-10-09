@@ -8,9 +8,9 @@ set -eu
 : "${IMAGE_TAG:?IMAGE_TAG is required}"
 
 case "$APPLICATION" in
-  atmo|neople-game-analytics|ontology-asal-agent) ;;
+  atmo|neople-game-analytics|ontology-asal-agent|q-interior) ;;
   *)
-    echo "APPLICATION must be atmo, neople-game-analytics, or ontology-asal-agent" >&2
+    echo "APPLICATION must be atmo, neople-game-analytics, ontology-asal-agent, or q-interior" >&2
     exit 1
     ;;
 esac

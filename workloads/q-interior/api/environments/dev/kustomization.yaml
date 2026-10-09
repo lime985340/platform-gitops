@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: q-interior-api-dev
+labels:
+  - pairs:
+      app.kubernetes.io/instance: q-interior-api-dev
+    includeSelectors: true
+    includeTemplates: true
+resources:
+  - ../../resources
+  - sealed-secrets.yaml
+
+images:
+  - name: registry.gitlab.com/lime985340/q-interior-api
+    newTag: bootstrap-pending
+replicas:
+  - name: q-interior-api
+    count: 0

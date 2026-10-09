@@ -1,0 +1,46 @@
+validate:q-interior:
+  image: alpine/k8s:1.31.4
+  stage: validate
+  before_script:
+    - apk add --no-cache python3 py3-yaml bash
+  script:
+    - python3 ci/validate-q-interior.py
+    - bash -n ci/q-interior-source.sh ci/q-interior-deploy.sh ci/q-interior-android.sh ci/q-interior-ios.sh ci/seal-secrets.sh
+
+q:deploy:
+  image: alpine:3.20
+  stage: distribute
+  resource_group: q-interior-gitops-update
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "pipeline" && ($Q_ACTION == "deploy-api" || $Q_ACTION == "deploy-web") && $CI_COMMIT_BRANCH == "main"'
+  before_script:
+    - apk add --no-cache git
+  script:
+    - sh ci/q-interior-source.sh
+    - sh ci/q-interior-deploy.sh
+
+q:android:
+  image: ghcr.io/cirruslabs/android-sdk:35
+  stage: distribute
+  resource_group: q-interior-android-distribution
+  environment:
+    name: q-interior-mobile-dev
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "pipeline" && $Q_ACTION == "android" && $Q_ENVIRONMENT == "dev" && $CI_COMMIT_BRANCH == "main"'
+  before_script:
+    - apt-get update -qq && apt-get install -y openjdk-17-jdk nodejs npm git
+  script:
+    - sh ci/q-interior-source.sh
+    - sh ci/q-interior-android.sh
+
+q:ios:
+  tags: [macos, q-interior]
+  stage: distribute
+  resource_group: q-interior-ios-distribution
+  environment:
+    name: q-interior-mobile-dev
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "pipeline" && $Q_ACTION == "ios" && $Q_ENVIRONMENT == "dev" && $CI_COMMIT_BRANCH == "main"'
+  script:
+    - sh ci/q-interior-source.sh
+    - bash ci/q-interior-ios.sh

@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: q-interior-web-prod
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: q-interior-web-prod-q-interior-strip-prefix@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /q-interior
+            pathType: Prefix
+            backend:
+              service:
+                name: q-interior-web
+                port:
+                  number: 80

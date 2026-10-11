@@ -1,5 +1,19 @@
 spec:
   inputs:
+    q_action:
+      type: string
+      default: none
+      options: [none, deploy-api, deploy-web, android, ios]
+    q_environment:
+      type: string
+      default: dev
+      options: [dev, prod]
+    q_source_ref:
+      type: string
+      default: main
+    q_source_sha:
+      type: string
+      default: ''
     update_secrets:
       type: boolean
       default: false
@@ -9,6 +23,16 @@ spec:
 stages:
   - validate
   - secrets
+  - distribute
+
+include:
+  - local: /ci/q-interior-jobs.yml
+
+variables:
+  Q_ACTION: $[[ inputs.q_action ]]
+  Q_ENVIRONMENT: $[[ inputs.q_environment ]]
+  Q_SOURCE_REF: $[[ inputs.q_source_ref ]]
+  Q_SOURCE_SHA: $[[ inputs.q_source_sha ]]
 
 validate:manifests:
   image: alpine/k8s:1.31.4
@@ -129,6 +153,10 @@ seal:workload-secrets:
         workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml \
         workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml \
         workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml \
+        workloads/q-interior/api/environments/dev/sealed-secrets.yaml \
+        workloads/q-interior/api/environments/prod/sealed-secrets.yaml \
+        workloads/q-interior/web/environments/dev/sealed-secrets.yaml \
+        workloads/q-interior/web/environments/prod/sealed-secrets.yaml \
         platform/graphdb/sealed-secret.yaml
 
       if git diff --cached --quiet; then

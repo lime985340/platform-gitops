@@ -260,6 +260,24 @@ seal_registry_secret "$prod_ontology_agent_output" ontology-asal-agent-api-prod
 : > "$prod_ontology_agent_web_output"
 seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-prod
 
+# New application variables are optional until its initial bootstrap is ready.
+for q_environment in dev prod; do
+  case "$q_environment" in
+    dev) q_db_env="${Q_INTERIOR_API_DEV_ENV:-}" ;;
+    prod) q_db_env="${Q_INTERIOR_API_PROD_ENV:-}" ;;
+  esac
+  if [ -n "$q_db_env" ]; then
+    reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_${q_environment}_ENV"
+    q_api_output="workloads/q-interior/api/environments/$q_environment/sealed-secrets.yaml"
+    q_web_output="workloads/q-interior/web/environments/$q_environment/sealed-secrets.yaml"
+    : > "$q_api_output"
+    seal_env_secret "$q_api_output" "q-interior-api-$q_environment" q-interior-db-secret "$q_db_env"
+    seal_registry_secret "$q_api_output" "q-interior-api-$q_environment"
+    : > "$q_web_output"
+    seal_registry_secret "$q_web_output" "q-interior-web-$q_environment"
+  fi
+done
+
 secret_file_manifest="${SECRET_FILE_MANIFEST:-ci/secret-files.conf}"
 if [ ! -f "$secret_file_manifest" ]; then
   echo "Missing Secure Files manifest: $secret_file_manifest" >&2

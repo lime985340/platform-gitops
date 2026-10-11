@@ -27,8 +27,10 @@ template = yaml.safe_load((root / "ci/templates/q-interior-container.yml").read_
 assert template[".q_gitops_trigger"]["trigger"]["forward"] == {
     "yaml_variables": False, "pipeline_variables": False
 }, "Source variables must not override central secrets"
-pipeline = yaml.safe_load((root / ".gitlab-ci.yml").read_text())
-assert pipeline["spec"]["inputs"]["q_action"]["options"] == ["none", "deploy-api", "deploy-web"]
+pipeline_documents = list(yaml.safe_load_all((root / ".gitlab-ci.yml").read_text()))
+assert len(pipeline_documents) == 2, "GitLab CI config must contain an input spec and pipeline document"
+input_spec, pipeline = pipeline_documents
+assert input_spec["spec"]["inputs"]["q_action"]["options"] == ["none", "deploy-api", "deploy-web"]
 jobs = yaml.safe_load((root / "ci/q-interior-jobs.yml").read_text())
 assert "q:android" not in jobs and "q:ios" not in jobs
 assert "mobile" not in template["stages"], "Mobile builds belong to the client project CI"

@@ -27,11 +27,13 @@ template = yaml.safe_load((root / "ci/templates/q-interior-container.yml").read_
 assert template[".q_gitops_trigger"]["trigger"]["forward"] == {
     "yaml_variables": False, "pipeline_variables": False
 }, "Source variables must not override central secrets"
+pipeline = yaml.safe_load((root / ".gitlab-ci.yml").read_text())
+assert pipeline["spec"]["inputs"]["q_action"]["options"] == ["none", "deploy-api", "deploy-web"]
 jobs = yaml.safe_load((root / "ci/q-interior-jobs.yml").read_text())
-for name in ("q:android", "q:ios"):
-    assert jobs[name]["environment"]["name"] == "q-interior-mobile-dev"
-    assert 'CI_PIPELINE_SOURCE == "pipeline"' in jobs[name]["rules"][0]["if"]
-    assert "artifacts" not in jobs[name], "Signing material must not become CI artifacts"
+assert "q:android" not in jobs and "q:ios" not in jobs
+assert "mobile" not in template["stages"], "Mobile builds belong to the client project CI"
+assert not (root / "ci/q-interior-android.sh").exists()
+assert not (root / "ci/q-interior-ios.sh").exists()
 
 for environment in ("dev", "prod"):
     policy = yaml.safe_load((root / f"platform/policies/allow-q-interior-api-{environment}-mail-egress.yaml").read_text())

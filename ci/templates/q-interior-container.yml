@@ -1,4 +1,4 @@
-stages: [test, image, release, gitops, mobile]
+stages: [test, image, release, gitops]
 
 variables:
   DOCKER_TLS_CERTDIR: ""

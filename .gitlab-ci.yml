@@ -3,7 +3,7 @@ spec:
     q_action:
       type: string
       default: none
-      options: [none, deploy-api, deploy-web, android, ios]
+      options: [none, deploy-api, deploy-web]
     q_environment:
       type: string
       default: dev

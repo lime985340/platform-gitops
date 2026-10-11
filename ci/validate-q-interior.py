@@ -25,8 +25,20 @@ for workload in ("api", "web"):
 
 template = yaml.safe_load((root / "ci/templates/q-interior-container.yml").read_text())
 assert template[".q_gitops_trigger"]["trigger"]["forward"] == {
-    "yaml_variables": False, "pipeline_variables": False
-}, "Source variables must not override central secrets"
+    "yaml_variables": True, "pipeline_variables": False
+}, "Only explicit source YAML variables may reach the GitOps pipeline"
+for job_name, environment, source_ref in (
+    ("update_gitops_dev", "dev", "$CI_DEFAULT_BRANCH"),
+    ("update_gitops_prod", "prod", "$CI_COMMIT_TAG"),
+):
+    job = template[job_name]
+    assert job["inherit"]["variables"] == ["Q_GITOPS_ACTION"]
+    assert job["variables"] == {
+        "Q_ACTION": "$Q_GITOPS_ACTION",
+        "Q_SOURCE_REF": source_ref,
+        "Q_SOURCE_SHA": "$CI_COMMIT_SHA",
+    }
+    assert job["trigger"]["inputs"] == {"q_environment": environment}
 pipeline_documents = list(yaml.safe_load_all((root / ".gitlab-ci.yml").read_text()))
 assert len(pipeline_documents) == 2, "GitLab CI config must contain an input spec and pipeline document"
 input_spec, pipeline = pipeline_documents

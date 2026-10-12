@@ -18,6 +18,11 @@ spec:
       type: boolean
       default: false
       description: Run the manual Sealed Secrets job for a web pipeline on the selected branch.
+    secret_scope:
+      type: string
+      default: all
+      options: [all, q-interior-dev]
+      description: Limit secret rotation to Q Interior dev when selected.
 ---
 
 stages:
@@ -33,6 +38,7 @@ variables:
   Q_ENVIRONMENT: $[[ inputs.q_environment ]]
   Q_SOURCE_REF: $[[ inputs.q_source_ref ]]
   Q_SOURCE_SHA: $[[ inputs.q_source_sha ]]
+  Q_SECRET_SCOPE: $[[ inputs.secret_scope ]]
 
 validate:manifests:
   image: alpine/k8s:1.31.4
@@ -103,28 +109,32 @@ seal:workload-secrets:
       tar --extract --gzip --file "$kubeseal_archive_path" --directory /usr/local/bin kubeseal
       chmod 755 /usr/local/bin/kubeseal
 
-      api_base="${CI_API_V4_URL:-${CI_SERVER_URL}/api/v4}"
-      secure_files_api="${api_base}/projects/${CI_PROJECT_ID}/secure_files"
       secure_files_metadata="$secure_files_dir/.metadata.json"
-      curl --fail --silent --show-error \
-        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-        "$secure_files_api" > "$secure_files_metadata"
-      while IFS='|' read -r secure_file_name _namespace _secret_name _secret_key _output; do
-        case "$secure_file_name" in
-          ''|'#'*) continue ;;
-        esac
-        secure_file_id="$(jq -r --arg name "$secure_file_name" \
-          '[.[] | select(.name == $name) | .id] | if length == 1 then .[0] else empty end' \
-          "$secure_files_metadata")"
-        if [ -z "$secure_file_id" ]; then
-          echo "Secure File was not found or is ambiguous: $secure_file_name" >&2
-          exit 1
-        fi
-        curl --fail --silent --show-error --location \
+      if [ "$Q_SECRET_SCOPE" = all ]; then
+        api_base="${CI_API_V4_URL:-${CI_SERVER_URL}/api/v4}"
+        secure_files_api="${api_base}/projects/${CI_PROJECT_ID}/secure_files"
+        curl --fail --silent --show-error \
           --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-          --output "$secure_files_dir/$secure_file_name" \
-          "$secure_files_api/$secure_file_id/download"
-      done < ci/secret-files.conf
+          "$secure_files_api" > "$secure_files_metadata"
+        while IFS='|' read -r secure_file_name _namespace _secret_name _secret_key _output; do
+          case "$secure_file_name" in
+            ''|'#'*) continue ;;
+          esac
+          secure_file_id="$(jq -r --arg name "$secure_file_name" \
+            '[.[] | select(.name == $name) | .id] | if length == 1 then .[0] else empty end' \
+            "$secure_files_metadata")"
+          if [ -z "$secure_file_id" ]; then
+            echo "Secure File was not found or is ambiguous: $secure_file_name" >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error --location \
+            --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+            --output "$secure_files_dir/$secure_file_name" \
+            "$secure_files_api/$secure_file_id/download"
+        done < ci/secret-files.conf
+      else
+        echo "Skipping unrelated GitLab Secure Files for q-interior-dev scope"
+      fi
       rm -f "$secure_files_metadata"
       export SECURE_FILES_DIR="$secure_files_dir"
 

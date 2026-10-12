@@ -2,6 +2,12 @@
 
 set -eu
 
+q_secret_scope="${Q_SECRET_SCOPE:-all}"
+case "$q_secret_scope" in
+  all|q-interior-dev) ;;
+  *) echo "Unsupported Q_SECRET_SCOPE: $q_secret_scope" >&2; exit 1 ;;
+esac
+
 : "${SEALED_SECRETS_CERT:?SEALED_SECRETS_CERT must point to the controller public certificate}"
 
 if [ ! -f "$SEALED_SECRETS_CERT" ]; then
@@ -26,7 +32,9 @@ command -v jq >/dev/null 2>&1 || {
 
 : "${GITLAB_REGISTRY_USERNAME:?GITLAB_REGISTRY_USERNAME is required}"
 : "${GITLAB_REGISTRY_TOKEN:?GITLAB_REGISTRY_TOKEN is required}"
-: "${SECURE_FILES_DIR:?SECURE_FILES_DIR must point to the downloaded GitLab Secure Files directory}"
+if [ "$q_secret_scope" = all ]; then
+  : "${SECURE_FILES_DIR:?SECURE_FILES_DIR must point to the downloaded GitLab Secure Files directory}"
+fi
 
 umask 077
 tmp_dir="$(mktemp -d)"
@@ -172,6 +180,20 @@ seal_registry_secret() {
   append_sealed "$output" "$sealed_manifest"
   echo "Generated encrypted SealedSecret ${namespace}/gitlab-regcred"
 }
+
+if [ "$q_secret_scope" = q-interior-dev ]; then
+  q_dev_api_output="workloads/q-interior/api/environments/dev/sealed-secrets.yaml"
+  q_db_env="${Q_INTERIOR_API_DEV_ENV:-}"
+  reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_DEV_ENV"
+  : > "$q_dev_api_output"
+  seal_env_secret \
+    "$q_dev_api_output" \
+    q-interior-api-dev \
+    q-interior-db-secret \
+    "$q_db_env"
+  seal_registry_secret "$q_dev_api_output" q-interior-api-dev
+  exit 0
+fi
 
 dev_api_output="workloads/atmo/api/environments/dev/sealed-secrets.yaml"
 prod_api_output="workloads/atmo/api/environments/prod/sealed-secrets.yaml"

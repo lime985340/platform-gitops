@@ -12,7 +12,7 @@ resources:
 
 images:
   - name: registry.gitlab.com/lime985340/q-interior-client
-    newTag: bootstrap-pending
+    newTag: 82fd6720814941e524d211052fe62908eb83155f
 replicas:
   - name: q-interior-web
-    count: 0
+    count: 1

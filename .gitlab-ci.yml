@@ -21,8 +21,8 @@ spec:
     secret_scope:
       type: string
       default: all
-      options: [all, q-interior-dev]
-      description: Reseal Q Interior dev API DB/registry and web registry secrets.
+      options: [all, q-interior-dev, q-interior-prod]
+      description: Reseal Q Interior environment secrets without touching other workloads.
 ---
 
 stages:

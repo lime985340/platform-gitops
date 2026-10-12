@@ -12,10 +12,15 @@ image_tag="$Q_SOURCE_SHA"
 if [ "$Q_ENVIRONMENT" = prod ]; then image_tag="$Q_SOURCE_REF"; fi
 if [ "$workload" = api ]; then
   case "$Q_ENVIRONMENT" in
-    dev) neon_host="${Q_INTERIOR_NEON_DEV_HOST:?Neon hostname is required}" ;;
-    prod) neon_host="${Q_INTERIOR_NEON_PROD_HOST:?Neon hostname is required}" ;;
+    dev) q_db_env="${Q_INTERIOR_API_DEV_ENV:-}" ;;
+    prod) q_db_env="${Q_INTERIOR_API_PROD_ENV:-}" ;;
   esac
-  printf '%s' "$neon_host" | grep -Eq '^[a-z0-9.-]+\.neon\.tech$' || exit 1
+  if [ -z "$q_db_env" ] || [ ! -f "$q_db_env" ]; then
+    echo "Q_INTERIOR_API_${Q_ENVIRONMENT}_ENV must be a File variable for API deployment" >&2
+    exit 1
+  fi
+  . ci/q-interior-neon-host.sh
+  neon_host=$(q_interior_neon_host_from_env "$q_db_env")
   policy="platform/policies/allow-q-interior-api-$Q_ENVIRONMENT-db-egress.yaml"
   sed -i -E "s/(matchName: ).*/\1$neon_host/" "$policy"
   git add "$policy"

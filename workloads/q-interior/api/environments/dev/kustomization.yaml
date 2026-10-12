@@ -12,7 +12,7 @@ resources:
 
 images:
   - name: registry.gitlab.com/lime985340/q-interior-api
-    newTag: 46a77f3b3587af83c6a204561ed39f6a5c6c0e2e
+    newTag: 5cc18a6626b456da668a7d08044c3dd258b24145
 replicas:
   - name: q-interior-api
     count: 1

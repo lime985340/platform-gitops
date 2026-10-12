@@ -12,7 +12,7 @@ resources:
 
 images:
   - name: registry.gitlab.com/lime985340/q-interior-client
-    newTag: 38e888f23f619ce47f7cf53cb5ff6cb601888375
+    newTag: 5db05ff1e4b6d5bc374ae82ad50882a4ac9b6328
 replicas:
   - name: q-interior-web
     count: 1

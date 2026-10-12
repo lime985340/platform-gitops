@@ -183,6 +183,7 @@ seal_registry_secret() {
 
 if [ "$q_secret_scope" = q-interior-dev ]; then
   q_dev_api_output="workloads/q-interior/api/environments/dev/sealed-secrets.yaml"
+  q_dev_web_output="workloads/q-interior/web/environments/dev/sealed-secrets.yaml"
   q_db_env="${Q_INTERIOR_API_DEV_ENV:-}"
   reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_DEV_ENV"
   : > "$q_dev_api_output"
@@ -192,6 +193,8 @@ if [ "$q_secret_scope" = q-interior-dev ]; then
     q-interior-db-secret \
     "$q_db_env"
   seal_registry_secret "$q_dev_api_output" q-interior-api-dev
+  : > "$q_dev_web_output"
+  seal_registry_secret "$q_dev_web_output" q-interior-web-dev
   exit 0
 fi
 

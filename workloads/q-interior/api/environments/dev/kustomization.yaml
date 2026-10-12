@@ -9,6 +9,8 @@ labels:
 resources:
   - ../../resources
   - sealed-secrets.yaml
+  - ingress.yaml
+  - middleware.yaml
 
 images:
   - name: registry.gitlab.com/lime985340/q-interior-api

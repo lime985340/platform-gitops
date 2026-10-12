@@ -9,10 +9,12 @@ labels:
 resources:
   - ../../resources
   - sealed-secrets.yaml
+  - ingress.yaml
+  - middleware.yaml
 
 images:
   - name: registry.gitlab.com/lime985340/q-interior-client
-    newTag: 5db05ff1e4b6d5bc374ae82ad50882a4ac9b6328
+    newTag: fe32648a95e3ff6e04ead188978194b1183c3a27
 replicas:
   - name: q-interior-web
     count: 1

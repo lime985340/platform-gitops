@@ -63,8 +63,8 @@ API File 변수 필수 항목은 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USE
 
 1. 그룹에 두 소스 저장소를 생성하고 `main`을 보호합니다. 서명 변수가 있는 모바일 배포 job은 클라이언트 저장소의 보호된 기본 브랜치에서만 실행합니다.
 2. 본 저장소 CI include와 downstream 입력 기능을 먼저 병합합니다. 소스 CI는 해당 템플릿이 main에 있어야 시작할 수 있습니다.
-3. API·클라이언트 프로젝트의 CI_JOB_TOKEN allowlist에 본 GitOps 프로젝트를 추가합니다. GitOps가 소스를 읽어 고정 SHA를 확인하기 위한 권한입니다.
-4. 본 프로젝트가 소스 프로젝트의 웹/API multi-project trigger를 허용하고, 본 프로젝트의 CI_JOB_TOKEN repository push 기능이 켜져 있는지 확인합니다. 기존 sealing push와 동일한 방식입니다. 모바일 job은 이 downstream 경로를 사용하지 않습니다.
+3. 소스 파이프라인은 `main` 또는 `vX.Y.Z` 태그에서 이미지를 빌드한 뒤 정확한 commit SHA를 typed input으로 전달합니다. GitOps는 그 SHA를 이미지 태그로만 사용하며 private 소스 저장소를 clone하지 않으므로, 이 읽기 작업을 위해 `platform-gitops`를 `q-interior-client` allowlist에 추가할 필요가 없습니다.
+4. 소스 프로젝트의 웹/API multi-project trigger와 실행 사용자의 GitOps pipeline 권한을 확인하고, 본 프로젝트의 CI_JOB_TOKEN repository push 기능이 켜져 있는지 확인합니다. GitOps 배포 job은 GitOps 저장소 안에서 배포 MR을 생성합니다. 모바일 job은 이 downstream 경로를 사용하지 않습니다.
 5. Registry read token이 새 API·Client 이미지도 읽을 수 있는지 확인합니다. 기존 토큰 값은 코드로 복사하지 않습니다.
 6. 런타임 API·Neon·Sealed Secrets 변수를 본 저장소에 설정합니다. 이들은 Kubernetes 런타임 전용이며 앱 서명 변수는 넣지 않습니다.
 7. main 이미지 빌드가 성공한 뒤 deploy downstream이 만드는 MR을 검토·병합합니다. prod는 동일 SHA에 대한 `vX.Y.Z` 승격 이미지로 배포합니다.

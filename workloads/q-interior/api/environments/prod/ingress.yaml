@@ -9,7 +9,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /q-interior/api
+          - path: /saerom/api
             pathType: Prefix
             backend:
               service:

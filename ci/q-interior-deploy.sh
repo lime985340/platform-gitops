@@ -55,4 +55,4 @@ unset GIT_TRACE GIT_TRACE2 GIT_TRACE_CURL GIT_CURL_VERBOSE
 git -c credential.helper= -c http.followRedirects=false push \
   -o merge_request.create -o merge_request.target=main \
   -o "merge_request.title=deploy: Q Interior $workload $Q_ENVIRONMENT $image_tag" \
-  "https://${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "HEAD:$deploy_branch"
+  "https://${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "HEAD:refs/heads/$deploy_branch"

@@ -22,7 +22,7 @@ spec:
       type: string
       default: all
       options: [all, q-interior-dev]
-      description: Limit secret rotation to Q Interior dev when selected.
+      description: Reseal Q Interior dev API DB/registry and web registry secrets.
 ---
 
 stages:

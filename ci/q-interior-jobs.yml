@@ -5,6 +5,7 @@ validate:q-interior:
     - apk add --no-cache python3 py3-yaml bash
   script:
     - python3 ci/validate-q-interior.py
+    - sh ci/test-q-interior-source.sh
     - bash -n ci/q-interior-source.sh ci/q-interior-deploy.sh ci/seal-secrets.sh
 
 q:deploy:

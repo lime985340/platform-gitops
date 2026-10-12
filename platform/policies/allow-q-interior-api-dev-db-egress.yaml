@@ -18,9 +18,9 @@ spec:
               protocol: ANY
           rules:
             dns:
-              - matchName: q-interior-db.unconfigured.invalid
+              - matchName: ep-calm-violet-b7h93sls-pooler.c-13.us-east-1.aws.neon.tech
     - toFQDNs:
-        - matchName: q-interior-db.unconfigured.invalid
+        - matchName: ep-calm-violet-b7h93sls-pooler.c-13.us-east-1.aws.neon.tech
       toPorts:
         - ports:
             - port: "5432"

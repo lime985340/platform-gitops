@@ -4,6 +4,7 @@ metadata:
   name: q-interior-api-dev
   annotations:
     traefik.ingress.kubernetes.io/router.middlewares: q-interior-api-dev-q-interior-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.priority: "100"
 spec:
   ingressClassName: traefik
   rules:

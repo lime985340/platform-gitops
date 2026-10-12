@@ -24,7 +24,7 @@ Firebase는 tester 배포입니다. Play Store/App Store 정식 출시는 별도
 
 ## 운영 경로
 
-API 공개 경로는 `/q-interior/api/v1`, 서버 내부 경로는 `/api/v1`입니다. 웹 공개 경로는 `/q-interior/`입니다. Traefik이 `/q-interior`를 제거하고 각 서비스로 보냅니다. Cookie path는 공개 API 경로와 일치합니다.
+API 공개 경로는 `/saerom/api/v1`, 서버 내부 경로는 `/api/v1`입니다. 웹 공개 경로는 `/saerom/`입니다. Traefik이 `/saerom`을 제거하고 각 서비스로 보냅니다. Cookie path는 공개 API 경로와 일치합니다.
 
 overlay는 `workloads/q-interior/{api,web}/environments/{dev,prod}`입니다. 기존 ApplicationSet이 자동 발견하므로 별도 앱 ApplicationSet을 만들지 않습니다. 기존 atmo와 동일하게 dev는 ingress 없이 port-forward 중심, prod는 path ingress를 준비했습니다. 실제 host는 기존 Traefik 진입점을 사용하며 새 도메인을 임의로 지정하지 않습니다.
 
@@ -49,7 +49,7 @@ API File 변수 필수 항목은 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USE
 
 | 이름 | 형태 | 사용처 |
 | --- | --- | --- |
-| `Q_INTERIOR_API_URL` | 공개 설정, protected | 앱 번들에 포함되는 API URL, `/q-interior/api/v1` 포함 |
+| `Q_INTERIOR_API_URL` | 공개 설정, protected | 앱 번들에 포함되는 API URL, `/saerom/api/v1` 포함 |
 | `Q_INTERIOR_ANDROID_KEYSTORE` | File, protected | Android signing keystore |
 | `Q_INTERIOR_ANDROID_STORE_PASSWORD`, `Q_INTERIOR_ANDROID_KEY_ALIAS`, `Q_INTERIOR_ANDROID_KEY_PASSWORD` | masked/protected | Android signing credentials |
 | `Q_INTERIOR_FIREBASE_CREDENTIALS` | File, protected | 제한된 App Distribution 권한의 서비스 계정 JSON |

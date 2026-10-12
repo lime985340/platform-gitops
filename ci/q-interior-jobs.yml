@@ -6,7 +6,8 @@ validate:q-interior:
   script:
     - python3 ci/validate-q-interior.py
     - sh ci/test-q-interior-source.sh
-    - bash -n ci/q-interior-source.sh ci/q-interior-deploy.sh ci/seal-secrets.sh
+    - sh ci/test-q-interior-neon-host.sh
+    - bash -n ci/q-interior-source.sh ci/q-interior-deploy.sh ci/q-interior-neon-host.sh ci/seal-secrets.sh
 
 q:deploy:
   image: alpine:3.20

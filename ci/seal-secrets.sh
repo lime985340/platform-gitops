@@ -4,7 +4,7 @@ set -eu
 
 q_secret_scope="${Q_SECRET_SCOPE:-all}"
 case "$q_secret_scope" in
-  all|q-interior-dev) ;;
+  all|q-interior-dev|q-interior-prod) ;;
   *) echo "Unsupported Q_SECRET_SCOPE: $q_secret_scope" >&2; exit 1 ;;
 esac
 
@@ -195,6 +195,24 @@ if [ "$q_secret_scope" = q-interior-dev ]; then
   seal_registry_secret "$q_dev_api_output" q-interior-api-dev
   : > "$q_dev_web_output"
   seal_registry_secret "$q_dev_web_output" q-interior-web-dev
+  exit 0
+fi
+
+if [ "$q_secret_scope" = q-interior-prod ]; then
+  q_prod_api_output="workloads/q-interior/api/environments/prod/sealed-secrets.yaml"
+  q_prod_web_output="workloads/q-interior/web/environments/prod/sealed-secrets.yaml"
+  q_db_env="${Q_INTERIOR_API_PROD_ENV:-}"
+  : "${q_db_env:?Q_INTERIOR_API_PROD_ENV must be configured as a GitLab File variable}"
+  reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_PROD_ENV"
+  : > "$q_prod_api_output"
+  seal_env_secret \
+    "$q_prod_api_output" \
+    q-interior-api-prod \
+    q-interior-db-secret \
+    "$q_db_env"
+  seal_registry_secret "$q_prod_api_output" q-interior-api-prod
+  : > "$q_prod_web_output"
+  seal_registry_secret "$q_prod_web_output" q-interior-web-prod
   exit 0
 fi
 

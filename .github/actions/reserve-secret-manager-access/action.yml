@@ -1,0 +1,16 @@
+name: Reserve Secret Manager access budget
+description: Persist a monthly GitOps CI access reservation before reading Secret Manager.
+inputs:
+  reserve:
+    description: Maximum Secret Manager access calls this run can make.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Reserve monthly access budget
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        RESERVE_CALLS: ${{ inputs.reserve }}
+      run: python3 "$GITHUB_WORKSPACE/ci/secret-manager-access-budget.py" --reserve "$RESERVE_CALLS"

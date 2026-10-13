@@ -1,0 +1,44 @@
+name: GitOps validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-manifests:
+    runs-on: ubuntu-latest
+    container: alpine/k8s:1.31.4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render every Kustomize root
+        run: |
+          set -eu
+          find workloads -name kustomization.yaml -exec sh -c '
+            for file do
+              directory="$(dirname "$file")"
+              echo "Rendering $directory"
+              kubectl kustomize "$directory" > /dev/null
+            done
+          ' sh {} +
+
+  validate-platform:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/yannh/kubeconform:v0.7.0-alpine
+      options: --entrypoint=""
+    steps:
+      - uses: actions/checkout@v4
+      - run: /kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.31.0 -summary platform argocd bootstrap
+
+  validate-secret-contract:
+    runs-on: ubuntu-latest
+    container: alpine/k8s:1.31.4
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh ci/test-seal-secrets-contract.sh

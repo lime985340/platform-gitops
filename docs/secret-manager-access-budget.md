@@ -106,8 +106,8 @@ files under the ephemeral runner's temp directory and removes them at job end.
 
 Before running it, configure these **repository variables** in `platform-gitops`:
 `GCP_PROJECT_ID`, `GCP_BILLING_ACCOUNT_ID`, `GCP_WIF_PROVIDER`,
-`GCP_SERVICE_ACCOUNT`, and the public `SEALED_SECRETS_CERT` value. Configure
-these **repository secrets**:
+and `GCP_SERVICE_ACCOUNT`. Configure these **repository secrets**:
+`SEALED_SECRETS_CERT`,
 `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`, and
 `GRAPHDB_LICENSE_BASE64` (the GraphDB license file encoded as Base64; required
 only for `all`). Grant the trusted Workload Identity service account Secret

@@ -102,7 +102,7 @@ spec:
                        ]
                      ] .
 
-    - repoURL: https://gitlab.com/lime985340/platform-gitops.git
+    - repoURL: https://github.com/lime985340/platform-gitops.git
       targetRevision: refs/heads/main
       path: platform/graphdb
 

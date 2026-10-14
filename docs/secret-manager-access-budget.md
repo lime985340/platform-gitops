@@ -1,7 +1,8 @@
 # Secret Manager access budget for GitHub Actions
 
-The GitOps workflow must reserve its maximum planned Secret Manager access calls
-before authenticating to Google Cloud or reading any secret payload.
+The GitOps workflow authenticates to Google Cloud, reads the billing account's
+current project list and Secret Manager access request metrics, then reserves
+the run's maximum planned calls before reading any secret payload.
 
 ## Budget policy
 
@@ -14,9 +15,15 @@ before authenticating to Google Cloud or reading any secret payload.
   group-level GitLab variable entries. It did not read the contents of the 13
   File variables, so a separate count of environment keys such as 58 is not
   verified by that inventory.
-- At 9,900 reserved calls, the action emits a warning. Later runs are blocked if
-  their reservation would exceed 9,900. A run is rejected before any secret read
-  if the projected count exceeds the cap.
+- The preflight queries Cloud Monitoring's
+  `serviceruntime.googleapis.com/api/request_count` for Secret Manager API
+  requests in each project currently associated with the configured billing
+  account. It deliberately counts all Secret Manager API methods, including
+  free management calls, so the estimate errs high. It adds this run's
+  reservation and CI reservations from the last 30 minutes, then blocks before
+  any secret read if the projection exceeds 9,900.
+- If the billing project list or any project's metrics cannot be read, the
+  workflow fails closed before Secret Manager access.
 - Selective runs should reserve their own maximum (`1` for one Q Interior bundle,
   for example). Any retries that can repeat a Secret Manager access must be
   included in the reservation or avoided.
@@ -33,11 +40,11 @@ The GitHub Actions job that reads secrets must:
 
 1. Set a repository-wide concurrency group with `cancel-in-progress: false` so
    two reservations cannot race.
-2. Grant `contents: write` to `GITHUB_TOKEN`; the token writes a count-only ledger
-   to the `secret-manager-access-budget` branch.
-3. Check out the repository, then invoke
-   `.github/actions/reserve-secret-manager-access` **before** Google OIDC
-   authentication and before every `gcloud secrets versions access` call.
+2. Grant `contents: write` to `GITHUB_TOKEN`; the token writes a count-and-time
+   reservation ledger to the `secret-manager-access-budget` branch.
+3. Authenticate through Google OIDC, then invoke
+   `.github/actions/reserve-secret-manager-access` before every
+   `gcloud secrets versions access` call.
 4. Use `reserve: "6"` for the full-scope job. Set a smaller reservation only
    when the job is guaranteed to read fewer bundles.
 
@@ -55,24 +62,31 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v3
       - uses: ./.github/actions/reserve-secret-manager-access
         with:
           reserve: "6"
-      # Google Workload Identity authentication and secret reads follow here.
+      # Secret Manager payload reads follow only after the preflight passes.
 ```
 
-The state branch contains only the month and reserved-call count, never secret
-payloads. Failed runs after reservation remain counted, intentionally favoring
-an early stop over undercounting. A deleted or manually reset state branch would
-reset this repository's ledger, so the branch must be protected from deletion
-and manual edits.
+The state branch contains only the month, request counts, and reservation
+timestamps, never secret payloads. Failed runs after reservation remain counted
+for 30 minutes to cover metric publication delay, intentionally favoring an
+early stop over undercounting. A deleted or manually reset state branch removes
+that short-lived buffer.
 
 ## GitHub Actions reseal workflow
 
 The draft GitHub migration adds `.github/workflows/reseal-secrets.yml`. It is a
 manual workflow, rejects runs against the default branch, serializes secret
-reseals, and reserves access calls before OIDC authentication. A full run
-reserves six calls; a Q Interior dev or prod run reserves one.
+reseals, and checks usage after OIDC authentication but before reading secret
+payloads. A full run reserves six calls; a Q Interior dev or prod run reserves
+one.
 
 The workflow expects six Secret Manager payloads. Each payload is a gzip tar
 archive containing regular files at its archive root, named exactly as follows:
@@ -91,8 +105,9 @@ names. The workflow does not print bundle contents. It keeps temporary bundle
 files under the ephemeral runner's temp directory and removes them at job end.
 
 Before running it, configure these **repository variables** in `platform-gitops`:
-`GCP_PROJECT_ID`, `GCP_WIF_PROVIDER`, `GCP_SERVICE_ACCOUNT`, and the public
-`SEALED_SECRETS_CERT` value. Configure these **repository secrets**:
+`GCP_PROJECT_ID`, `GCP_BILLING_ACCOUNT_ID`, `GCP_WIF_PROVIDER`,
+and `GCP_SERVICE_ACCOUNT`. Configure these **repository secrets**:
+`SEALED_SECRETS_CERT`,
 `GITLAB_REGISTRY_USERNAME`, `GITLAB_REGISTRY_TOKEN`, and
 `GRAPHDB_LICENSE_BASE64` (the GraphDB license file encoded as Base64; required
 only for `all`). Grant the trusted Workload Identity service account Secret
@@ -104,16 +119,30 @@ GitHub branch and does not merge them. Review and merge those generated files
 through a pull request. This migration PR does not configure Google Cloud IAM or
 copy any secret payload.
 
-## Limits
+## Limits and required Google Cloud access
 
-This ledger measures reservations made by this GitHub repository. Google
-aggregates the free allowance across every project linked to the billing
-account, so the ledger cannot see reads from other projects or principals. The
-100-call gap below the published 10,000-call free allowance is a buffer, not a
-hard account-wide cap. Do not grant other workloads access to these secrets if
-the intent is to keep their reads inside this CI ledger.
+The Google Cloud Free Tier aggregates Secret Manager operations across
+projects linked to a billing account. Cloud Billing's project-list API provides
+the projects currently linked to that account; Cloud Monitoring then provides
+project-level request metrics. Grant the GitHub workload identity:
 
-The helper, composite action, and manual reseal workflow are in the GitHub
-migration draft PR. They are not active until that PR is merged and the GCP
-Workload Identity, billing, Secret Manager bundles, repository variables, and
-repository secrets are configured.
+- `roles/billing.viewer` on the billing account, which includes
+  `billing.resourceAssociations.list`.
+- `roles/monitoring.viewer` on every project returned for the billing account.
+- The `cloudbilling.googleapis.com` and `monitoring.googleapis.com` APIs must be
+  enabled in `GCP_PROJECT_ID`.
+
+The `serviceruntime.googleapis.com/api/request_count` metric is sampled every
+60 seconds and can take up to 1,800 seconds to appear. The workflow counts all
+Secret Manager API methods, including non-billable management calls, and adds
+its own reservations from the last 30 minutes. It cannot account for other
+callers that have not appeared in Monitoring yet. The metric-based check is therefore
+a conservative CI preflight, not Google's authoritative billing meter or a
+hard billing-account cap. Other projects or principals can still use the shared
+free allowance. The 100-call gap below 10,000 is a safety buffer, not a
+guarantee against delayed or external usage. Billing export data is not used as
+the gate because it can also lag actual use.
+
+The guard cannot pass until the billing account ID, Workload Identity, IAM
+access, APIs, Secret Manager bundles, repository variables, and repository
+secrets are configured.

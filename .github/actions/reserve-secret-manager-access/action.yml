@@ -1,5 +1,5 @@
 name: Reserve Secret Manager access budget
-description: Persist a monthly GitOps CI access reservation before reading Secret Manager.
+description: Check billing-account request metrics and reserve CI accesses before reading Secret Manager.
 inputs:
   reserve:
     description: Maximum Secret Manager access calls this run can make.
@@ -7,7 +7,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Reserve monthly access budget
+    - name: Check observed usage and reserve monthly access budget
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}

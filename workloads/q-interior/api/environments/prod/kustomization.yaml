@@ -13,8 +13,8 @@ resources:
   - middleware.yaml
 images:
   - name: ghcr.io/lime985340/q-interior-api
-    newName: registry.gitlab.com/lime985340/q-interior-api
-    newTag: bootstrap-pending
+    newName: ghcr.io/lime985340/q-interior-api
+    newTag: v0.1.0
 replicas:
   - name: q-interior-api
-    count: 0
+    count: 1

@@ -16,5 +16,5 @@ resources:
   - redirect-ingress.yaml
   - sealed-secrets.yaml
 images:
-  - name: registry.gitlab.com/lime985340/ontology-asal-agent-web
+  - name: ghcr.io/lime985340/ontology-asal-agent-web
     newTag: b83970a6614623a3105d3c0066e020ba1c7995b0

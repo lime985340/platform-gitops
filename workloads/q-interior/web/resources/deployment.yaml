@@ -18,13 +18,13 @@ spec:
         app.kubernetes.io/name: q-interior-web
         app.kubernetes.io/component: web
       annotations:
-        secret.reloader.stakater.com/reload: "gitlab-regcred"
+        secret.reloader.stakater.com/reload: "ghcr-regcred"
     spec:
       imagePullSecrets:
-        - name: gitlab-regcred
+        - name: ghcr-regcred
       containers:
         - name: q-interior-web
-          image: registry.gitlab.com/lime985340/q-interior-client
+          image: ghcr.io/lime985340/q-interior-client
           ports:
             - containerPort: 80
           resources:

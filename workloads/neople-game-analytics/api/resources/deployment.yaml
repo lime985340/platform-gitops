@@ -10,17 +10,17 @@ spec:
   template:
     metadata:
       annotations:
-        secret.reloader.stakater.com/reload: "gitlab-regcred,neople-game-analytics-api-secret,neople-game-analytics-api-db-secret"
+        secret.reloader.stakater.com/reload: "ghcr-regcred,neople-game-analytics-api-secret,neople-game-analytics-api-db-secret"
       labels:
         app: neople-game-analytics-api
         app.kubernetes.io/name: neople-game-analytics-api
         app.kubernetes.io/component: api
     spec:
       imagePullSecrets:
-        - name: gitlab-regcred
+        - name: ghcr-regcred
       containers:
         - name: api
-          image: registry.gitlab.com/lime985340/neople-game-analytics-api
+          image: ghcr.io/lime985340/neople-game-analytics-api
           resources:
             requests:
               cpu: 100m

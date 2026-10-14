@@ -13,7 +13,7 @@ spec:
     metadata:
       annotations:
         configmap.reloader.stakater.com/reload: "ontology-asal-agent-config"
-        secret.reloader.stakater.com/reload: "ontology-asal-agent-secrets,gitlab-regcred"
+        secret.reloader.stakater.com/reload: "ontology-asal-agent-secrets,ghcr-regcred"
       labels:
         app: ontology-asal-agent-api
         app.kubernetes.io/name: ontology-asal-agent
@@ -25,10 +25,10 @@ spec:
         runAsGroup: 10001
         fsGroup: 10001
       imagePullSecrets:
-        - name: gitlab-regcred
+        - name: ghcr-regcred
       containers:
         - name: api
-          image: registry.gitlab.com/lime985340/ontology-asal-agent-api
+          image: ghcr.io/lime985340/ontology-asal-agent-api
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

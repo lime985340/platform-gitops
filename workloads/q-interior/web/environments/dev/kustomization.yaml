@@ -13,7 +13,7 @@ resources:
   - middleware.yaml
 
 images:
-  - name: registry.gitlab.com/lime985340/q-interior-client
+  - name: ghcr.io/lime985340/q-interior-client
     newTag: fe32648a95e3ff6e04ead188978194b1183c3a27
 replicas:
   - name: q-interior-web

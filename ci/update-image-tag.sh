@@ -2,7 +2,7 @@
 
 set -eu
 
-: "${APPLICATION:?APPLICATION is required (atmo, neople-game-analytics, or ontology-asal-agent)}"
+: "${APPLICATION:?APPLICATION is required (atmo, neople-game-analytics, ontology-asal-agent, or q-interior)}"
 : "${WORKLOAD:?WORKLOAD is required (api or web)}"
 : "${ENVIRONMENT:?ENVIRONMENT is required (dev or prod)}"
 : "${IMAGE_TAG:?IMAGE_TAG is required}"

@@ -20,10 +20,10 @@ spec:
         app.kubernetes.io/component: web
     spec:
       imagePullSecrets:
-        - name: gitlab-regcred
+        - name: ghcr-regcred
       containers:
         - name: web
-          image: registry.gitlab.com/lime985340/neople-game-analytics-web
+          image: ghcr.io/lime985340/neople-game-analytics-web
           resources:
             requests:
               cpu: 10m

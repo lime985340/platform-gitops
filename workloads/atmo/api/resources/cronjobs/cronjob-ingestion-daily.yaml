@@ -27,10 +27,10 @@ spec:
         spec:
           restartPolicy: OnFailure
           imagePullSecrets:
-            - name: gitlab-regcred
+            - name: ghcr-regcred
           containers:
             - name: ingestion
-              image: registry.gitlab.com/lime985340/atmo-api:latest
+              image: ghcr.io/lime985340/atmo-api:latest
               command: ["java", "-jar", "/app/ingestion.jar"]
               env:
                 - name: SPRING_PROFILES_ACTIVE

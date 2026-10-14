@@ -31,14 +31,18 @@ There is no host or TLS section in the current prod Ingress resources. Cloudflar
 terminates HTTPS for the temporary hostname, while `cloudflared` connects to
 Traefik over the internal HTTP service.
 
-The Deployment uses a startup probe so a slow tunnel startup does not trigger
-an immediate restart. Its liveness probe allows short `/ready` response delays,
-while the readiness probe can temporarily remove the pod from service without
-restarting it. This reduces false restarts caused by transient probe timeouts;
-the Quick Tunnel URL can still change if the process or pod genuinely stops.
-The startup probe allows up to 150 seconds for startup, and the liveness probe
-allows six consecutive 5-second probe timeouts at 15-second intervals before a
-restart.
+The startup and liveness probes only check whether the local metrics listener
+accepts TCP connections. They do not restart the container when Cloudflare's
+edge connection or the `/ready` status is temporarily unavailable. The readiness
+probe still checks `/ready` and removes an unready pod from service after six
+consecutive failures; this does not restart the container. The startup probe
+allows up to 150 seconds for the listener to start, and liveness requires six
+consecutive failed TCP checks at 15-second intervals before restarting.
+
+These probes avoid restarts caused by a transient tunnel readiness failure, but
+they cannot prevent Kubernetes from restarting the container if the
+`cloudflared` process exits. Quick Tunnels also have no uptime guarantee, and the
+URL changes if the pod is recreated.
 
 The Cilium policy under `platform/policies` allows the tunnel's required
 outbound TCP and UDP traffic on port `7844` to the Cloudflare edge.

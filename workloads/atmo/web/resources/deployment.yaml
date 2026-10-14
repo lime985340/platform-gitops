@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: atmo-web
-          image: registry.gitlab.com/lime985340/atmo-web
+          image: ghcr.io/lime985340/atmo-web
           resources:
             requests:
               cpu: 10m

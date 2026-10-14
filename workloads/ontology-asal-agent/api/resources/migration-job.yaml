@@ -19,10 +19,11 @@ spec:
       restartPolicy: OnFailure
       automountServiceAccountToken: false
       imagePullSecrets:
+        - name: ghcr-regcred
         - name: gitlab-regcred
       containers:
         - name: publish-ontology
-          image: registry.gitlab.com/lime985340/ontology-asal-agent-api
+          image: ghcr.io/lime985340/ontology-asal-agent-api
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh

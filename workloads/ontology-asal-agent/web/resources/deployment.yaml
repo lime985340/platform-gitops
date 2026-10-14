@@ -21,10 +21,11 @@ spec:
         app.kubernetes.io/part-of: ontology-asal-agent
     spec:
       imagePullSecrets:
+        - name: ghcr-regcred
         - name: gitlab-regcred
       containers:
         - name: web
-          image: registry.gitlab.com/lime985340/ontology-asal-agent-web
+          image: ghcr.io/lime985340/ontology-asal-agent-web
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

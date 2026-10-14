@@ -16,5 +16,6 @@ resources:
 - middleware.yaml
 - sealed-secrets.yaml
 images:
-- name: registry.gitlab.com/lime985340/atmo-web
+- name: ghcr.io/lime985340/atmo-web
+  newName: registry.gitlab.com/lime985340/atmo-web
   newTag: v0.2.2

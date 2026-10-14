@@ -96,7 +96,7 @@ seal_env_secret() {
   sealed_manifest="$tmp_dir/${namespace}-${name}-sealed.yaml"
 
   if [ -z "$env_file" ] || [ ! -f "$env_file" ]; then
-    echo "Missing GitLab File variable for ${namespace}/${name}" >&2
+    echo "Missing environment file for ${namespace}/${name}" >&2
     exit 1
   fi
 
@@ -140,7 +140,7 @@ seal_file_secret() {
   sealed_manifest="$tmp_dir/${namespace}-${name}-sealed.yaml"
 
   if [ ! -f "$file_path" ]; then
-    echo "Missing GitLab File variable for ${namespace}/${name}" >&2
+    echo "Missing environment file for ${namespace}/${name}" >&2
     exit 1
   fi
 
@@ -202,7 +202,7 @@ if [ "$q_secret_scope" = q-interior-prod ]; then
   q_prod_api_output="workloads/q-interior/api/environments/prod/sealed-secrets.yaml"
   q_prod_web_output="workloads/q-interior/web/environments/prod/sealed-secrets.yaml"
   q_db_env="${Q_INTERIOR_API_PROD_ENV:-}"
-  : "${q_db_env:?Q_INTERIOR_API_PROD_ENV must be configured as a GitLab File variable}"
+  : "${q_db_env:?Q_INTERIOR_API_PROD_ENV must be supplied from the GitHub Secret Manager bundle}"
   reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_PROD_ENV"
   : > "$q_prod_api_output"
   seal_env_secret \

@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       annotations:
-        secret.reloader.stakater.com/reload: "atmo-db-secret,atmo-jwt-secret,atmo-oauth-secret,atmo-publicdata-secret,gitlab-regcred"
+        secret.reloader.stakater.com/reload: "atmo-db-secret,atmo-jwt-secret,atmo-oauth-secret,atmo-publicdata-secret,ghcr-regcred"
       labels:
         app: atmo-api
         app.kubernetes.io/name: atmo-api
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: atmo-api
-          image: registry.gitlab.com/lime985340/atmo-api
+          image: ghcr.io/lime985340/atmo-api
           resources:
             requests:
               cpu: 100m

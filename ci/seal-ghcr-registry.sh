@@ -4,8 +4,8 @@ set -eu
 
 ghcr_scope="${1:-dev}"
 case "$ghcr_scope" in
-  dev|all) ;;
-  *) echo "Usage: $0 [dev|all]" >&2; exit 2 ;;
+  dev|all|q-interior-dev|q-interior-prod) ;;
+  *) echo "Usage: $0 [dev|all|q-interior-dev|q-interior-prod]" >&2; exit 2 ;;
 esac
 
 : "${SEALED_SECRETS_CERT:?SEALED_SECRETS_CERT must point to the controller public certificate}"
@@ -68,10 +68,12 @@ import sys
 
 target = pathlib.Path(sys.argv[1])
 sealed = pathlib.Path(sys.argv[2]).read_text(encoding="utf-8").strip()
+sealed = re.sub(r"\A---[ \t]*\r?\n", "", sealed)
 marker = "# Managed by ci/seal-ghcr-registry.sh"
 content = target.read_text(encoding="utf-8")
 documents = re.split(r"(?m)^---[ \t]*\r?$", content)
-kept = [document.strip() for document in documents if marker not in document]
+kept = [document.strip() for document in documents
+        if marker not in document and not re.search(r"(?m)^  name: ghcr-regcred[ \t]*$", document)]
 base = "\n---\n".join(document for document in kept if document)
 replacement = f"{marker}\n{sealed}"
 updated = f"{base}\n---\n{replacement}\n" if base else f"{replacement}\n"
@@ -93,6 +95,12 @@ seal_environment() {
   seal_namespace q-interior/web "q-interior-web-$environment"
 }
 
+seal_q_interior_environment() {
+  environment="$1"
+  seal_namespace q-interior/api "q-interior-api-$environment"
+  seal_namespace q-interior/web "q-interior-web-$environment"
+}
+
 case "$ghcr_scope" in
   dev)
     seal_environment dev
@@ -100,6 +108,12 @@ case "$ghcr_scope" in
   all)
     seal_environment dev
     seal_environment prod
+    ;;
+  q-interior-dev)
+    seal_q_interior_environment dev
+    ;;
+  q-interior-prod)
+    seal_q_interior_environment prod
     ;;
 esac
 

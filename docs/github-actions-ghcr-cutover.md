@@ -14,4 +14,6 @@ Add repository secrets `GHCR_READ_USERNAME` and `GHCR_READ_TOKEN`. The token mus
 
 Run **Reseal workload secrets** on a non-main review branch with `ghcr-dev` to create pull credentials for dev namespaces, or `ghcr-all` for dev and prod. This workflow reads no Secret Manager values. Review and merge its SealedSecret changes before switching any workload to GHCR.
 
+When resealing `q-interior-dev`, `q-interior-prod`, or `all`, the workflow also derives the matching Neon hostname from the corresponding `Q_INTERIOR_API_*_ENV` Secret Manager file and updates that environment's Cilium DB-egress policy. If GHCR SealedSecrets already exist, the GHCR credentials must be present so resealing preserves the pull credentials.
+
 The published GHCR packages are private by default. The GitOps manifests use `ghcr.io/lime985340/*` and `ghcr-regcred`. Do not enable either deployment variable until the matching namespaces contain the generated `ghcr-regcred` Secret, Argo CD can read the private GitHub GitOps repository, and the GitOps source is switched to GitHub.

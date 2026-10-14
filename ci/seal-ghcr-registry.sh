@@ -4,8 +4,8 @@ set -eu
 
 ghcr_scope="${1:-dev}"
 case "$ghcr_scope" in
-  dev|all) ;;
-  *) echo "Usage: $0 [dev|all]" >&2; exit 2 ;;
+  dev|all|q-interior-dev|q-interior-prod) ;;
+  *) echo "Usage: $0 [dev|all|q-interior-dev|q-interior-prod]" >&2; exit 2 ;;
 esac
 
 : "${SEALED_SECRETS_CERT:?SEALED_SECRETS_CERT must point to the controller public certificate}"
@@ -93,6 +93,12 @@ seal_environment() {
   seal_namespace q-interior/web "q-interior-web-$environment"
 }
 
+seal_q_interior_environment() {
+  environment="$1"
+  seal_namespace q-interior/api "q-interior-api-$environment"
+  seal_namespace q-interior/web "q-interior-web-$environment"
+}
+
 case "$ghcr_scope" in
   dev)
     seal_environment dev
@@ -100,6 +106,12 @@ case "$ghcr_scope" in
   all)
     seal_environment dev
     seal_environment prod
+    ;;
+  q-interior-dev)
+    seal_q_interior_environment dev
+    ;;
+  q-interior-prod)
+    seal_q_interior_environment prod
     ;;
 esac
 

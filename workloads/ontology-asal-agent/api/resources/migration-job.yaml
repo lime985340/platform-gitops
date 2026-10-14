@@ -20,6 +20,7 @@ spec:
       automountServiceAccountToken: false
       imagePullSecrets:
         - name: ghcr-regcred
+        - name: gitlab-regcred
       containers:
         - name: publish-ontology
           image: ghcr.io/lime985340/ontology-asal-agent-api

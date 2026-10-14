@@ -26,6 +26,7 @@ spec:
           restartPolicy: OnFailure
           imagePullSecrets:
             - name: ghcr-regcred
+            - name: gitlab-regcred
           containers:
             - name: worker
               image: ghcr.io/lime985340/neople-game-analytics-api

@@ -28,6 +28,7 @@ spec:
           restartPolicy: OnFailure
           imagePullSecrets:
             - name: ghcr-regcred
+            - name: gitlab-regcred
           containers:
             - name: ingestion
               image: ghcr.io/lime985340/atmo-api:latest

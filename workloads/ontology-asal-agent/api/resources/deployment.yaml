@@ -26,6 +26,7 @@ spec:
         fsGroup: 10001
       imagePullSecrets:
         - name: ghcr-regcred
+        - name: gitlab-regcred
       containers:
         - name: api
           image: ghcr.io/lime985340/ontology-asal-agent-api

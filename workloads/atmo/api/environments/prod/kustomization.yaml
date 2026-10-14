@@ -17,4 +17,5 @@ resources:
 - sealed-secrets.yaml
 images:
 - name: ghcr.io/lime985340/atmo-api
+  newName: registry.gitlab.com/lime985340/atmo-api
   newTag: v0.3.2

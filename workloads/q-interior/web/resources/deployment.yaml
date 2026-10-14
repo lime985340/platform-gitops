@@ -22,6 +22,7 @@ spec:
     spec:
       imagePullSecrets:
         - name: ghcr-regcred
+        - name: gitlab-regcred
       containers:
         - name: q-interior-web
           image: ghcr.io/lime985340/q-interior-client

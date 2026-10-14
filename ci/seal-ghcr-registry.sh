@@ -61,6 +61,12 @@ seal_namespace() {
     --format yaml \
     < "$plain_manifest" > "$sealed_manifest"
 
+  # Ontology publication is a Sync hook in wave -1. Pull credentials must
+  # decrypt before that hook can start on a newly configured namespace.
+  kubectl annotate --local -f "$sealed_manifest" \
+    argocd.argoproj.io/sync-wave=-2 --overwrite -o yaml > "$tmp_dir/ordered-sealed.yaml"
+  mv "$tmp_dir/ordered-sealed.yaml" "$sealed_manifest"
+
   python3 - "$output" "$sealed_manifest" <<'PY'
 import pathlib
 import re

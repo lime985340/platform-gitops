@@ -38,18 +38,6 @@ spec:
             - name: metrics
               containerPort: 2000
               protocol: TCP
-          startupProbe:
-            tcpSocket:
-              port: metrics
-            timeoutSeconds: 5
-            periodSeconds: 5
-            failureThreshold: 30
-          livenessProbe:
-            tcpSocket:
-              port: metrics
-            timeoutSeconds: 5
-            periodSeconds: 15
-            failureThreshold: 6
           readinessProbe:
             httpGet:
               path: /ready

@@ -17,4 +17,5 @@ patches:
   - path: api-upstream-patch.yaml
 images:
   - name: ghcr.io/lime985340/neople-game-analytics-web
+    newName: ghcr.io/lime985340/neople-game-analytics-web
     newTag: 73dcdf5b3277b064f69c59bbb45052308ae02c45

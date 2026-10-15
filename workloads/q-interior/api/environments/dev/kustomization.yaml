@@ -15,7 +15,7 @@ resources:
 images:
   - name: ghcr.io/lime985340/q-interior-api
     newName: ghcr.io/lime985340/q-interior-api
-    newTag: 9d953457dc6a883b01f63f6d5bee2a9b6d4cd863
+    newTag: b0ffc2758c45d3f2aa3740ee7eeb0ac7c9810c65
 replicas:
   - name: q-interior-api
     count: 1

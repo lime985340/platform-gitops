@@ -39,6 +39,8 @@ spec:
               - neople-game-analytics-web-prod
               - ontology-asal-agent-api-prod
               - ontology-asal-agent-web-prod
+              - q-interior-api-prod
+              - q-interior-web-prod
           kubernetesCRD:
             enabled: true
 

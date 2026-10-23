@@ -244,14 +244,19 @@ Named Tunnel과 외부에 공개할 환경의 hostname 기반 Ingress를 함께 
 이 경우 Kubernetes `Ingress`에 별도 TLS Secret이나 cert-manager를 반드시
 추가할 필요는 없다.
 
-Redis currently uses the Bitnami Helm Chart in standalone mode with one
-Deployment replica, no PVC, no authentication, and no AOF/RDB persistence.
-The chart's master Service is `redis-master`, so the Atmo API Secret values
-must use `redis-master.redis.svc.cluster.local` as `SPRING_REDIS_HOST`.
-This Redis instance is ephemeral and must not be treated as a production data
-store. Enable authentication and persistence, or use a managed Redis service,
-before production use. The chart supports these settings through its Helm
-values. See the [Bitnami Redis Chart](https://artifacthub.io/packages/helm/bitnami/redis)
+Redis uses the Bitnami Helm Chart in standalone mode with one Deployment
+replica, a 1 GiB PVC, and AOF persistence. Its `allkeys-lru` policy caps cache
+memory at 192 MiB and evicts least-recently-used entries when needed. The Atmo
+API stores only public station and observation snapshots with a six-hour fresh
+window and a fourteen-day retention window; it serves a retained snapshot while
+one background refresh runs. User-specific favorites bypass Redis and always
+read from the database, so private locations are not written to the persistent
+cache. Redis authentication remains disabled; network policy limits access to
+the Atmo API, and the cache does not contain credentials.
+Redis remains a cache, not the source of truth: a cold cache still loads from Neon,
+and losing the local cluster also loses its PVC. The chart's master Service is `redis-master`, so the Atmo API Secret values
+must use `redis-master.redis.svc.cluster.local` as `SPRING_REDIS_HOST`. See the
+[Bitnami Redis Chart](https://artifacthub.io/packages/helm/bitnami/redis)
 for the available configuration. Because the chart is sourced from a Docker
 Hub OCI registry, Argo CD installations that do not auto-discover public OCI
 sources must register `registry-1.docker.io/bitnamicharts` as a Helm OCI

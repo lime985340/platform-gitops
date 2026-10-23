@@ -15,8 +15,6 @@ resources:
 - ingress.yaml
 - middleware.yaml
 - sealed-secrets.yaml
-patches:
-- path: patches/patch-ingestion-hourly-daily.yaml
 images:
 - name: ghcr.io/lime985340/atmo-api
   newName: ghcr.io/lime985340/atmo-api

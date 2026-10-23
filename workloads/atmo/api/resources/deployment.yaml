@@ -43,16 +43,6 @@ spec:
             - name: APP_AUTH_REFRESH_COOKIE_PATH
               value: "/atmo/api/v1/auth/refresh"
 
-            # Match the API pool's 30-minute Hikari connection lifetime.
-            - name: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
-              value: "1800000"
-
-            # Share one bounded public station snapshot across map and station requests.
-            - name: ATMO_CACHE_PUBLIC_FRESH_SECONDS
-              value: "21600"
-            - name: ATMO_CACHE_PUBLIC_RETAIN_SECONDS
-              value: "1209600"
-
           volumeMounts:
             - name: app-secrets
               mountPath: /etc/secrets

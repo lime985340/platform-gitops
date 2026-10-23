@@ -43,10 +43,6 @@ spec:
             - name: APP_AUTH_REFRESH_COOKIE_PATH
               value: "/atmo/api/v1/auth/refresh"
 
-            # Recycle connections before managed PostgreSQL closes idle ones.
-            - name: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
-              value: "240000"
-
           volumeMounts:
             - name: app-secrets
               mountPath: /etc/secrets

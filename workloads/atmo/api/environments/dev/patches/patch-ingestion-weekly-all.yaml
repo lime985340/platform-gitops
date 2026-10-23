@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: atmo-ingestion-weekly
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ingestion
+              env:
+                - name: INGESTION_JOB
+                  value: all

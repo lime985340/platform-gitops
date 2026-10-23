@@ -28,14 +28,18 @@ spec:
           enabled: false
 
         commonConfiguration: |-
-          appendonly no
+          appendonly yes
+          appendfsync everysec
           save ""
+          maxmemory 192mb
+          maxmemory-policy allkeys-lru
 
         master:
           count: 1
           kind: Deployment
           persistence:
-            enabled: false
+            enabled: true
+            size: 1Gi
           resources:
             requests:
               cpu: 50m

@@ -3,4 +3,4 @@ kind: CronJob
 metadata:
   name: atmo-ingestion-daily
 spec:
-  schedule: "30 3 * * 1"
+  suspend: true

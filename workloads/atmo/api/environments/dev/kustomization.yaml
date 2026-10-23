@@ -14,8 +14,9 @@ resources:
 - ../../resources
 - sealed-secrets.yaml
 patches:
-- path: patches/patch-ingestion-hourly-weekly.yaml
-- path: patches/patch-ingestion-daily-weekly.yaml
+- path: patches/patch-ingestion-hourly-suspend.yaml
+- path: patches/patch-ingestion-daily-suspend.yaml
+- path: patches/patch-ingestion-weekly-all.yaml
 images:
 - name: ghcr.io/lime985340/atmo-api
   newName: ghcr.io/lime985340/atmo-api

@@ -43,9 +43,9 @@ spec:
             - name: APP_AUTH_REFRESH_COOKIE_PATH
               value: "/atmo/api/v1/auth/refresh"
 
-            # Recycle connections before managed PostgreSQL closes idle ones.
+            # Match the API pool's 30-minute Hikari connection lifetime.
             - name: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
-              value: "240000"
+              value: "1800000"
 
           volumeMounts:
             - name: app-secrets

@@ -3,4 +3,4 @@ kind: CronJob
 metadata:
   name: atmo-ingestion-hourly
 spec:
-  schedule: "10 6 * * 1"
+  suspend: true

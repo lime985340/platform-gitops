@@ -4,7 +4,7 @@ set -eu
 
 q_secret_scope="${Q_SECRET_SCOPE:-all}"
 case "$q_secret_scope" in
-  all|q-interior-dev|q-interior-prod) ;;
+  all|atmo-api-dev|atmo-api-prod|q-interior-dev|q-interior-prod) ;;
   *) echo "Unsupported Q_SECRET_SCOPE: $q_secret_scope" >&2; exit 1 ;;
 esac
 
@@ -213,6 +213,28 @@ if [ "$q_secret_scope" = q-interior-prod ]; then
   seal_registry_secret "$q_prod_api_output" q-interior-api-prod
   : > "$q_prod_web_output"
   seal_registry_secret "$q_prod_web_output" q-interior-web-prod
+  exit 0
+fi
+
+if [ "$q_secret_scope" = atmo-api-dev ]; then
+  dev_api_output="workloads/atmo/api/environments/dev/sealed-secrets.yaml"
+  : > "$dev_api_output"
+  seal_env_secret "$dev_api_output" atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB_ENV:-}"
+  seal_env_secret "$dev_api_output" atmo-api-dev atmo-jwt-secret "${ATMO_API_DEV_JWT_ENV:-}"
+  seal_env_secret "$dev_api_output" atmo-api-dev atmo-oauth-secret "${ATMO_API_DEV_OAUTH_ENV:-}"
+  seal_env_secret "$dev_api_output" atmo-api-dev atmo-publicdata-secret "${ATMO_API_DEV_PUBLICDATA_ENV:-}"
+  seal_registry_secret "$dev_api_output" atmo-api-dev
+  exit 0
+fi
+
+if [ "$q_secret_scope" = atmo-api-prod ]; then
+  prod_api_output="workloads/atmo/api/environments/prod/sealed-secrets.yaml"
+  : > "$prod_api_output"
+  seal_env_secret "$prod_api_output" atmo-api-prod atmo-db-secret "${ATMO_API_PROD_DB_ENV:-}"
+  seal_env_secret "$prod_api_output" atmo-api-prod atmo-jwt-secret "${ATMO_API_PROD_JWT_ENV:-}"
+  seal_env_secret "$prod_api_output" atmo-api-prod atmo-oauth-secret "${ATMO_API_PROD_OAUTH_ENV:-}"
+  seal_env_secret "$prod_api_output" atmo-api-prod atmo-publicdata-secret "${ATMO_API_PROD_PUBLICDATA_ENV:-}"
+  seal_registry_secret "$prod_api_output" atmo-api-prod
   exit 0
 fi
 

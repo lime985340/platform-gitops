@@ -116,7 +116,9 @@ and `GCP_SERVICE_ACCOUNT`. Configure these **repository secrets**:
 `GRAPHDB_LICENSE_BASE64` (the GraphDB license file encoded as Base64; required
 only for `all`). Grant the trusted Workload Identity service account Secret
 Manager access only to the six named secrets. The workflow keeps the current
-GitLab image registry credentials for sealing Kubernetes pull secrets.
+GitLab image registry credentials for sealing Kubernetes pull secrets. Atmo
+selective runs also reseal the GHCR pull credential for only the selected Atmo
+API environment.
 
 The workflow writes the generated SealedSecrets to the selected non-default
 GitHub branch and does not merge them. Review and merge those generated files

@@ -24,9 +24,9 @@ the run's maximum planned calls before reading any secret payload.
   any secret read if the projection exceeds 9,900.
 - If the billing project list or any project's metrics cannot be read, the
   workflow fails closed before Secret Manager access.
-- Selective runs should reserve their own maximum (`1` for one Q Interior bundle,
-  for example). Any retries that can repeat a Secret Manager access must be
-  included in the reservation or avoided.
+- Selective runs should reserve their own maximum (`1` for one Atmo or Q Interior
+  environment bundle, for example). Any retries that can repeat a Secret Manager
+  access must be included in the reservation or avoided.
 
 This design allows at most `floor(9,900 / 6) = 1,650` full-scope runs in a month,
 assuming each run reads each bundle once. If 58 values were instead stored and
@@ -85,11 +85,15 @@ that short-lived buffer.
 The draft GitHub migration adds `.github/workflows/reseal-secrets.yml`. It is a
 manual workflow, rejects runs against the default branch, serializes secret
 reseals, and checks usage after OIDC authentication but before reading secret
-payloads. A full run reserves six calls; a Q Interior dev or prod run reserves
-one.
+payloads. A full run reserves six calls; an Atmo or Q Interior dev/prod run
+reserves one.
 
 The workflow expects six Secret Manager payloads. Each payload is a gzip tar
-archive containing regular files at its archive root, named exactly as follows:
+archive containing regular files at its archive root, named exactly as follows.
+The Secret Manager console can store a text-only version as
+`GITOPS_TAR_GZ_BASE64_V1` followed by a newline and the archive's Base64 text;
+the workflow decodes this wrapper before extraction. Raw gzip versions remain
+supported.
 
 | Secret Manager secret | Required archive files |
 | --- | --- |

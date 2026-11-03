@@ -8,8 +8,6 @@ spec:
       containers:
         - name: atmo-api
           env:
-            - name: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
-              value: "1800000"
             - name: ATMO_CACHE_PUBLIC_FRESH_SECONDS
               value: "21600"
             - name: ATMO_CACHE_PUBLIC_RETAIN_SECONDS

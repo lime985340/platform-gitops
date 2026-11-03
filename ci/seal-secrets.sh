@@ -30,8 +30,15 @@ command -v jq >/dev/null 2>&1 || {
   exit 1
 }
 
-: "${GITLAB_REGISTRY_USERNAME:?GITLAB_REGISTRY_USERNAME is required}"
-: "${GITLAB_REGISTRY_TOKEN:?GITLAB_REGISTRY_TOKEN is required}"
+needs_gitlab_registry=true
+case "$q_secret_scope" in
+  atmo-api-dev|atmo-api-prod) needs_gitlab_registry=false ;;
+esac
+
+if [ "$needs_gitlab_registry" = true ]; then
+  : "${GITLAB_REGISTRY_USERNAME:?GITLAB_REGISTRY_USERNAME is required}"
+  : "${GITLAB_REGISTRY_TOKEN:?GITLAB_REGISTRY_TOKEN is required}"
+fi
 if [ "$q_secret_scope" = all ]; then
   : "${SECURE_FILES_DIR:?SECURE_FILES_DIR must point to the downloaded GitLab Secure Files directory}"
 fi
@@ -46,23 +53,25 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-if ! jq -n \
-  '{auths: {"registry.gitlab.com": {
-    username: env.GITLAB_REGISTRY_USERNAME,
-    password: env.GITLAB_REGISTRY_TOKEN,
-    auth: ((env.GITLAB_REGISTRY_USERNAME + ":" + env.GITLAB_REGISTRY_TOKEN) | @base64)
-  }}}' \
-  > "$registry_config"; then
-  echo "Failed to create the temporary registry configuration" >&2
-  exit 1
-fi
+if [ "$needs_gitlab_registry" = true ]; then
+  if ! jq -n \
+    '{auths: {"registry.gitlab.com": {
+      username: env.GITLAB_REGISTRY_USERNAME,
+      password: env.GITLAB_REGISTRY_TOKEN,
+      auth: ((env.GITLAB_REGISTRY_USERNAME + ":" + env.GITLAB_REGISTRY_TOKEN) | @base64)
+    }}}' \
+    > "$registry_config"; then
+    echo "Failed to create the temporary registry configuration" >&2
+    exit 1
+  fi
 
-if [ ! -s "$registry_config" ]; then
-  echo "Temporary registry configuration is empty" >&2
-  exit 1
-fi
+  if [ ! -s "$registry_config" ]; then
+    echo "Temporary registry configuration is empty" >&2
+    exit 1
+  fi
 
-unset GITLAB_REGISTRY_USERNAME GITLAB_REGISTRY_TOKEN
+  unset GITLAB_REGISTRY_USERNAME GITLAB_REGISTRY_TOKEN
+fi
 
 # Keep the generated config only until all registry SealedSecrets are created.
 
@@ -162,6 +171,9 @@ seal_file_secret() {
 seal_registry_secret() {
   output="$1"
   namespace="$2"
+  if [ "$needs_gitlab_registry" != true ]; then
+    return 0
+  fi
   plain_manifest="$tmp_dir/${namespace}-gitlab-regcred.yaml"
   sealed_manifest="$tmp_dir/${namespace}-gitlab-regcred-sealed.yaml"
 
@@ -223,7 +235,6 @@ if [ "$q_secret_scope" = atmo-api-dev ]; then
   seal_env_secret "$dev_api_output" atmo-api-dev atmo-jwt-secret "${ATMO_API_DEV_JWT_ENV:-}"
   seal_env_secret "$dev_api_output" atmo-api-dev atmo-oauth-secret "${ATMO_API_DEV_OAUTH_ENV:-}"
   seal_env_secret "$dev_api_output" atmo-api-dev atmo-publicdata-secret "${ATMO_API_DEV_PUBLICDATA_ENV:-}"
-  seal_registry_secret "$dev_api_output" atmo-api-dev
   exit 0
 fi
 
@@ -234,7 +245,6 @@ if [ "$q_secret_scope" = atmo-api-prod ]; then
   seal_env_secret "$prod_api_output" atmo-api-prod atmo-jwt-secret "${ATMO_API_PROD_JWT_ENV:-}"
   seal_env_secret "$prod_api_output" atmo-api-prod atmo-oauth-secret "${ATMO_API_PROD_OAUTH_ENV:-}"
   seal_env_secret "$prod_api_output" atmo-api-prod atmo-publicdata-secret "${ATMO_API_PROD_PUBLICDATA_ENV:-}"
-  seal_registry_secret "$prod_api_output" atmo-api-prod
   exit 0
 fi
 
@@ -256,14 +266,12 @@ seal_env_secret "$dev_api_output" atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB
 seal_env_secret "$dev_api_output" atmo-api-dev atmo-jwt-secret "${ATMO_API_DEV_JWT_ENV:-}"
 seal_env_secret "$dev_api_output" atmo-api-dev atmo-oauth-secret "${ATMO_API_DEV_OAUTH_ENV:-}"
 seal_env_secret "$dev_api_output" atmo-api-dev atmo-publicdata-secret "${ATMO_API_DEV_PUBLICDATA_ENV:-}"
-seal_registry_secret "$dev_api_output" atmo-api-dev
 
 : > "$prod_api_output"
 seal_env_secret "$prod_api_output" atmo-api-prod atmo-db-secret "${ATMO_API_PROD_DB_ENV:-}"
 seal_env_secret "$prod_api_output" atmo-api-prod atmo-jwt-secret "${ATMO_API_PROD_JWT_ENV:-}"
 seal_env_secret "$prod_api_output" atmo-api-prod atmo-oauth-secret "${ATMO_API_PROD_OAUTH_ENV:-}"
 seal_env_secret "$prod_api_output" atmo-api-prod atmo-publicdata-secret "${ATMO_API_PROD_PUBLICDATA_ENV:-}"
-seal_registry_secret "$prod_api_output" atmo-api-prod
 
 : > "$dev_web_output"
 seal_registry_secret "$dev_web_output" atmo-web-dev

@@ -24,4 +24,4 @@ patches:
 images:
 - name: ghcr.io/lime985340/atmo-api
   newName: ghcr.io/lime985340/atmo-api
-  newTag: 46e278d313785e341f1fb9deff4d7cf3c52e3825
+  newTag: b58e38e271626464533c9e7d93353778fd20c3a8

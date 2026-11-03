@@ -12,9 +12,12 @@ labels:
   includeTemplates: true
 resources:
 - ../../resources
+- ingress.yaml
+- middleware.yaml
 - sealed-secrets.yaml
 patches:
 - path: patches/patch-api-dev-neon-cache.yaml
+- path: patches/patch-api-dev-refresh-cookie.yaml
 - path: patches/patch-ingestion-hourly-suspend.yaml
 - path: patches/patch-ingestion-daily-suspend.yaml
 - path: patches/patch-ingestion-weekly-all.yaml

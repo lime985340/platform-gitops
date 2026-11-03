@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atmo-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: atmo-api
+          env:
+            - name: APP_AUTH_REFRESH_COOKIE_PATH
+              value: "/dev/atmo/api/v1/auth/refresh"

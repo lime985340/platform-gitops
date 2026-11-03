@@ -16,4 +16,4 @@ resources:
 images:
 - name: ghcr.io/lime985340/atmo-web
   newName: ghcr.io/lime985340/atmo-web
-  newTag: 891a14e7956ebe2add2768a4fb9d88d39b62f845
+  newTag: be5c30800832b0336aab3e121a4c3277ceb16699

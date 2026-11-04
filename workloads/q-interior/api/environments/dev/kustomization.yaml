@@ -12,6 +12,9 @@ resources:
   - ingress.yaml
   - middleware.yaml
 
+patches:
+  - path: session-cookie-path.yaml
+
 images:
   - name: ghcr.io/lime985340/q-interior-api
     newName: ghcr.io/lime985340/q-interior-api

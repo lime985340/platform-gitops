@@ -36,11 +36,14 @@ overlay는 `workloads/q-interior/{api,web}/environments/{dev,prod}`입니다. �
 
 | 이름 | 형태 | 사용처 |
 | --- | --- | --- |
-| `Q_INTERIOR_API_DEV_ENV` / `Q_INTERIOR_API_PROD_ENV` | File, protected | datasource URL·username·password를 kubeseal로 암호화 |
+| Secret Manager bundle `q-interior-api-dev`: `Q_INTERIOR_API_DEV_ENV` | File | dev DB URL·username·password를 `q-interior-db-secret`으로 봉인 |
+| Secret Manager bundle `q-interior-api-dev`: `Q_INTERIOR_API_DEV_PUBLICDATA_ENV` | File, optional | NTS·KISCON 키를 `q-interior-publicdata-secret`으로 봉인하고 dev API 환경변수로 전달 |
+| Secret Manager bundle `q-interior-api-prod`: `Q_INTERIOR_API_PROD_ENV` | File | prod DB URL·username·password를 `q-interior-db-secret`으로 봉인 |
+| Secret Manager bundle `q-interior-api-prod`: `Q_INTERIOR_API_PROD_PUBLICDATA_ENV` | File, optional | prod 공공데이터 키용; dev 설정과 별개로 승인 후 등록 |
 | 기존 `SEALED_SECRETS_CERT` | File | Sealed Secrets 공개 인증서 |
-| 기존 `GITLAB_REGISTRY_USERNAME/TOKEN` | masked/protected | 두 이미지 저장소 읽기용 registry secret |
+| 기존 `GITLAB_REGISTRY_USERNAME/TOKEN`, `GHCR_READ_USERNAME/TOKEN` | masked/protected | 컨테이너 이미지 저장소 읽기용 registry secret |
 
-API File 변수 필수 항목은 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`입니다. URL은 JDBC 형식과 SSL 검증을 사용합니다. 시크릿은 기존 sealing job이 암호화해 생성하며 실제 env 파일은 Git에 들어가지 않습니다. Q 인테리어 변수가 없으면 기존 서비스 sealing 동작을 유지합니다.
+DB env 파일 필수 항목은 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`입니다. 공공데이터 파일은 API 키별 환경변수(`DATA_GO_KR_NTS_SERVICE_KEY`, `DATA_GO_KR_KISCON_SERVICE_KEY`)를 담으며 dev에서는 같은 포털 인증키를 두 변수에 지정할 수 있습니다. URL은 JDBC 형식과 SSL 검증을 사용합니다. 실제 env 파일은 Git에 들어가지 않고, 생성된 SealedSecret만 GitOps로 전달됩니다. 공공데이터 키가 있어도 해당 연동 기능 플래그가 꺼져 있으면 외부 API 호출은 시작되지 않습니다.
 
 API 배포는 선택한 환경의 File 변수에서 `SPRING_DATASOURCE_URL`의 Neon 호스트를 추출해 Cilium DNS·5432 egress 정책을 갱신합니다. 별도 `Q_INTERIOR_NEON_DEV_HOST` / `Q_INTERIOR_NEON_PROD_HOST` 변수는 설정하지 않습니다.
 

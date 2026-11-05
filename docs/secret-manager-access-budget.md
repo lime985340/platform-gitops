@@ -101,8 +101,8 @@ supported.
 | `atmo-api-prod` | `ATMO_API_PROD_DB_ENV`, `ATMO_API_PROD_JWT_ENV`, `ATMO_API_PROD_OAUTH_ENV`, `ATMO_API_PROD_PUBLICDATA_ENV` |
 | `neople-api-dev` | `NEOPLE_GAME_ANALYTICS_API_DEV_ENV`; optional `NEOPLE_GAME_ANALYTICS_API_DEV_DB_ENV` |
 | `neople-api-prod` | `NEOPLE_GAME_ANALYTICS_API_PROD_ENV`, `NEOPLE_GAME_ANALYTICS_API_PROD_DB_ENV` |
-| `q-interior-api-dev` | `Q_INTERIOR_API_DEV_ENV` |
-| `q-interior-api-prod` | `Q_INTERIOR_API_PROD_ENV` |
+| `q-interior-api-dev` | `Q_INTERIOR_API_DEV_ENV`; optional `Q_INTERIOR_API_DEV_PUBLICDATA_ENV` |
+| `q-interior-api-prod` | `Q_INTERIOR_API_PROD_ENV`; optional `Q_INTERIOR_API_PROD_PUBLICDATA_ENV` |
 
 Archive extraction accepts only unique regular files with simple root-level
 names. The workflow does not print bundle contents. It keeps temporary bundle

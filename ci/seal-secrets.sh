@@ -204,6 +204,11 @@ if [ "$q_secret_scope" = q-interior-dev ]; then
     q-interior-api-dev \
     q-interior-db-secret \
     "$q_db_env"
+  seal_env_secret_if_configured \
+    "$q_dev_api_output" \
+    q-interior-api-dev \
+    q-interior-publicdata-secret \
+    "${Q_INTERIOR_API_DEV_PUBLICDATA_ENV:-}"
   seal_registry_secret "$q_dev_api_output" q-interior-api-dev
   : > "$q_dev_web_output"
   seal_registry_secret "$q_dev_web_output" q-interior-web-dev
@@ -222,6 +227,11 @@ if [ "$q_secret_scope" = q-interior-prod ]; then
     q-interior-api-prod \
     q-interior-db-secret \
     "$q_db_env"
+  seal_env_secret_if_configured \
+    "$q_prod_api_output" \
+    q-interior-api-prod \
+    q-interior-publicdata-secret \
+    "${Q_INTERIOR_API_PROD_PUBLICDATA_ENV:-}"
   seal_registry_secret "$q_prod_api_output" q-interior-api-prod
   : > "$q_prod_web_output"
   seal_registry_secret "$q_prod_web_output" q-interior-web-prod
@@ -336,8 +346,14 @@ seal_registry_secret "$prod_ontology_agent_web_output" ontology-asal-agent-web-p
 # New application variables are optional until its initial bootstrap is ready.
 for q_environment in dev prod; do
   case "$q_environment" in
-    dev) q_db_env="${Q_INTERIOR_API_DEV_ENV:-}" ;;
-    prod) q_db_env="${Q_INTERIOR_API_PROD_ENV:-}" ;;
+    dev)
+      q_db_env="${Q_INTERIOR_API_DEV_ENV:-}"
+      q_publicdata_env="${Q_INTERIOR_API_DEV_PUBLICDATA_ENV:-}"
+      ;;
+    prod)
+      q_db_env="${Q_INTERIOR_API_PROD_ENV:-}"
+      q_publicdata_env="${Q_INTERIOR_API_PROD_PUBLICDATA_ENV:-}"
+      ;;
   esac
   if [ -n "$q_db_env" ]; then
     reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_${q_environment}_ENV"
@@ -345,6 +361,11 @@ for q_environment in dev prod; do
     q_web_output="workloads/q-interior/web/environments/$q_environment/sealed-secrets.yaml"
     : > "$q_api_output"
     seal_env_secret "$q_api_output" "q-interior-api-$q_environment" q-interior-db-secret "$q_db_env"
+    seal_env_secret_if_configured \
+      "$q_api_output" \
+      "q-interior-api-$q_environment" \
+      q-interior-publicdata-secret \
+      "$q_publicdata_env"
     seal_registry_secret "$q_api_output" "q-interior-api-$q_environment"
     : > "$q_web_output"
     seal_registry_secret "$q_web_output" "q-interior-web-$q_environment"

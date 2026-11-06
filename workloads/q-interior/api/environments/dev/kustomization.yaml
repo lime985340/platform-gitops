@@ -9,10 +9,13 @@ labels:
 resources:
   - ../../resources
   - sealed-secrets.yaml
+  - attachment-security-sealed-secret.yaml
+  - clamav.yaml
   - ingress.yaml
   - middleware.yaml
 
 patches:
+  - path: attachment-security-patch.yaml
   - path: session-cookie-path.yaml
 
 images:

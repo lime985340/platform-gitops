@@ -16,3 +16,5 @@ spec:
         - ports:
             - port: "3310"
               protocol: TCP
+            - port: "15008"
+              protocol: TCP

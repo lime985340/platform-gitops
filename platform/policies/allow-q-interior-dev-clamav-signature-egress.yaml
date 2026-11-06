@@ -1,0 +1,28 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-q-interior-dev-clamav-signature-egress
+spec:
+  description: Allow only the q-interior dev ClamAV pod to resolve and fetch official virus signatures.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: q-interior-api-dev
+      k8s:app.kubernetes.io/name: q-interior-clamav
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchName: database.clamav.net
+    - toFQDNs:
+        - matchName: database.clamav.net
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

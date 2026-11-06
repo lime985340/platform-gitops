@@ -23,6 +23,7 @@ spec:
           - ontology-asal-agent-api-prod
           - ontology-asal-agent-web-dev
           - ontology-asal-agent-web-prod
+          - q-interior-api-dev
           - istio-system
   ingress:
     - fromEntities:

@@ -21,7 +21,7 @@ patches:
 images:
   - name: ghcr.io/lime985340/q-interior-api
     newName: ghcr.io/lime985340/q-interior-api
-    newTag: 61da26a5d08af0731c38932cf0e13e15e6996776
+    newTag: 6cec827b7a244129527954b6ed47d62529c94c72
 replicas:
   - name: q-interior-api
     count: 1

@@ -34,6 +34,9 @@ platform components or workloads.
 
 - Operator and project charts are pinned to `0.8.4` and installed in separate
   sync waves so the CRDs are installed before the Supabase project.
+- OCI Argo CD restores health checks for child `Application` resources and the
+  Operator's `Ready` conditions. This lets the root wait for the Operator and
+  its CRDs before syncing the Supabase project chart.
 - The Operator and Supabase component Pods have
   `kubernetes.io/arch: arm64` node selectors. Their chart-pinned images publish
   `linux/arm64` manifests; the container runtime selects those manifests from

@@ -18,11 +18,20 @@ spec:
 
         project:
           publicUrl: http://localhost:8000
+          migrations:
+            pod:
+              spec:
+                nodeSelector:
+                  kubernetes.io/arch: arm64
 
         ingress:
           enable: false
 
         singleDatabase:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
           storage:
             accessModes:
               - ReadWriteOnce
@@ -31,7 +40,53 @@ spec:
               requests:
                 storage: 20Gi
 
+        rest:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
+
+        meta:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
+
+        realtime:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
+
+        auth:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
+
+        supavisor:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
+
+        edgeRuntime:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
+
+        envoy:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
+
         storage:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
           storage:
             accessModes:
               - ReadWriteOnce
@@ -41,6 +96,10 @@ spec:
                 storage: 5Gi
 
         studio:
+          pod:
+            spec:
+              nodeSelector:
+                kubernetes.io/arch: arm64
           storage:
             accessModes:
               - ReadWriteOnce

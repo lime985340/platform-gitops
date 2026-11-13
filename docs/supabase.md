@@ -34,6 +34,10 @@ platform components or workloads.
 
 - Operator and project charts are pinned to `0.8.4` and installed in separate
   sync waves so the CRDs are installed before the Supabase project.
+- The Operator and Supabase component Pods have
+  `kubernetes.io/arch: arm64` node selectors. Their chart-pinned images publish
+  `linux/arm64` manifests; the container runtime selects those manifests from
+  the normal image tags, so no architecture-specific image suffix is needed.
 - Analytics and Vector are disabled to reduce the initial footprint on the
   single-node server.
 - Ingress is disabled. The Envoy Service remains internal; after installation,

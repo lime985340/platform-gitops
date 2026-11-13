@@ -16,6 +16,8 @@ spec:
       values: |
         manager:
           replicas: 1
+          nodeSelector:
+            kubernetes.io/arch: arm64
 
         metrics:
           enable: false

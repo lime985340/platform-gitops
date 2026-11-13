@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: supabase-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: oci-supabase
+  source:
+    repoURL: https://supabase-community.github.io/supabase-kubernetes
+    chart: supabase-operator
+    targetRevision: 0.8.4
+    helm:
+      releaseName: supabase-operator
+      values: |
+        manager:
+          replicas: 1
+
+        metrics:
+          enable: false
+
+        prometheus:
+          enable: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: supabase-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

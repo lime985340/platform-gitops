@@ -1,17 +1,29 @@
-# Supabase on OCI Osaka K3s
+# Supabase GitOps deployments
 
-This deployment is isolated from the repository's existing `argocd/` root. The
-normal root Application points at `argocd/` and will not discover
-`clusters/oci-osaka/argocd/`; the Supabase Applications below therefore target
-the single-node OCI Osaka K3s cluster only.
+Supabase is managed in both Kubernetes clusters:
 
-Supabase is installed with the [community Kubernetes Operator](https://github.com/supabase-community/supabase-kubernetes).
-Supabase's [self-hosting documentation](https://supabase.com/docs/guides/self-hosting)
+- The existing platform cluster receives the Applications under
+  `argocd/applications/` through the repository's normal root Application. Its
+  default storage class is `standard`, and Cilium egress policies are managed
+  with the other platform policies.
+- The single-node OCI Osaka K3s cluster receives the Applications under
+  `clusters/oci-osaka/argocd/` through its separate root Application. It uses
+  `local-path` storage on the instance's boot disk and pins Pods to ARM64 nodes.
+
+Both clusters use the community Kubernetes Operator and matching chart version
+`0.8.4`. Supabase's [self-hosting documentation](https://supabase.com/docs/guides/self-hosting)
 recommends Docker and identifies Kubernetes as a community-maintained project.
-The Operator is currently early-stage, so review its upgrade notes before
-changing the pinned chart version.
+The Operator is early-stage; review its upgrade notes before changing versions.
 
-## Bootstrap
+## Existing platform cluster
+
+After the change is merged to `main`, the existing root Application discovers
+the Supabase Applications automatically. It installs the Operator first and
+waits for its Application health before syncing the project chart. The
+platform's Cilium policy permits API access from the Operator, internal
+Supabase component traffic, and HTTP(S) egress from Edge Functions.
+
+## OCI Osaka K3s bootstrap
 
 The OCI Argo CD instance must be able to read the private GitHub repository
 before its root Application is applied. In that cluster's Argo CD UI, add
@@ -26,30 +38,26 @@ once from a machine with access to the OCI cluster:
 kubectl apply -f bootstrap/argocd-oci-osaka-root.yaml
 ```
 
-That root loads only the OCI AppProject and Supabase Applications in
-`clusters/oci-osaka/argocd/`. It does not install the repository's other
+That root loads only the OCI Argo CD settings, AppProject, and Supabase
+Applications in `clusters/oci-osaka/argocd/`. It does not install the other
 platform components or workloads.
 
-## Configuration
+## Shared configuration
 
-- Operator and project charts are pinned to `0.8.4` and installed in separate
-  sync waves so the CRDs are installed before the Supabase project.
-- OCI Argo CD restores health checks for child `Application` resources and the
-  Operator's `Ready` conditions. This lets the root wait for the Operator and
-  its CRDs before syncing the Supabase project chart.
-- The Operator and Supabase component Pods have
-  `kubernetes.io/arch: arm64` node selectors. Their chart-pinned images publish
-  `linux/arm64` manifests; the container runtime selects those manifests from
-  the normal image tags, so no architecture-specific image suffix is needed.
-- Analytics and Vector are disabled to reduce the initial footprint on the
-  single-node server.
-- Ingress is disabled. The Envoy Service remains internal; after installation,
+- Operator and project charts are pinned to `0.8.4`. The Operator installs
+  CRDs before the project chart is synced.
+- Both deployments disable Analytics and Vector to reduce the initial
+  footprint.
+- Ingress is disabled. The Envoy Service remains internal. After installation,
   use `kubectl -n supabase port-forward svc/supabase-envoy 8000:8000` to open
   Studio and the API at `http://localhost:8000`.
 - PostgreSQL requests `20Gi`, Storage requests `5Gi`, and Studio requests
-  `1Gi`, using K3s `local-path` storage on the instance's existing boot disk.
-  These claims share the node filesystem; they are not a separate OCI block
-  volume and do not provide a backup or high-availability arrangement.
+  `1Gi`. The existing platform cluster uses `standard`; OCI uses K3s
+  `local-path`. OCI claims share the node's boot disk rather than a separate
+  block volume, and neither setup provides backups or high availability.
+- OCI Pods use `kubernetes.io/arch: arm64`. Their chart-pinned images publish
+  `linux/arm64` manifests; the container runtime selects the matching image
+  from the normal image tags.
 - The Operator creates database, Studio, and API credentials as Kubernetes
   Secrets. Keep their values out of Git and retrieve them from the `supabase`
   namespace when needed.

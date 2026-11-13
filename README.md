@@ -6,8 +6,8 @@ never committed to Git; only encrypted `SealedSecret` data is stored.
 
 Cluster and Argo CD installation prerequisites are documented in
 [`docs/cluster-bootstrap.md`](docs/cluster-bootstrap.md).
-The isolated Supabase deployment for the OCI Osaka K3s cluster is documented in
-[`docs/supabase.md`](docs/supabase.md).
+The Supabase deployments for the existing platform cluster and OCI Osaka K3s
+cluster are documented in [`docs/supabase.md`](docs/supabase.md).
 Sealed Secrets recovery is documented in
 [`docs/sealed-secrets-recovery.md`](docs/sealed-secrets-recovery.md).
 The Controller public certificate and GitLab variable setup are described in

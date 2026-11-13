@@ -1,0 +1,33 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-supabase-internal-egress
+spec:
+  description: Allow Supabase components to communicate within their namespace.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: supabase
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: supabase
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ccnp-allow-supabase-functions-internet-egress
+spec:
+  description: Allow Supabase Edge Functions to call external HTTP(S) services.
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: supabase
+      k8s:app.kubernetes.io/component: functions
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP

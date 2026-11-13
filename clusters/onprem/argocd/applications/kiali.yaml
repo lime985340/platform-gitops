@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/lime985340/platform-gitops.git
     targetRevision: refs/heads/main
-    path: platform/observability/kiali
+    path: clusters/onprem/platform/observability/kiali
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system

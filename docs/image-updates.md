@@ -48,18 +48,18 @@ sh ci/update-image-tag.sh
 The supported paths are:
 
 ~~~text
-workloads/atmo/api/environments/dev/kustomization.yaml
-workloads/atmo/api/environments/prod/kustomization.yaml
-workloads/atmo/web/environments/dev/kustomization.yaml
-workloads/atmo/web/environments/prod/kustomization.yaml
-workloads/neople-game-analytics/api/environments/dev/kustomization.yaml
-workloads/neople-game-analytics/api/environments/prod/kustomization.yaml
-workloads/neople-game-analytics/web/environments/dev/kustomization.yaml
-workloads/neople-game-analytics/web/environments/prod/kustomization.yaml
-workloads/ontology-asal-agent/api/environments/dev/kustomization.yaml
-workloads/ontology-asal-agent/api/environments/prod/kustomization.yaml
-workloads/ontology-asal-agent/web/environments/dev/kustomization.yaml
-workloads/ontology-asal-agent/web/environments/prod/kustomization.yaml
+clusters/onprem/workloads/atmo/api/environments/dev/kustomization.yaml
+clusters/onprem/workloads/atmo/api/environments/prod/kustomization.yaml
+clusters/onprem/workloads/atmo/web/environments/dev/kustomization.yaml
+clusters/onprem/workloads/atmo/web/environments/prod/kustomization.yaml
+clusters/onprem/workloads/neople-game-analytics/api/environments/dev/kustomization.yaml
+clusters/onprem/workloads/neople-game-analytics/api/environments/prod/kustomization.yaml
+clusters/onprem/workloads/neople-game-analytics/web/environments/dev/kustomization.yaml
+clusters/onprem/workloads/neople-game-analytics/web/environments/prod/kustomization.yaml
+clusters/onprem/workloads/ontology-asal-agent/api/environments/dev/kustomization.yaml
+clusters/onprem/workloads/ontology-asal-agent/api/environments/prod/kustomization.yaml
+clusters/onprem/workloads/ontology-asal-agent/web/environments/dev/kustomization.yaml
+clusters/onprem/workloads/ontology-asal-agent/web/environments/prod/kustomization.yaml
 ~~~
 
 ## Neople Game Analytics service branch flow
@@ -196,7 +196,7 @@ APPLICATION=atmo WORKLOAD=api ENVIRONMENT=dev IMAGE_TAG="$CI_COMMIT_SHA" \
 
 git config user.name "gitlab-ci[bot]"
 git config user.email "gitlab-ci[bot]@users.noreply.gitlab.com"
-git add workloads/atmo/api/environments/dev/kustomization.yaml
+git add clusters/onprem/workloads/atmo/api/environments/dev/kustomization.yaml
 git commit -m "chore: deploy atmo-api ${CI_COMMIT_SHA}"
 git -c credential.helper= -c http.followRedirects=false \
   push origin "HEAD:$GITOPS_BRANCH"

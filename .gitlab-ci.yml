@@ -151,23 +151,23 @@ seal:workload-secrets:
       git config user.name "gitlab-ci[bot]"
       git config user.email "gitlab-ci[bot]@users.noreply.gitlab.com"
       git add \
-        workloads/atmo/api/environments/dev/sealed-secrets.yaml \
-        workloads/atmo/api/environments/prod/sealed-secrets.yaml \
-        workloads/atmo/web/environments/dev/sealed-secrets.yaml \
-        workloads/atmo/web/environments/prod/sealed-secrets.yaml \
-        workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml \
-        workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml \
-        workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml \
-        workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml \
-        workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml \
-        workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml \
-        workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml \
-        workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml \
-        workloads/q-interior/api/environments/dev/sealed-secrets.yaml \
-        workloads/q-interior/api/environments/prod/sealed-secrets.yaml \
-        workloads/q-interior/web/environments/dev/sealed-secrets.yaml \
-        workloads/q-interior/web/environments/prod/sealed-secrets.yaml \
-        platform/graphdb/sealed-secret.yaml
+        clusters/onprem/workloads/atmo/api/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/atmo/api/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/workloads/atmo/web/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/atmo/web/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/workloads/q-interior/api/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/q-interior/api/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/workloads/q-interior/web/environments/dev/sealed-secrets.yaml \
+        clusters/onprem/workloads/q-interior/web/environments/prod/sealed-secrets.yaml \
+        clusters/onprem/platform/graphdb/sealed-secret.yaml
 
       if git diff --cached --quiet; then
         echo "No SealedSecret changes to commit"

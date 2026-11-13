@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/lime985340/platform-gitops.git
     targetRevision: refs/heads/main
-    path: argocd
+    path: clusters/onprem/argocd
     directory:
       recurse: true
 

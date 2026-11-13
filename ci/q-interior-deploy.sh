@@ -2,7 +2,7 @@
 set -eu
 case "$Q_ACTION" in deploy-api) workload=api ;; deploy-web) workload=web ;; *) exit 1 ;; esac
 case "$Q_ENVIRONMENT" in dev|prod) ;; *) exit 1 ;; esac
-overlay="workloads/q-interior/$workload/environments/$Q_ENVIRONMENT"
+overlay="clusters/onprem/workloads/q-interior/$workload/environments/$Q_ENVIRONMENT"
 grep -q 'encryptedData:' "$overlay/sealed-secrets.yaml" || { echo 'Seal Q Interior secrets before enabling deployment' >&2; exit 1; }
 if [ "$workload" = api ]; then
   grep -q 'name: q-interior-db-secret' "$overlay/sealed-secrets.yaml" || exit 1
@@ -21,7 +21,7 @@ if [ "$workload" = api ]; then
   fi
   . ci/q-interior-neon-host.sh
   neon_host=$(q_interior_neon_host_from_env "$q_db_env")
-  policy="platform/policies/allow-q-interior-api-$Q_ENVIRONMENT-db-egress.yaml"
+  policy="clusters/onprem/platform/policies/allow-q-interior-api-$Q_ENVIRONMENT-db-egress.yaml"
   sed -i -E "s/(matchName: ).*/\1$neon_host/" "$policy"
   git add "$policy"
   case "$Q_ENVIRONMENT" in
@@ -30,7 +30,7 @@ if [ "$workload" = api ]; then
   esac
   if [ -n "$mail_host" ]; then
     printf '%s' "$mail_host" | grep -Eq '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$' || exit 1
-    mail_policy="platform/policies/allow-q-interior-api-$Q_ENVIRONMENT-mail-egress.yaml"
+    mail_policy="clusters/onprem/platform/policies/allow-q-interior-api-$Q_ENVIRONMENT-mail-egress.yaml"
     sed -i -E "s/(matchName: ).*/\1$mail_host/" "$mail_policy"
     git add "$mail_policy"
   fi

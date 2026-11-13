@@ -2,8 +2,8 @@
 
 Supabase is managed in both Kubernetes clusters:
 
-- The existing platform cluster receives the Applications under
-  `argocd/applications/` through the repository's normal root Application. Its
+- The on-prem cluster receives the Applications under
+  `clusters/onprem/argocd/applications/` through the repository's normal root Application. Its
   default storage class is `standard`, and Cilium egress policies are managed
   with the other platform policies.
 - The single-node OCI Osaka K3s cluster receives the Applications under
@@ -15,13 +15,16 @@ Both clusters use the community Kubernetes Operator and matching chart version
 recommends Docker and identifies Kubernetes as a community-maintained project.
 The Operator is early-stage; review its upgrade notes before changing versions.
 
-## Existing platform cluster
+## On-prem cluster
 
-After the change is merged to `main`, the existing root Application discovers
-the Supabase Applications automatically. It installs the Operator first and
-waits for its Application health before syncing the project chart. The
-platform's Cilium policy permits API access from the Operator, internal
-Supabase component traffic, and HTTP(S) egress from Edge Functions.
+Before reusing the on-prem cluster, apply
+`bootstrap/argocd-onprem-root.yaml` once so its root Application reads
+`clusters/onprem/argocd/`. After the change is merged to `main`, that root
+Application discovers the Supabase Applications automatically. It installs
+the Operator first and waits for its Application health before syncing the
+project chart. The platform's Cilium policy permits API access from the
+Operator, internal Supabase component traffic, and HTTP(S) egress from Edge
+Functions.
 
 ## OCI Osaka K3s bootstrap
 

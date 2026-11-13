@@ -17,19 +17,19 @@ Ambient는 노드당 L4 `ztunnel`을 사용해 mTLS, workload identity, L4 인�
 
 ## 현재 GitOps 상태
 
-- `argocd/applications` 아래에 `istio-base`, `istiod`, `istio-cni`, `ztunnel`을
+- `clusters/onprem/argocd/applications` 아래에 `istio-base`, `istiod`, `istio-cni`, `ztunnel`을
   공식 Istio Helm Chart `1.29.5`로 관리하는 Application이 있습니다.
-- `argocd/applicationsets/platform.yaml`의 Platform ApplicationSet은
-  `platform/policies`와 Cloudflare 경로만 생성합니다.
-- `argocd/applicationsets/workloads.yaml`은
+- `clusters/onprem/argocd/applicationsets/platform.yaml`의 Platform ApplicationSet은
+  `clusters/onprem/platform/policies`와 Cloudflare 경로만 생성합니다.
+- `clusters/onprem/argocd/applicationsets/workloads.yaml`은
   `feature/clean-gitops-layout`의
-  `workloads/*/*/environments/*`를 동기화하며, `managedNamespaceMetadata`로
+  `clusters/onprem/workloads/*/*/environments/*`를 동기화하며, `managedNamespaceMetadata`로
   각 생성 Namespace에 `istio.io/dataplane-mode=ambient`를 붙입니다.
-- `platform/policies`는 Cilium `CiliumClusterwideNetworkPolicy`를 사용하고,
+- `clusters/onprem/platform/policies`는 Cilium `CiliumClusterwideNetworkPolicy`를 사용하고,
   Ambient HBONE 포트·kubelet health probe·Istio control plane 통신 예외를
   별도 정책으로 관리합니다.
-- `workloads/cli-proxy/api`는 공용 CLI Proxy API workload이고,
-  `workloads/ontology-asal-agent/api`는 애플리케이션 workload입니다.
+- `clusters/onprem/workloads/cli-proxy/api`는 공용 CLI Proxy API workload이고,
+  `clusters/onprem/workloads/ontology-asal-agent/api`는 애플리케이션 workload입니다.
 - CLI Proxy API에는 Dev/Prod 모두 `PeerAuthentication(STRICT)`와
   `AuthorizationPolicy`가 추가되어 해당 환경의 Ontology API ServiceAccount만
   포트 `8317`로 호출할 수 있게 했습니다.

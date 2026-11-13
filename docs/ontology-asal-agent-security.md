@@ -148,7 +148,7 @@ GraphDB를 노트북에서 별도로 실행하거나 Google 계정으로 로그�
 2. GraphDB Helm Chart가 요구하는 초기 사용자 설정(`users.js` 등)과 provisioning
    인증 정보를 Secret으로 준비합니다. Chart 버전에 맞는 키 이름과 형식을
    사용합니다.
-3. `argocd/applications/graphdb.yaml`의 운영 overlay에서 GraphDB security를
+3. `clusters/onprem/argocd/applications/graphdb.yaml`의 운영 overlay에서 GraphDB security를
    활성화합니다.
 4. 초기 사용자 Secret, GraphDB license, API 런타임 File 변수를 평문이 아닌
    GitLab File Variable/승인된 Secret 저장소에 등록합니다.
@@ -190,7 +190,7 @@ GraphDB UI와 repository 목록은 license가 없어도 일부 확인할 수 있
 `LIME_GRAPHDB_FREE_v11.3.license`는 GitLab 프로젝트의 `Settings` → `CI/CD` → `Secure Files`에서
 원본 파일로 업로드합니다. CI는 이 파일을 Job Token으로 다운로드해
 `kubectl create secret --from-file`에 직접 전달합니다. CI가 생성한 암호화 결과만
-`platform/graphdb/sealed-secret.yaml`에 저장하며, Git에는 license 원문이나
+`clusters/onprem/platform/graphdb/sealed-secret.yaml`에 저장하며, Git에는 license 원문이나
 Base64 문자열을 저장하지 않습니다.
 
 Secure File이 없거나 다운로드되지 않으면 manifest 검증에서 sealing job이 실패합니다.

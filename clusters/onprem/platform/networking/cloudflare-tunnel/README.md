@@ -38,7 +38,7 @@ affects readiness and does not restart the pod. Kubernetes still restarts the
 container if the `cloudflared` process exits. Quick Tunnels also have no uptime
 guarantee, and the URL changes if the pod is recreated.
 
-The Cilium policy under `platform/policies` allows the tunnel's required
+The Cilium policy under `clusters/onprem/platform/policies` allows the tunnel's required
 outbound TCP and UDP traffic on port `7844` to the Cloudflare edge.
 
 To find the current URL after a restart, inspect the pod logs:

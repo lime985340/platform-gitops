@@ -5,7 +5,7 @@ import yaml
 root = pathlib.Path(__file__).resolve().parent.parent
 for workload in ("api", "web"):
     for environment in ("dev", "prod"):
-        overlay = root / "workloads/q-interior" / workload / "environments" / environment
+        overlay = root / "clusters/onprem/workloads/q-interior" / workload / "environments" / environment
         documents = list(yaml.safe_load_all(subprocess.check_output(
             ["kubectl", "kustomize", str(overlay)], text=True
         )))
@@ -51,7 +51,7 @@ assert not (root / "ci/q-interior-android.sh").exists()
 assert not (root / "ci/q-interior-ios.sh").exists()
 
 for environment in ("dev", "prod"):
-    policy = yaml.safe_load((root / f"platform/policies/allow-q-interior-api-{environment}-mail-egress.yaml").read_text())
+    policy = yaml.safe_load((root / f"clusters/onprem/platform/policies/allow-q-interior-api-{environment}-mail-egress.yaml").read_text())
     assert policy["spec"]["endpointSelector"]["matchLabels"]["k8s:io.kubernetes.pod.namespace"] == f"q-interior-api-{environment}"
     mail = policy["spec"]["egress"][1]
     assert mail["toPorts"][0]["ports"] == [{"port": "587", "protocol": "TCP"}]

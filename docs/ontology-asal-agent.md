@@ -4,7 +4,7 @@
 [`ontology-asal-agent-security.md`](ontology-asal-agent-security.md)를 참조합니다.
 
 The active cluster follows `main`, so this workload
-is managed under `workloads/ontology-asal-agent/{api,web}/environments/{dev,prod}`.
+is managed under `clusters/onprem/workloads/ontology-asal-agent/{api,web}/environments/{dev,prod}`.
 
 ## Current test flow
 
@@ -64,7 +64,7 @@ LLM_MODEL=<proxy model alias>
 
 The GitOps sealing job encrypts only the API runtime values that still require a
 Secret, such as GraphDB reader credentials, with the Sealed Secrets controller
-certificate. Cilium policies in `platform/policies` provide the Proxy access
+certificate. Cilium policies in `clusters/onprem/platform/policies` provide the Proxy access
 allow-list. The shared group registry variables continue to create
 `gitlab-regcred` for both agent Namespaces.
 

@@ -38,7 +38,7 @@ case "$IMAGE_TAG" in
     ;;
 esac
 
-file="workloads/${APPLICATION}/${WORKLOAD}/environments/${ENVIRONMENT}/kustomization.yaml"
+file="clusters/onprem/workloads/${APPLICATION}/${WORKLOAD}/environments/${ENVIRONMENT}/kustomization.yaml"
 test -f "$file" || {
   echo "Image configuration not found: $file" >&2
   exit 1

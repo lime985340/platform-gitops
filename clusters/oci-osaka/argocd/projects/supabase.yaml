@@ -6,13 +6,23 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
 spec:
-  description: Supabase for the single-node OCI Osaka K3s cluster.
+  description: Project-isolated Supabase deployments for the OCI Osaka K3s cluster.
   sourceRepos:
     - https://supabase-community.github.io/supabase-kubernetes
   destinations:
     - namespace: supabase-operator
       server: https://kubernetes.default.svc
     - namespace: supabase
+      server: https://kubernetes.default.svc
+    - namespace: supabase-q-interior-dev
+      server: https://kubernetes.default.svc
+    - namespace: supabase-neople-game-analytics
+      server: https://kubernetes.default.svc
+    - namespace: supabase-nyc-taxi
+      server: https://kubernetes.default.svc
+    - namespace: supabase-lime-game
+      server: https://kubernetes.default.svc
+    - namespace: supabase-lime-mimir
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ''

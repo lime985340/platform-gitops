@@ -1,0 +1,187 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: supabase-projects
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - list:
+        elements:
+          # Reuse the already-provisioned empty Supabase stack for lime_atmos.
+          # Keep its Helm release/resource names so the existing PVCs are retained.
+          - appName: atmo
+            neonProject: lime_atmos
+            namespace: supabase
+            releaseName: supabase
+            fullName: supabase
+            databaseStorage: 20Gi
+            objectStorage: 5Gi
+            studioStorage: 1Gi
+          - appName: q-interior-dev
+            neonProject: q-interior-dev
+            namespace: supabase-q-interior-dev
+            releaseName: q-interior-dev
+            fullName: q-interior-dev
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
+          - appName: neople-game-analytics
+            neonProject: neople-game-analytics
+            namespace: supabase-neople-game-analytics
+            releaseName: neople-game-analytics
+            fullName: neople-game-analytics
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
+          - appName: nyc-taxi
+            neonProject: nyc_taxi
+            namespace: supabase-nyc-taxi
+            releaseName: nyc-taxi
+            fullName: nyc-taxi
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
+          - appName: lime-game
+            neonProject: lime_game
+            namespace: supabase-lime-game
+            releaseName: lime-game
+            fullName: lime-game
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
+          - appName: lime-mimir
+            neonProject: lime_mimir
+            namespace: supabase-lime-mimir
+            releaseName: lime-mimir
+            fullName: lime-mimir
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
+  template:
+    metadata:
+      name: '{{.appName}}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: "1"
+        gitops.lime985340/neon-project: '{{.neonProject}}'
+    spec:
+      project: oci-supabase
+      source:
+        repoURL: https://supabase-community.github.io/supabase-kubernetes
+        chart: supabase-project
+        targetRevision: 0.8.4
+        helm:
+          releaseName: '{{.releaseName}}'
+          values: |
+            fullnameOverride: {{.fullName | quote}}
+
+            project:
+              publicUrl: http://localhost:8000
+              migrations:
+                pod:
+                  spec:
+                    nodeSelector:
+                      kubernetes.io/arch: arm64
+
+            ingress:
+              enable: false
+
+            singleDatabase:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+              storage:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: local-path
+                resources:
+                  requests:
+                    storage: {{.databaseStorage}}
+
+            rest:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+
+            meta:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+
+            realtime:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+
+            auth:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+
+            supavisor:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+
+            edgeRuntime:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+
+            envoy:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+
+            storage:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+              storage:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: local-path
+                resources:
+                  requests:
+                    storage: {{.objectStorage}}
+
+            studio:
+              pod:
+                spec:
+                  nodeSelector:
+                    kubernetes.io/arch: arm64
+              storage:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: local-path
+                resources:
+                  requests:
+                    storage: {{.studioStorage}}
+
+            analytics:
+              enable: false
+
+            vector:
+              enable: false
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

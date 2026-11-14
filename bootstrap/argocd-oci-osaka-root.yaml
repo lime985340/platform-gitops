@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: bootstrap-oci-osaka
+  name: oci-osaka
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io

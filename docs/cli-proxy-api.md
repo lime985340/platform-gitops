@@ -9,9 +9,9 @@
 고정 버전, Deployment, Service, PVC, ConfigMap을 관리합니다.
 
 ```text
-workloads/cli-proxy/api/resources/
-workloads/cli-proxy/api/environments/dev/
-workloads/cli-proxy/api/environments/prod/
+clusters/onprem/workloads/cli-proxy/api/resources/
+clusters/onprem/workloads/cli-proxy/api/environments/dev/
+clusters/onprem/workloads/cli-proxy/api/environments/prod/
 ```
 
 환경별 Service DNS는 다음과 같습니다.

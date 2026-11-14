@@ -17,6 +17,7 @@ spec:
     - https://maven.ontotext.com/repository/helm-public/
     - https://blob.istio.io/istio-release/charts
     - https://kiali.org/helm-charts
+    - https://supabase-community.github.io/supabase-kubernetes
   destinations:
     - namespace: argocd
       server: https://kubernetes.default.svc
@@ -37,6 +38,10 @@ spec:
     - namespace: istio-system
       server: https://kubernetes.default.svc
     - namespace: kiali-operator
+      server: https://kubernetes.default.svc
+    - namespace: supabase-operator
+      server: https://kubernetes.default.svc
+    - namespace: supabase
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ''

@@ -1,7 +1,7 @@
 # GraphDB test deployment
 
 The current validation cluster uses the official Ontotext GraphDB Helm chart
-through `argocd/applications/graphdb.yaml` and synchronizes the GitOps
+through `clusters/onprem/argocd/applications/graphdb.yaml` and synchronizes the GitOps
 companion manifests from `main`.
 
 The feature cluster intentionally starts with GraphDB security disabled so the

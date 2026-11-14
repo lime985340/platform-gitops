@@ -9,7 +9,7 @@
 ## 사전 구성
 
 클러스터에는 Sealed Secrets Controller가 설치되어 있어야 합니다. 현재 저장소는
-`argocd/applications/sealed-secrets.yaml`의 Helm Chart Application으로 Controller를
+`clusters/onprem/argocd/applications/sealed-secrets.yaml`의 Helm Chart Application으로 Controller를
 관리합니다. Controller가 사용하는 Private Key는 클러스터 외부의 안전한 백업에도
 보관해야 하며 Git에는 저장하지 않습니다.
 
@@ -415,7 +415,7 @@ OpenAI-compatible API를 사용할 다른 서비스가 같은 환경의 Proxy Se
 호출할 수 있습니다.
 
 별도의 CLIProxyAPI Secret 변수는 사용하지 않습니다. Proxy는 외부에 공개하지
-않고 `platform/policies`의 Cilium 정책에서 온톨로지 API Pod만 환경별
+않고 `clusters/onprem/platform/policies`의 Cilium 정책에서 온톨로지 API Pod만 환경별
 `8317/TCP`로 접근하도록 제한합니다. Proxy의 Codex OAuth 인증정보는
 `cli-proxy-api-auth` PVC에 저장하며 GitLab CI나 Git에 넣지 않습니다.
 
@@ -451,19 +451,19 @@ PVC에 저장되므로 Pod 재생성마다 다시 로그인하지 않습니다.
 생성되는 파일은 다음과 같습니다.
 
 ```text
-workloads/atmo/api/environments/dev/sealed-secrets.yaml
-workloads/atmo/api/environments/prod/sealed-secrets.yaml
-workloads/atmo/web/environments/dev/sealed-secrets.yaml
-workloads/atmo/web/environments/prod/sealed-secrets.yaml
-workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml
-workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml
-workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
-workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
-workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml
-workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml
-workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml
-workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml
-platform/graphdb/sealed-secret.yaml
+clusters/onprem/workloads/atmo/api/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/atmo/api/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/atmo/web/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/atmo/web/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml
+clusters/onprem/platform/graphdb/sealed-secret.yaml
 ```
 
 파일 안에는 `encryptedData`만 저장되며 실제 값은 저장되지 않습니다.
@@ -493,7 +493,7 @@ SealedSecret의 이름과 Namespace는 암호화 시점과 적용 시점에 같�
 
 GraphDB license 반영 성공 여부는 Job 로그의
 `Generated encrypted SealedSecret graphdb/graphdb-license` 메시지와
-`platform/graphdb/sealed-secret.yaml`의 비어 있지 않은 `encryptedData`로
+`clusters/onprem/platform/graphdb/sealed-secret.yaml`의 비어 있지 않은 `encryptedData`로
 확인합니다. 암호문 외에 license 원문은 Git이나 로그에 남기지 않습니다.
 
 Secret 값은 GitLab CI/CD Variables에만 저장하며 Pipeline 입력 화면에는 입력하지

@@ -41,11 +41,11 @@ the target cluster. Then apply the repository's one-time root Application:
 ```powershell
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-kubectl apply -f .\bootstrap\argocd-root.yaml
+kubectl apply -f .\bootstrap\argocd-onprem-root.yaml
 ```
 
-`bootstrap/argocd-root.yaml` points Argo CD at the selected Git branch and
-recursively loads the manifests under `argocd/`. After this step, Argo CD
+`bootstrap/argocd-onprem-root.yaml` points Argo CD at the selected Git branch and
+recursively loads the manifests under `clusters/onprem/argocd/`. After this step, Argo CD
 creates the AppProjects, Applications, and ApplicationSets from Git.
 
 ## Branch selection

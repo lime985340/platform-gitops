@@ -194,8 +194,8 @@ seal_registry_secret() {
 }
 
 if [ "$q_secret_scope" = q-interior-dev ]; then
-  q_dev_api_output="workloads/q-interior/api/environments/dev/sealed-secrets.yaml"
-  q_dev_web_output="workloads/q-interior/web/environments/dev/sealed-secrets.yaml"
+  q_dev_api_output="clusters/onprem/workloads/q-interior/api/environments/dev/sealed-secrets.yaml"
+  q_dev_web_output="clusters/onprem/workloads/q-interior/web/environments/dev/sealed-secrets.yaml"
   q_db_env="${Q_INTERIOR_API_DEV_ENV:-}"
   reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_DEV_ENV"
   : > "$q_dev_api_output"
@@ -216,8 +216,8 @@ if [ "$q_secret_scope" = q-interior-dev ]; then
 fi
 
 if [ "$q_secret_scope" = q-interior-prod ]; then
-  q_prod_api_output="workloads/q-interior/api/environments/prod/sealed-secrets.yaml"
-  q_prod_web_output="workloads/q-interior/web/environments/prod/sealed-secrets.yaml"
+  q_prod_api_output="clusters/onprem/workloads/q-interior/api/environments/prod/sealed-secrets.yaml"
+  q_prod_web_output="clusters/onprem/workloads/q-interior/web/environments/prod/sealed-secrets.yaml"
   q_db_env="${Q_INTERIOR_API_PROD_ENV:-}"
   : "${q_db_env:?Q_INTERIOR_API_PROD_ENV must be supplied from the GitHub Secret Manager bundle}"
   reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_PROD_ENV"
@@ -239,7 +239,7 @@ if [ "$q_secret_scope" = q-interior-prod ]; then
 fi
 
 if [ "$q_secret_scope" = atmo-api-dev ]; then
-  dev_api_output="workloads/atmo/api/environments/dev/sealed-secrets.yaml"
+  dev_api_output="clusters/onprem/workloads/atmo/api/environments/dev/sealed-secrets.yaml"
   : > "$dev_api_output"
   seal_env_secret "$dev_api_output" atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB_ENV:-}"
   seal_env_secret "$dev_api_output" atmo-api-dev atmo-jwt-secret "${ATMO_API_DEV_JWT_ENV:-}"
@@ -249,7 +249,7 @@ if [ "$q_secret_scope" = atmo-api-dev ]; then
 fi
 
 if [ "$q_secret_scope" = atmo-api-prod ]; then
-  prod_api_output="workloads/atmo/api/environments/prod/sealed-secrets.yaml"
+  prod_api_output="clusters/onprem/workloads/atmo/api/environments/prod/sealed-secrets.yaml"
   : > "$prod_api_output"
   seal_env_secret "$prod_api_output" atmo-api-prod atmo-db-secret "${ATMO_API_PROD_DB_ENV:-}"
   seal_env_secret "$prod_api_output" atmo-api-prod atmo-jwt-secret "${ATMO_API_PROD_JWT_ENV:-}"
@@ -258,18 +258,18 @@ if [ "$q_secret_scope" = atmo-api-prod ]; then
   exit 0
 fi
 
-dev_api_output="workloads/atmo/api/environments/dev/sealed-secrets.yaml"
-prod_api_output="workloads/atmo/api/environments/prod/sealed-secrets.yaml"
-dev_web_output="workloads/atmo/web/environments/dev/sealed-secrets.yaml"
-prod_web_output="workloads/atmo/web/environments/prod/sealed-secrets.yaml"
-dev_neople_api_output="workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml"
-prod_neople_api_output="workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml"
-dev_neople_web_output="workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml"
-prod_neople_web_output="workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml"
-dev_ontology_agent_output="workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml"
-prod_ontology_agent_output="workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml"
-dev_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml"
-prod_ontology_agent_web_output="workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml"
+dev_api_output="clusters/onprem/workloads/atmo/api/environments/dev/sealed-secrets.yaml"
+prod_api_output="clusters/onprem/workloads/atmo/api/environments/prod/sealed-secrets.yaml"
+dev_web_output="clusters/onprem/workloads/atmo/web/environments/dev/sealed-secrets.yaml"
+prod_web_output="clusters/onprem/workloads/atmo/web/environments/prod/sealed-secrets.yaml"
+dev_neople_api_output="clusters/onprem/workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml"
+prod_neople_api_output="clusters/onprem/workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml"
+dev_neople_web_output="clusters/onprem/workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml"
+prod_neople_web_output="clusters/onprem/workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml"
+dev_ontology_agent_output="clusters/onprem/workloads/ontology-asal-agent/api/environments/dev/sealed-secrets.yaml"
+prod_ontology_agent_output="clusters/onprem/workloads/ontology-asal-agent/api/environments/prod/sealed-secrets.yaml"
+dev_ontology_agent_web_output="clusters/onprem/workloads/ontology-asal-agent/web/environments/dev/sealed-secrets.yaml"
+prod_ontology_agent_web_output="clusters/onprem/workloads/ontology-asal-agent/web/environments/prod/sealed-secrets.yaml"
 
 : > "$dev_api_output"
 seal_env_secret "$dev_api_output" atmo-api-dev atmo-db-secret "${ATMO_API_DEV_DB_ENV:-}"
@@ -357,8 +357,8 @@ for q_environment in dev prod; do
   esac
   if [ -n "$q_db_env" ]; then
     reject_placeholder_file "$q_db_env" "Q_INTERIOR_API_${q_environment}_ENV"
-    q_api_output="workloads/q-interior/api/environments/$q_environment/sealed-secrets.yaml"
-    q_web_output="workloads/q-interior/web/environments/$q_environment/sealed-secrets.yaml"
+    q_api_output="clusters/onprem/workloads/q-interior/api/environments/$q_environment/sealed-secrets.yaml"
+    q_web_output="clusters/onprem/workloads/q-interior/web/environments/$q_environment/sealed-secrets.yaml"
     : > "$q_api_output"
     seal_env_secret "$q_api_output" "q-interior-api-$q_environment" q-interior-db-secret "$q_db_env"
     seal_env_secret_if_configured \

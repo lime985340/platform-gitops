@@ -69,14 +69,14 @@ Sealing Job은 각 서비스의 환경별 `sealed-secrets.yaml`을 갱신합니�
 대표 경로는 다음과 같고, Neople·Ontology 경로도 같은 방식으로 함께 갱신됩니다.
 
 ```text
-workloads/atmo/api/environments/dev/sealed-secrets.yaml
-workloads/atmo/api/environments/prod/sealed-secrets.yaml
-workloads/atmo/web/environments/dev/sealed-secrets.yaml
-workloads/atmo/web/environments/prod/sealed-secrets.yaml
-workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml
-workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml
-workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
-workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/atmo/api/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/atmo/api/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/atmo/web/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/atmo/web/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/api/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/api/environments/prod/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/web/environments/dev/sealed-secrets.yaml
+clusters/onprem/workloads/neople-game-analytics/web/environments/prod/sealed-secrets.yaml
 ```
 
 `encryptedData: {}` 상태의 파일은 임시 Placeholder이므로 운영 Secret으로

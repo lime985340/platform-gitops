@@ -6,6 +6,8 @@ never committed to Git; only encrypted `SealedSecret` data is stored.
 
 Cluster and Argo CD installation prerequisites are documented in
 [`docs/cluster-bootstrap.md`](docs/cluster-bootstrap.md).
+The Supabase deployments for the existing platform cluster and OCI Osaka K3s
+cluster are documented in [`docs/supabase.md`](docs/supabase.md).
 Sealed Secrets recovery is documented in
 [`docs/sealed-secrets-recovery.md`](docs/sealed-secrets-recovery.md).
 The Controller public certificate and GitLab variable setup are described in
@@ -80,12 +82,12 @@ Publicdata Secret을 사용하고 API/Web의 private 이미지 Pull에는
 
 GitLab.com shared runner로 충분하므로 현재 저장소에는 GitLab Runner Helm
 Chart와 Runner ServiceAccount를 추가하지 않습니다. Sealed Secrets
-Controller 설치는 `argocd/applications/sealed-secrets.yaml`의 Helm
+Controller 설치는 `clusters/onprem/argocd/applications/sealed-secrets.yaml`의 Helm
 Application이 담당합니다.
 
 ### Secret 변경 후 API 자동 재시작
 
-`argocd/applications/reloader.yaml`은 Stakater Reloader Helm Chart를 설치합니다.
+`clusters/onprem/argocd/applications/reloader.yaml`은 Stakater Reloader Helm Chart를 설치합니다.
 API Deployment에는 API가 실제로 참조하는 Secret 목록을
 `secret.reloader.stakater.com/reload` annotation으로 지정해 두었습니다.
 따라서 Secret sealing Pipeline이 새 `SealedSecret`을 Push하고 Argo CD가 동기화하면,
@@ -100,7 +102,7 @@ Web의 `VITE_*` 값은 이미지 빌드 시 번들에 포함되는 값이므로 
 
 ## Argo CD recursion and Kustomize
 
-The bootstrap Application in `bootstrap/argocd-root.yaml` uses:
+The bootstrap Application in `bootstrap/argocd-onprem-root.yaml` uses:
 
 ```yaml
 source:
@@ -110,8 +112,8 @@ source:
 ```
 
 This recursively discovers the Application, AppProject, and ApplicationSet
-YAML files under `argocd/`. It does not recursively render all directories
-under `platform/`.
+YAML files under `clusters/onprem/argocd/`. It does not recursively render all directories
+under `clusters/onprem/platform/`.
 
 The `platform` ApplicationSet generates the two Git-backed platform
 Applications (`policies` and `cloudflare-quick-tunnel`) from
@@ -145,7 +147,7 @@ The simplified sync-wave order is:
 | `2` | Workload ApplicationSet |
 | `3` | Cloudflare Quick Tunnel |
 
-The workload layout keeps six Kustomizations under `workloads/atmo/`: one
+The workload layout keeps six Kustomizations under `clusters/onprem/workloads/atmo/`: one
 resource composition file for API, one for Web, and one dev/prod environment
 file for each service. The shared patches are applied once in the service
 resource composition, while each environment only sets its namespace and image
@@ -167,7 +169,7 @@ Platform components use one of two deployment styles:
   Their Argo CD Application files define the chart repository, chart version,
   and Helm values. The chart renders the underlying Deployments, Services, and
   configuration resources.
-- Cloudflare Quick Tunnel uses raw Kubernetes YAML under `platform/`. The
+- Cloudflare Quick Tunnel uses raw Kubernetes YAML under `clusters/onprem/platform/`. The
   `platform` ApplicationSet generates its Argo CD Application, while
   `deployment.yaml` defines the resource and pinned container image.
 - Redis uses the Bitnami Redis Helm Chart. Its Argo CD Application defines the
@@ -262,14 +264,14 @@ Hub OCI registry, Argo CD installations that do not auto-discover public OCI
 sources must register `registry-1.docker.io/bitnamicharts` as a Helm OCI
 repository with `enableOCI: true` outside this repository.
 
-The only raw `Deployment` resource under `platform/` is currently
+The only raw `Deployment` resource under `clusters/onprem/platform/` is currently
 `cloudflared`. The Atmo API and Web Deployments are workload resources, while
 Cilium policies and Ingresses are raw Kubernetes resources by nature and do
 not need Helm Charts.
 
 ### Cilium policy scope
 
-`platform/policies` uses Cilium `CiliumClusterwideNetworkPolicy` resources for
+`clusters/onprem/platform/policies` uses Cilium `CiliumClusterwideNetworkPolicy` resources for
 the small test cluster. Non-system Pods start with default-deny Egress, and
 only the required flows are opened:
 
@@ -290,7 +292,7 @@ discover and collect metrics from multiple cluster components. In a larger
 production cluster, this exception should be narrowed further using specific
 service endpoints and Cilium FQDN policies.
 
-The bootstrap Application's recursion setting applies only to its `argocd/`
+The bootstrap Application's recursion setting applies only to its `clusters/onprem/argocd/`
 source. Platform raw resources are kept directly under their Application
 source directories.
 
@@ -302,7 +304,7 @@ creates the Kubernetes Secret objects.
 ## Validation
 
 The `validate:manifests` job renders the remaining Kustomize directories under
-`workloads/` and validates the raw YAML resources under `platform/`. The
+`clusters/onprem/workloads/` and validates the raw YAML resources under `clusters/onprem/platform/`. The
 validation does not require Secret values.
 
 ## Argo CD revision policy
@@ -323,8 +325,8 @@ files. Encrypted `SealedSecret` YAML is expected to be committed.
 The `neople-game-analytics` application uses the same workload layout as Atmo:
 
 ```text
-workloads/neople-game-analytics/api  -> FastAPI + daily data Worker CronJob
-workloads/neople-game-analytics/web  -> React + TypeScript static dashboard
+clusters/onprem/workloads/neople-game-analytics/api  -> FastAPI + daily data Worker CronJob
+clusters/onprem/workloads/neople-game-analytics/web  -> React + TypeScript static dashboard
 ```
 
 The API repository publishes

@@ -25,7 +25,7 @@ Controller Private Key는 기존 SealedSecret 복호화에 필요한 민감한 �
 
 ## 저장소의 Controller 설정
 
-`argocd/applications/sealed-secrets.yaml` 기준 설정은 다음과 같습니다.
+`clusters/onprem/argocd/applications/sealed-secrets.yaml` 기준 설정은 다음과 같습니다.
 
 ```text
 namespace: sealed-secrets
@@ -414,7 +414,7 @@ git status --short
 
 ## 참고
 
-- [`argocd/applications/sealed-secrets.yaml`](../argocd/applications/sealed-secrets.yaml)
+- [`clusters/onprem/argocd/applications/sealed-secrets.yaml`](../clusters/onprem/argocd/applications/sealed-secrets.yaml)
 - [`ci/seal-secrets.sh`](../ci/seal-secrets.sh)
 - [`sealed-secrets-recovery.md`](sealed-secrets-recovery.md)
 - [Sealed Secrets 공식 문서](https://github.com/bitnami-labs/sealed-secrets)

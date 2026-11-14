@@ -104,7 +104,7 @@ spec:
 
     - repoURL: https://github.com/lime985340/platform-gitops.git
       targetRevision: refs/heads/main
-      path: platform/graphdb
+      path: clusters/onprem/platform/graphdb
 
   destination:
     server: https://kubernetes.default.svc

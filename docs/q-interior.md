@@ -26,7 +26,7 @@ Firebase는 tester 배포입니다. Play Store/App Store 정식 출시는 별도
 
 API 공개 경로는 `/saerom/api/v1`, 서버 내부 경로는 `/api/v1`입니다. 웹 공개 경로는 `/saerom/`입니다. Traefik이 `/saerom`을 제거하고 각 서비스로 보냅니다. Cookie path는 공개 API 경로와 일치합니다.
 
-overlay는 `workloads/q-interior/{api,web}/environments/{dev,prod}`입니다. 기존 ApplicationSet이 자동 발견하므로 별도 앱 ApplicationSet을 만들지 않습니다. 기존 atmo와 동일하게 dev는 ingress 없이 port-forward 중심, prod는 path ingress를 준비했습니다. 실제 host는 기존 Traefik 진입점을 사용하며 새 도메인을 임의로 지정하지 않습니다.
+overlay는 `clusters/onprem/workloads/q-interior/{api,web}/environments/{dev,prod}`입니다. 기존 ApplicationSet이 자동 발견하므로 별도 앱 ApplicationSet을 만들지 않습니다. 기존 atmo와 동일하게 dev는 ingress 없이 port-forward 중심, prod는 path ingress를 준비했습니다. 실제 host는 기존 Traefik 진입점을 사용하며 새 도메인을 임의로 지정하지 않습니다.
 
 초기 replicas는 **0**입니다. Registry secret·DB secret이 비어 있는 overlay를 실제 운영 완료로 간주하지 않습니다. 첫 배포 명령은 필요한 암호화 secret과 Neon host를 검사한 뒤 image tag 및 replicas를 바꾸는 MR을 만듭니다. 배포 MR을 병합해야 Argo CD가 실제 반영합니다.
 

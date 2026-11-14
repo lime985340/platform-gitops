@@ -11,11 +11,11 @@ spec:
     - list:
         elements:
           - name: policies
-            path: platform/policies
+            path: clusters/onprem/platform/policies
             namespace: argocd
             syncWave: "-10"
           - name: cloudflare-quick-tunnel
-            path: platform/networking/cloudflare-tunnel
+            path: clusters/onprem/platform/networking/cloudflare-tunnel
             namespace: cloudflared
             syncWave: "3"
   template:

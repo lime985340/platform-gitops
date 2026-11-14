@@ -41,7 +41,7 @@ unset GHCR_READ_USERNAME GHCR_READ_TOKEN auth
 seal_namespace() {
   workload_path="$1"
   namespace="$2"
-  output="workloads/$workload_path/environments/$environment/sealed-secrets.yaml"
+  output="clusters/onprem/workloads/$workload_path/environments/$environment/sealed-secrets.yaml"
   plain_manifest="$tmp_dir/${namespace}-ghcr-regcred.yaml"
   sealed_manifest="$tmp_dir/${namespace}-ghcr-regcred-sealed.yaml"
   test -f "$output" || {

@@ -46,22 +46,6 @@ spec:
             databaseStorage: 1Gi
             objectStorage: 1Gi
             studioStorage: 512Mi
-          - appName: lime-game
-            neonProject: lime_game
-            namespace: supabase-lime-game
-            releaseName: lime-game
-            fullName: lime-game
-            databaseStorage: 1Gi
-            objectStorage: 1Gi
-            studioStorage: 512Mi
-          - appName: lime-mimir
-            neonProject: lime_mimir
-            namespace: supabase-lime-mimir
-            releaseName: lime-mimir
-            fullName: lime-mimir
-            databaseStorage: 1Gi
-            objectStorage: 1Gi
-            studioStorage: 512Mi
   template:
     metadata:
       name: '{{.appName}}'

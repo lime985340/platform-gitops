@@ -20,10 +20,6 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: supabase-nyc-taxi
       server: https://kubernetes.default.svc
-    - namespace: supabase-lime-game
-      server: https://kubernetes.default.svc
-    - namespace: supabase-lime-mimir
-      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace

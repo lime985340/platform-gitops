@@ -50,6 +50,7 @@ def main() -> int:
         print("No OCI GHCR images were found", file=sys.stderr)
         return 1
 
+    failures: list[str] = []
     for image, tag in sorted(images):
         scope = urlencode({"scope": f"repository:{image}:pull", "service": "ghcr.io"})
         try:
@@ -79,12 +80,17 @@ def main() -> int:
                 raise ValueError("image does not publish linux/arm64")
             print(f"Verified {image}:{tag}: {', '.join(sorted(platforms))}")
         except HTTPError as error:
-            print(f"Cannot verify {image}:{tag}: GHCR HTTP {error.code}", file=sys.stderr)
-            return 1
+            message = f"{image}:{tag}: GHCR HTTP {error.code}"
+            print(f"Cannot verify {message}", file=sys.stderr)
+            failures.append(message)
         except (URLError, ValueError, KeyError) as error:
-            print(f"Cannot verify {image}:{tag}: {error}", file=sys.stderr)
-            return 1
+            message = f"{image}:{tag}: {error}"
+            print(f"Cannot verify {message}", file=sys.stderr)
+            failures.append(message)
 
+    if failures:
+        print(f"{len(failures)} OCI image tag(s) are not deployable on ARM64", file=sys.stderr)
+        return 1
     return 0
 
 

@@ -22,6 +22,15 @@ spec:
             databaseStorage: 20Gi
             objectStorage: 5Gi
             studioStorage: 1Gi
+          # Keep Atmo development data isolated from the migrated production DB.
+          - appName: atmo-dev
+            neonProject: lime_atmos/dev
+            namespace: supabase-atmo-dev
+            releaseName: atmo-dev
+            fullName: atmo-dev
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
           - appName: q-interior-dev
             neonProject: q-interior-dev
             namespace: supabase-q-interior-dev
@@ -30,11 +39,28 @@ spec:
             databaseStorage: 1Gi
             objectStorage: 1Gi
             studioStorage: 512Mi
+          # Production has no migrated OCI data yet; keep its database isolated.
+          - appName: q-interior-prod
+            neonProject: q-interior-dev/production
+            namespace: supabase-q-interior-prod
+            releaseName: q-interior-prod
+            fullName: q-interior-prod
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
           - appName: neople-game-analytics
             neonProject: neople-game-analytics
             namespace: supabase-neople-game-analytics
             releaseName: neople-game-analytics
             fullName: neople-game-analytics
+            databaseStorage: 1Gi
+            objectStorage: 1Gi
+            studioStorage: 512Mi
+          - appName: neople-game-analytics-dev
+            neonProject: neople-game-analytics/dev
+            namespace: supabase-neople-game-analytics-dev
+            releaseName: neople-game-analytics-dev
+            fullName: neople-game-analytics-dev
             databaseStorage: 1Gi
             objectStorage: 1Gi
             studioStorage: 512Mi

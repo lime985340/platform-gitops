@@ -14,9 +14,15 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: supabase
       server: https://kubernetes.default.svc
+    - namespace: supabase-atmo-dev
+      server: https://kubernetes.default.svc
     - namespace: supabase-q-interior-dev
       server: https://kubernetes.default.svc
+    - namespace: supabase-q-interior-prod
+      server: https://kubernetes.default.svc
     - namespace: supabase-neople-game-analytics
+      server: https://kubernetes.default.svc
+    - namespace: supabase-neople-game-analytics-dev
       server: https://kubernetes.default.svc
     - namespace: supabase-nyc-taxi
       server: https://kubernetes.default.svc

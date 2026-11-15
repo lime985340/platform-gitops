@@ -25,6 +25,9 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: q-interior-web-*
       server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'

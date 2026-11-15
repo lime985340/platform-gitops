@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: atmo-api-dev
+  labels:
+    app.kubernetes.io/name: atmo-api
+    app.kubernetes.io/component: dev-ingress
+    app.kubernetes.io/part-of: atmo
+spec:
+  routes:
+    - match: "PathPrefix(`/dev/atmo/api`)"
+      kind: Rule
+      priority: 100
+      middlewares:
+        - name: atmo-strip-prefix-dev
+      services:
+        - name: atmo-api
+          port: 80

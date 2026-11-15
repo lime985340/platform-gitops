@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: q-interior-api-prod
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: q-interior-api-prod-q-interior-strip-prefix@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /saerom/api
+            pathType: Prefix
+            backend:
+              service:
+                name: q-interior-api
+                port:
+                  number: 80

@@ -1,0 +1,118 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: graphdb
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: platform
+  sources:
+    - repoURL: https://maven.ontotext.com/repository/helm-public/
+      chart: graphdb
+      targetRevision: 12.5.0
+      helm:
+        releaseName: graphdb
+        values: |
+          # The OCI Osaka cluster uses an independent GraphDB instance. Enable
+          # GraphDB security after the SealedSecret contract is provisioned.
+          replicas: 1
+
+          # Standalone GraphDB does not create a cluster proxy. Disable the
+          # scale-cluster hook, which is only needed for multi-node clusters.
+          # The cluster can start without the Secret, but GraphDB writes
+          # remain unavailable until graphdb-license is populated.
+          license:
+            existingSecret: graphdb-license
+            optional: true
+
+          configuration:
+            externalUrl: http://graphdb.graphdb.svc.cluster.local/
+
+          cluster:
+            jobs:
+              scaleCluster:
+                enabled: false
+
+          security:
+            enabled: false
+
+          service:
+            enabled: true
+            type: ClusterIP
+
+          ingress:
+            enabled: false
+
+          persistence:
+            enabled: true
+            volumeClaimTemplate:
+              name: storage
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: local-path
+                resources:
+                  requests:
+                    storage: 5Gi
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 2Gi
+            limits:
+              memory: 2Gi
+
+          podDisruptionBudget:
+            enabled: false
+
+          repositories:
+            existingConfigmap: graphdb-repositories
+
+          extraObjects:
+            - apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: graphdb-repositories
+                labels:
+                  app.kubernetes.io/part-of: ontology-asal-agent
+              data:
+                asal-agent.ttl: |-
+                  @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+                  @prefix rep: <http://www.openrdf.org/config/repository#>.
+                  @prefix sr: <http://www.openrdf.org/config/repository/sail#>.
+                  @prefix sail: <http://www.openrdf.org/config/sail#>.
+                  @prefix graphdb: <http://www.ontotext.com/config/graphdb#>.
+
+                  [] a rep:Repository ;
+                     rep:repositoryID "asal-agent" ;
+                     rdfs:label "Ontology ASAL Agent" ;
+                     rep:repositoryImpl [
+                       rep:repositoryType "graphdb:SailRepository" ;
+                       sr:sailImpl [
+                         sail:sailType "graphdb:Sail" ;
+                         graphdb:base-URL "https://example.org/" ;
+                         graphdb:repository-type "file-repository" ;
+                         graphdb:ruleset "empty" ;
+                         graphdb:storage-folder "storage" ;
+                         graphdb:enable-context-index "true" ;
+                         graphdb:enablePredicateList "true" ;
+                         graphdb:enable-literal-index "true" ;
+                         graphdb:in-memory-literal-properties "true"
+                       ]
+                     ] .
+
+    - repoURL: https://github.com/lime985340/platform-gitops.git
+      targetRevision: refs/heads/main
+      path: clusters/oci-osaka/platform/graphdb
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: graphdb
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

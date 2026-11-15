@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ontology-asal-agent-api-prod
+labels:
+  - pairs:
+      app.kubernetes.io/instance: ontology-asal-agent-api-prod
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/name: ontology-asal-agent
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../../resources
+  - ingress.yaml
+  - sealed-secrets.yaml
+images:
+  - name: ghcr.io/lime985340/ontology-asal-agent-api
+    newName: ghcr.io/lime985340/ontology-asal-agent-api
+    newTag: oci-prod-v0.1.0
+configMapGenerator:
+  - name: ontology-asal-agent-config
+    literals:
+      - LLM_PROVIDER=codex_proxy
+      - LLM_BASE_URL=http://cli-proxy-api.cli-proxy-api-prod.svc.cluster.local:8317/v1
+      - LLM_MODEL=gpt-5.6-luna
+      - ONTOLOGY_SOURCE=triplestore
+      - TRIPLESTORE_QUERY_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent
+      - TRIPLESTORE_UPDATE_URL=http://graphdb.graphdb.svc.cluster.local:7200/repositories/asal-agent/statements
+      - TRIPLESTORE_ONTOLOGY_GRAPH=https://example.org/asal-agent/graph/ontology
+      - TRIPLESTORE_SHAPES_GRAPH=https://example.org/asal-agent/graph/shapes
+      - TRIPLESTORE_EX_NAMESPACE=https://example.org/asal-agent#
+      - TRIPLESTORE_TIMEOUT_SECONDS=30
+      - TRIPLESTORE_ALLOW_LOCAL_FALLBACK=false
+      - NOTIFICATION_GATEWAY=local
+      - NOTIFICATION_WEBHOOK_URL=
+      - NOTIFICATION_TIMEOUT_SECONDS=30
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"

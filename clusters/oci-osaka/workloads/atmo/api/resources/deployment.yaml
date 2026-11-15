@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atmo-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atmo-api
+  template:
+    metadata:
+      annotations:
+        secret.reloader.stakater.com/reload: "atmo-db-secret,atmo-jwt-secret,atmo-oauth-secret,atmo-publicdata-secret,ghcr-regcred"
+      labels:
+        app: atmo-api
+        app.kubernetes.io/name: atmo-api
+        app.kubernetes.io/component: api
+    spec:
+      containers:
+        - name: atmo-api
+          image: ghcr.io/lime985340/atmo-api
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          ports:
+            - containerPort: 8080
+
+          env:
+            # configtree를 루트 한 번만 import (B 방식 핵심)
+            - name: SPRING_CONFIG_IMPORT
+              value: "optional:configtree:/etc/secrets/"
+
+            # IPv4 우선(IPv6 우선 시도로 인한 NoRouteToHost 방지)
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
+
+            # Bound database connections per pod instead of keeping Hikari's default
+            # pool of 10 (and 10 minimum idle connections) open.
+            - name: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+              value: "3"
+            - name: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+              value: "0"
+            - name: SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT
+              value: "60000"
+            - name: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
+              value: "1800000"
+
+            # Production exposes /atmo/api; the dev overlay exposes
+            # /dev/atmo/api and overrides this cookie path accordingly.
+            - name: APP_AUTH_REFRESH_COOKIE_PATH
+              value: "/atmo/api/v1/auth/refresh"
+
+          volumeMounts:
+            - name: app-secrets
+              mountPath: /etc/secrets
+              readOnly: true
+
+      volumes:
+        - name: app-secrets
+          projected:
+            sources:
+              # DB
+              - secret:
+                  name: atmo-db-secret
+                  items:
+                    - key: SPRING_DATASOURCE_URL
+                      path: spring/datasource/url
+                    - key: SPRING_DATASOURCE_USERNAME
+                      path: spring/datasource/username
+                    - key: SPRING_DATASOURCE_PASSWORD
+                      path: spring/datasource/password
+                    - key: SPRING_REDIS_HOST
+                      path: spring/redis/host
+                    - key: SPRING_REDIS_PORT
+                      path: spring/redis/port
+
+              # JWT
+              - secret:
+                  name: atmo-jwt-secret
+                  items:
+                    - key: JWT_ACCESS_SECRET
+                      path: app/jwt/access-secret
+                    - key: JWT_REFRESH_SECRET
+                      path: app/jwt/refresh-secret
+                    - key: JWT_ACCESS_TTL_SECONDS
+                      path: app/jwt/access-ttl-seconds
+                    - key: JWT_REFRESH_TTL_SECONDS
+                      path: app/jwt/refresh-ttl-seconds
+
+              # OAuth (Kakao / Google / Naver)
+              - secret:
+                  name: atmo-oauth-secret
+                  items:
+                    - key: KAKAO_CLIENT_ID
+                      path: app/oauth/providers/kakao/client-id
+                    - key: KAKAO_CLIENT_SECRET
+                      path: app/oauth/providers/kakao/client-secret
+                    - key: KAKAO_REDIRECT_URI
+                      path: app/oauth/providers/kakao/redirect-uri
+                    - key: KAKAO_AUTH_URI
+                      path: app/oauth/providers/kakao/auth-uri
+                    - key: KAKAO_TOKEN_URI
+                      path: app/oauth/providers/kakao/token-uri
+                    - key: KAKAO_USERINFO_URI
+                      path: app/oauth/providers/kakao/userinfo-uri
+                    - key: KAKAO_SCOPE
+                      path: app/oauth/providers/kakao/scope
+
+                    - key: GOOGLE_CLIENT_ID
+                      path: app/oauth/providers/google/client-id
+                    - key: GOOGLE_CLIENT_SECRET
+                      path: app/oauth/providers/google/client-secret
+                    - key: GOOGLE_REDIRECT_URI
+                      path: app/oauth/providers/google/redirect-uri
+                    - key: GOOGLE_AUTH_URI
+                      path: app/oauth/providers/google/auth-uri
+                    - key: GOOGLE_TOKEN_URI
+                      path: app/oauth/providers/google/token-uri
+                    - key: GOOGLE_USERINFO_URI
+                      path: app/oauth/providers/google/userinfo-uri
+                    - key: GOOGLE_SCOPE
+                      path: app/oauth/providers/google/scope
+
+                    - key: NAVER_CLIENT_ID
+                      path: app/oauth/providers/naver/client-id
+                    - key: NAVER_CLIENT_SECRET
+                      path: app/oauth/providers/naver/client-secret
+                    - key: NAVER_REDIRECT_URI
+                      path: app/oauth/providers/naver/redirect-uri
+                    - key: NAVER_AUTH_URI
+                      path: app/oauth/providers/naver/auth-uri
+                    - key: NAVER_TOKEN_URI
+                      path: app/oauth/providers/naver/token-uri
+                    - key: NAVER_USERINFO_URI
+                      path: app/oauth/providers/naver/userinfo-uri
+                    - key: NAVER_SCOPE
+                      path: app/oauth/providers/naver/scope
+
+              # Public Data (공공데이터 서비스키)
+              - secret:
+                  name: atmo-publicdata-secret
+                  items:
+                    - key: PUBLIC_SERVICE_KEY
+                      path: app/external/publicdata/service-key

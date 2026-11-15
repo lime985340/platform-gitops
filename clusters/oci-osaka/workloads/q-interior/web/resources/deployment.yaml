@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: q-interior-web
+spec:
+  replicas: 0
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: q-interior-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: q-interior-web
+        app.kubernetes.io/component: web
+      annotations:
+        secret.reloader.stakater.com/reload: "ghcr-regcred"
+    spec:
+      imagePullSecrets:
+        - name: ghcr-regcred
+      containers:
+        - name: q-interior-web
+          image: ghcr.io/lime985340/q-interior-client
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10

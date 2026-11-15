@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: atmo-api-dev
+labels:
+  - pairs:
+      app.kubernetes.io/instance: atmo-api-dev
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/name: atmo-api
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../../resources
+  - sealed-secrets.yaml
+patches:
+  - path: patches/patch-public-cache.yaml
+  - path: patches/patch-api-dev-refresh-cookie.yaml
+  - target:
+      group: batch
+      version: v1
+      kind: CronJob
+    patch: |-
+      - op: add
+        path: /spec/suspend
+        value: true
+images:
+  - name: ghcr.io/lime985340/atmo-api
+    newName: ghcr.io/lime985340/atmo-api
+    newTag: 3d0b3e4e6f706eee3fc76296f11aaa42692bf223

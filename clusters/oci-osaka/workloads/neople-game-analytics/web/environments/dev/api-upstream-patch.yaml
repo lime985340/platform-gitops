@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neople-game-analytics-web
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          env:
+            - name: API_UPSTREAM
+              value: neople-game-analytics-api.neople-game-analytics-api-dev.svc.cluster.local

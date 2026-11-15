@@ -48,7 +48,7 @@ the other platform components or workloads.
 
 ## OCI project deployments
 
-The ApplicationSet maps the six Neon projects to separate Supabase
+The ApplicationSet maps the four active Neon projects to separate Supabase
 Applications:
 
 | Neon project | Argo CD application | Namespace |
@@ -57,8 +57,6 @@ Applications:
 | `q-interior-dev` | `q-interior-dev` | `supabase-q-interior-dev` |
 | `neople-game-analytics` | `neople-game-analytics` | `supabase-neople-game-analytics` |
 | `nyc_taxi` | `nyc-taxi` | `supabase-nyc-taxi` |
-| `lime_game` | `lime-game` | `supabase-lime-game` |
-| `lime_mimir` | `lime-mimir` | `supabase-lime-mimir` |
 
 Each stack has its own Postgres service and Secrets. The chart's internal
 database name is `postgres`; project names are represented by the Argo CD

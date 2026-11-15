@@ -13,6 +13,7 @@ labels:
 resources:
   - ../../resources
   - sealed-secrets.yaml
+  - database-bootstrap.yaml
 patches:
   - target:
       group: batch

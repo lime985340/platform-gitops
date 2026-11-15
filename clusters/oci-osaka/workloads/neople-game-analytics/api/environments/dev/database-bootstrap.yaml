@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neople-game-analytics-api-db-bootstrap
+data:
+  initialize.py: |
+    import json
+    import os
+    import subprocess
+    from pathlib import Path
+
+    import psycopg
+    from psycopg.types.json import Jsonb
+
+    database_url = os.environ.get("DATABASE_URL", "").strip()
+    if not database_url:
+        raise SystemExit("DATABASE_URL is not configured")
+
+    dashboard = Path("/tmp/neople-dashboard.json")
+    subprocess.run(
+        ["python", "-m", "src.web_export", "--output", str(dashboard)],
+        cwd="/app",
+        check=True,
+    )
+
+    def apply_sql_file(connection, path):
+        statement = []
+        for line in path.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("--"):
+                continue
+            statement.append(line)
+            if stripped.endswith(";"):
+                connection.execute("\n".join(statement).removesuffix(";"))
+                statement = []
+        if statement:
+            connection.execute("\n".join(statement))
+
+    with psycopg.connect(database_url) as connection:
+        apply_sql_file(connection, Path("/app/sql/01_schema.sql"))
+        apply_sql_file(connection, Path("/app/sql/03_views.sql"))
+        has_snapshot = connection.execute(
+            "SELECT EXISTS (SELECT 1 FROM neople.dashboard_snapshots)"
+        ).fetchone()[0]
+        if not has_snapshot:
+            payload = json.loads(dashboard.read_text(encoding="utf-8"))
+            connection.execute(
+                "INSERT INTO neople.dashboard_snapshots (payload) VALUES (%s)",
+                (Jsonb(payload),),
+            )
+    print("Neople dev schema initialized; snapshot inserted only when empty")
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: neople-game-analytics-api-db-bootstrap
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 300
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: ghcr-regcred
+      containers:
+        - name: initialize
+          image: ghcr.io/lime985340/neople-game-analytics-api:dev
+          imagePullPolicy: IfNotPresent
+          command: ["python", "/bootstrap/initialize.py"]
+          envFrom:
+            - secretRef:
+                name: neople-game-analytics-api-db-secret
+          volumeMounts:
+            - name: bootstrap
+              mountPath: /bootstrap
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: bootstrap
+          configMap:
+            name: neople-game-analytics-api-db-bootstrap

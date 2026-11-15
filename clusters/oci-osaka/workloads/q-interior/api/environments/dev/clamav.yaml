@@ -29,7 +29,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: clamd
-          image: clamav/clamav:1.5.4
+          image: clamav/clamav:1.5.4-debian
           imagePullPolicy: IfNotPresent
           ports:
             - name: clamd

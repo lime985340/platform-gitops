@@ -15,8 +15,6 @@ resources:
   - ingress.yaml
   - redirect-ingress.yaml
   - sealed-secrets.yaml
-  - ingress.yaml
-  - redirect-ingress.yaml
 images:
   - name: ghcr.io/lime985340/ontology-asal-agent-web
     newName: ghcr.io/lime985340/ontology-asal-agent-web

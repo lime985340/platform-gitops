@@ -14,7 +14,6 @@ resources:
   - ../../resources
   - ingress.yaml
   - sealed-secrets.yaml
-  - ingress.yaml
 images:
   - name: ghcr.io/lime985340/ontology-asal-agent-api
     newName: ghcr.io/lime985340/ontology-asal-agent-api

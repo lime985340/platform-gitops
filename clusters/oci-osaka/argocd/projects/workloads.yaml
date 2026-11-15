@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: oci-workloads
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  description: Application workloads running beside Supabase in OCI Osaka.
+  sourceRepos:
+    - https://github.com/lime985340/platform-gitops.git
+    - registry-1.docker.io/bitnamicharts
+  destinations:
+    - namespace: redis
+      server: https://kubernetes.default.svc
+    - namespace: atmo-api-*
+      server: https://kubernetes.default.svc
+    - namespace: atmo-web-*
+      server: https://kubernetes.default.svc
+    - namespace: neople-game-analytics-api-*
+      server: https://kubernetes.default.svc
+    - namespace: neople-game-analytics-web-*
+      server: https://kubernetes.default.svc
+    - namespace: q-interior-api-*
+      server: https://kubernetes.default.svc
+    - namespace: q-interior-web-*
+      server: https://kubernetes.default.svc
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

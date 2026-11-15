@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: q-interior-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: q-interior-api
+          env:
+            - name: SAEROM_CLAMAV_HOST
+              value: q-interior-clamav.q-interior-api-dev.svc.cluster.local
+            - name: SAEROM_CLAMAV_PORT
+              value: "3310"
+            - name: SAEROM_PII_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: q-interior-upload-security
+                  key: SAEROM_PII_ENCRYPTION_KEY

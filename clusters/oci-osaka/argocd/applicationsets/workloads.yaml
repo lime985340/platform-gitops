@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workloads
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: https://github.com/lime985340/platform-gitops.git
+        revision: refs/heads/main
+        directories:
+          - path: clusters/oci-osaka/workloads/*/*/environments/*
+  template:
+    metadata:
+      name: '{{ index .path.segments 3 }}-{{ index .path.segments 4 }}-{{ index .path.segments 6 }}'
+    spec:
+      project: oci-workloads
+      source:
+        repoURL: https://github.com/lime985340/platform-gitops.git
+        targetRevision: refs/heads/main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 3 }}-{{ index .path.segments 4 }}-{{ index .path.segments 6 }}'
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jqPathExpressions:
+            - .spec.template.metadata.annotations["reloader.stakater.com/last-reloaded-from"]
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true

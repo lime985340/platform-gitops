@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: q-interior-api-dev
+labels:
+  - pairs:
+      app.kubernetes.io/instance: q-interior-api-dev
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/name: q-interior-api
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../../resources
+  - sealed-secrets.yaml
+  - attachment-security-sealed-secret.yaml
+  - clamav.yaml
+patches:
+  - path: attachment-security-patch.yaml
+  - path: session-cookie-path.yaml
+images:
+  - name: ghcr.io/lime985340/q-interior-api
+    newName: ghcr.io/lime985340/q-interior-api
+    newTag: oci-dev-64457e0aea49ae342a8d3a5c6905dde12069d3a3
+replicas:
+  - name: q-interior-api
+    count: 1

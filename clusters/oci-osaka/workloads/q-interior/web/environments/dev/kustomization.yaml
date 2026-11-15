@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: q-interior-web-dev
+labels:
+  - pairs:
+      app.kubernetes.io/instance: q-interior-web-dev
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/name: q-interior-web
+    includeSelectors: false
+    includeTemplates: true
+resources:
+  - ../../resources
+  - sealed-secrets.yaml
+images:
+  - name: ghcr.io/lime985340/q-interior-client
+    newName: ghcr.io/lime985340/q-interior-client
+    newTag: oci-dev-07c599834a86316b9dc733e5d55aa4f7bbe8fdfd
+replicas:
+  - name: q-interior-web
+    count: 1

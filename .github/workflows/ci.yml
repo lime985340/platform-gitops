@@ -16,10 +16,10 @@ jobs:
     container: alpine/k8s:1.31.4
     steps:
       - uses: actions/checkout@v4
-      - name: Render every on-prem Kustomize root
+      - name: Render every workload Kustomize root
         run: |
           set -eu
-          find clusters/onprem/workloads -name kustomization.yaml -exec sh -c '
+          find clusters/onprem/workloads clusters/oci-osaka/workloads -name kustomization.yaml -exec sh -c '
             for file do
               directory="$(dirname "$file")"
               echo "Rendering $directory"

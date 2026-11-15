@@ -4,8 +4,8 @@ set -eu
 
 ghcr_scope="${1:-dev}"
 case "$ghcr_scope" in
-  dev|all|q-interior-dev|q-interior-prod|atmo-api-dev|atmo-api-prod) ;;
-  *) echo "Usage: $0 [dev|all|q-interior-dev|q-interior-prod|atmo-api-dev|atmo-api-prod]" >&2; exit 2 ;;
+  dev|all|oci|q-interior-dev|q-interior-prod|atmo-api-dev|atmo-api-prod) ;;
+  *) echo "Usage: $0 [dev|all|oci|q-interior-dev|q-interior-prod|atmo-api-dev|atmo-api-prod]" >&2; exit 2 ;;
 esac
 
 : "${SEALED_SECRETS_CERT:?SEALED_SECRETS_CERT must point to the controller public certificate}"
@@ -41,7 +41,8 @@ unset GHCR_READ_USERNAME GHCR_READ_TOKEN auth
 seal_namespace() {
   workload_path="$1"
   namespace="$2"
-  output="clusters/onprem/workloads/$workload_path/environments/$environment/sealed-secrets.yaml"
+  cluster="${3:-onprem}"
+  output="clusters/$cluster/workloads/$workload_path/environments/$environment/sealed-secrets.yaml"
   plain_manifest="$tmp_dir/${namespace}-ghcr-regcred.yaml"
   sealed_manifest="$tmp_dir/${namespace}-ghcr-regcred-sealed.yaml"
   test -f "$output" || {
@@ -112,6 +113,16 @@ seal_atmo_api_environment() {
   seal_namespace atmo/api "atmo-api-$environment"
 }
 
+seal_oci_environment() {
+  environment="$1"
+  seal_namespace atmo/api "atmo-api-$environment" oci-osaka
+  seal_namespace atmo/web "atmo-web-$environment" oci-osaka
+  seal_namespace neople-game-analytics/api "neople-game-analytics-api-$environment" oci-osaka
+  seal_namespace neople-game-analytics/web "neople-game-analytics-web-$environment" oci-osaka
+  seal_namespace q-interior/api "q-interior-api-$environment" oci-osaka
+  seal_namespace q-interior/web "q-interior-web-$environment" oci-osaka
+}
+
 case "$ghcr_scope" in
   dev)
     seal_environment dev
@@ -131,6 +142,10 @@ case "$ghcr_scope" in
     ;;
   atmo-api-prod)
     seal_atmo_api_environment prod
+    ;;
+  oci)
+    seal_oci_environment dev
+    seal_oci_environment prod
     ;;
 esac
 

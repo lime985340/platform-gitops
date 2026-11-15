@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cli-proxy-api-config
+data:
+  config-base.yaml: |
+    host: 0.0.0.0
+    port: 8317
+    auth-dir: /root/.cli-proxy-api
+    remote-management:
+      allow-remote: false

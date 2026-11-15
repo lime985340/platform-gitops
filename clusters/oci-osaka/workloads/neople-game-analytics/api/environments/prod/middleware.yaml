@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: neople-api-strip-prefix
+spec:
+  stripPrefix:
+    # Keep the /api part so /neople/api/dashboard reaches FastAPI /api/dashboard.
+    prefixes:
+      - /neople

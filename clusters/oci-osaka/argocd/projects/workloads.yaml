@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
 spec:
-  description: Application workloads running beside Supabase in OCI Osaka.
+  description: Independent application workloads running in OCI Osaka.
   sourceRepos:
     - https://github.com/lime985340/platform-gitops.git
     - registry-1.docker.io/bitnamicharts
@@ -24,6 +24,12 @@ spec:
     - namespace: q-interior-api-*
       server: https://kubernetes.default.svc
     - namespace: q-interior-web-*
+      server: https://kubernetes.default.svc
+    - namespace: cli-proxy-api-*
+      server: https://kubernetes.default.svc
+    - namespace: ontology-asal-agent-api-*
+      server: https://kubernetes.default.svc
+    - namespace: ontology-asal-agent-web-*
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ''

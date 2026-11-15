@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ontology-asal-agent-web-add-slash
+spec:
+  redirectRegex:
+    regex: ^(https?://[^/]+/ontology-asal-agent)$
+    replacement: ${1}/
+    permanent: true

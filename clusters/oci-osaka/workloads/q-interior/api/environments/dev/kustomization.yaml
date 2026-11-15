@@ -12,6 +12,8 @@ labels:
     includeTemplates: true
 resources:
   - ../../resources
+  - ingress.yaml
+  - middleware.yaml
   - sealed-secrets.yaml
   - attachment-security-sealed-secret.yaml
   - clamav.yaml

@@ -12,6 +12,8 @@ labels:
     includeTemplates: true
 resources:
   - ../../resources
+  - ingress.yaml
+  - middleware.yaml
   - sealed-secrets.yaml
 patches:
   - path: api-upstream-patch.yaml

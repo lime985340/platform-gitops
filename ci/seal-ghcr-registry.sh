@@ -119,6 +119,8 @@ seal_oci_environment() {
   seal_namespace atmo/web "atmo-web-$environment" oci-osaka
   seal_namespace neople-game-analytics/api "neople-game-analytics-api-$environment" oci-osaka
   seal_namespace neople-game-analytics/web "neople-game-analytics-web-$environment" oci-osaka
+  seal_namespace ontology-asal-agent/api "ontology-asal-agent-api-$environment" oci-osaka
+  seal_namespace ontology-asal-agent/web "ontology-asal-agent-web-$environment" oci-osaka
   seal_namespace q-interior/api "q-interior-api-$environment" oci-osaka
   seal_namespace q-interior/web "q-interior-web-$environment" oci-osaka
 }

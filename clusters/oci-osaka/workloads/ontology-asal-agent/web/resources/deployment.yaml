@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ontology-asal-agent-web
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ontology-asal-agent-web
+  template:
+    metadata:
+      labels:
+        app: ontology-asal-agent-web
+        app.kubernetes.io/name: ontology-asal-agent
+        app.kubernetes.io/component: web
+        app.kubernetes.io/part-of: ontology-asal-agent
+    spec:
+      imagePullSecrets:
+        - name: ghcr-regcred
+      containers:
+        - name: web
+          image: ghcr.io/lime985340/ontology-asal-agent-web
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

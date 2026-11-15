@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-quick-tunnel
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: oci-platform
+  source:
+    repoURL: https://github.com/lime985340/platform-gitops.git
+    targetRevision: refs/heads/main
+    path: clusters/oci-osaka/platform/networking/cloudflare-tunnel
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflared
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

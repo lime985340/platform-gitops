@@ -78,8 +78,11 @@ def main() -> int:
             if "linux/arm64" not in platforms:
                 raise ValueError("image does not publish linux/arm64")
             print(f"Verified {image}:{tag}: {', '.join(sorted(platforms))}")
-        except (HTTPError, URLError, ValueError, KeyError) as error:
-            print(f"Cannot verify {image}:{tag}: {error.__class__.__name__}", file=sys.stderr)
+        except HTTPError as error:
+            print(f"Cannot verify {image}:{tag}: GHCR HTTP {error.code}", file=sys.stderr)
+            return 1
+        except (URLError, ValueError, KeyError) as error:
+            print(f"Cannot verify {image}:{tag}: {error}", file=sys.stderr)
             return 1
 
     return 0

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-funnel
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  project: oci-tailscale
+  source:
+    repoURL: https://github.com/lime985340/platform-gitops.git
+    targetRevision: refs/heads/main
+    path: clusters/oci-osaka/platform/networking/tailscale-funnel
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

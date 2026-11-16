@@ -8,6 +8,8 @@ Cluster and Argo CD installation prerequisites are documented in
 [`docs/cluster-bootstrap.md`](docs/cluster-bootstrap.md).
 The Supabase deployments for the existing platform cluster and OCI Osaka K3s
 cluster are documented in [`docs/supabase.md`](docs/supabase.md).
+Tailscale Funnel for public OCI Osaka application routes is documented in
+[`docs/tailscale-funnel-oci-osaka.md`](docs/tailscale-funnel-oci-osaka.md).
 Sealed Secrets recovery is documented in
 [`docs/sealed-secrets-recovery.md`](docs/sealed-secrets-recovery.md).
 The Controller public certificate and GitLab variable setup are described in

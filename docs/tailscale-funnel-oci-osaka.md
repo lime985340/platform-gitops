@@ -27,7 +27,7 @@ custom-domain alias.
 
 ## Tailscale prerequisites
 
-1. MagicDNS is already enabled for `tail90ac67.ts.net`. HTTPS certificates are currently disabled and must be enabled for Tailscale Ingress. Tailscale warns that the tailnet DNS name and machine names used in certificates are published in the public Certificate Transparency ledger; the new `oci-web` name will therefore be publicly discoverable.
+1. MagicDNS and HTTPS certificates are enabled for `tail90ac67.ts.net`. Tailscale warns that the tailnet DNS name and machine names used in certificates are published in the public Certificate Transparency ledger; the new `oci-web` name will therefore be publicly discoverable.
 2. Create a dedicated OAuth client scoped to `tag:k8s-operator` with the
    Operator's required write permissions for Services, Devices, and Auth Keys.
 3. Add the tag ownership and Funnel permission to the tailnet policy. The

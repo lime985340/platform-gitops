@@ -49,11 +49,11 @@ custom-domain alias.
    Merge these entries into the existing policy without replacing its other
    rules. This grants Funnel eligibility to nodes carrying `tag:k8s`; keep
    that tag limited to the Operator-created ingress proxy nodes.
-4. Store a Secret Manager bundle named `tailscale-operator` in the project
-   selected by the repository's `GCP_PROJECT_ID` variable. The latest secret
-   version must contain a gzip tar archive with two regular files at its root:
-   `client_id` and `client_secret`. The GitHub Actions Workload Identity
-   service account needs `secretmanager.versions.access` on that secret.
+4. Store a Secret Manager secret named `tailscale-operator` in the project
+   selected by the repository's `GCP_PROJECT_ID` variable. Its latest version
+   must be a JSON object with non-empty string fields `client_id` and
+   `client_secret`. The GitHub Actions Workload Identity service account needs
+   `secretmanager.versions.access` on that secret.
 5. Run `Reseal workload secrets` from this feature branch with
    `secret_scope=tailscale-operator` and provide the OCI Osaka Sealed Secrets
    **public** certificate in `oci_sealed_secrets_cert`. The workflow reads the

@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: oci-tailscale
+  sources:
+    - repoURL: https://pkgs.tailscale.com/helmcharts
+      chart: tailscale-operator
+      targetRevision: 1.104.7
+      helm:
+        releaseName: tailscale-operator
+        values: |
+          installCRDs: true
+          operatorConfig:
+            hostname: oci-osaka-tailscale-operator
+            defaultTags:
+              - tag:k8s-operator
+          ingressClass:
+            enabled: true
+            name: tailscale
+    - repoURL: https://github.com/lime985340/platform-gitops.git
+      targetRevision: refs/heads/main
+      path: clusters/oci-osaka/platform/networking/tailscale-operator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tailscale
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

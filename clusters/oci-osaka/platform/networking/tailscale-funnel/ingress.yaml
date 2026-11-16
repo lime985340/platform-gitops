@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tailscale-funnel-oci-web
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: tailscale-funnel
+    app.kubernetes.io/component: public-ingress
+    app.kubernetes.io/part-of: platform
+  annotations:
+    tailscale.com/funnel: "true"
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - oci-web
+  rules:
+    - http:
+        paths:
+          - path: /atmo
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik
+                port:
+                  number: 80
+          - path: /saerom
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik
+                port:
+                  number: 80
+          - path: /neople
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik
+                port:
+                  number: 80
+          - path: /ontology-asal-agent
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik
+                port:
+                  number: 80

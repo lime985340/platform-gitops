@@ -6,6 +6,15 @@ set -eu
 : "${WORKLOAD:?WORKLOAD is required (api or web)}"
 : "${ENVIRONMENT:?ENVIRONMENT is required (dev or prod)}"
 : "${IMAGE_TAG:?IMAGE_TAG is required}"
+: "${CLUSTER:=onprem}"
+
+case "$CLUSTER" in
+  onprem|oci-osaka) ;;
+  *)
+    echo "CLUSTER must be onprem or oci-osaka" >&2
+    exit 1
+    ;;
+esac
 
 case "$APPLICATION" in
   atmo|neople-game-analytics|ontology-asal-agent|q-interior) ;;
@@ -38,7 +47,7 @@ case "$IMAGE_TAG" in
     ;;
 esac
 
-file="clusters/onprem/workloads/${APPLICATION}/${WORKLOAD}/environments/${ENVIRONMENT}/kustomization.yaml"
+file="clusters/${CLUSTER}/workloads/${APPLICATION}/${WORKLOAD}/environments/${ENVIRONMENT}/kustomization.yaml"
 test -f "$file" || {
   echo "Image configuration not found: $file" >&2
   exit 1

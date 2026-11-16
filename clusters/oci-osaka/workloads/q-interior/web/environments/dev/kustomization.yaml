@@ -22,3 +22,21 @@ images:
 replicas:
   - name: q-interior-web
     count: 1
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: q-interior-web
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: q-interior-web
+      spec:
+        strategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 0
+            maxUnavailable: 1

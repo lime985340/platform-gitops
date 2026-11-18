@@ -18,7 +18,7 @@ resources:
 images:
   - name: ghcr.io/lime985340/q-interior-client
     newName: ghcr.io/lime985340/q-interior-client
-    newTag: a5328b6bb5ad7f0ad61f962402bf8602b8c9d86d
+    newTag: b57765e757c82f571bfdd42d3e3f30943f46c502
 replicas:
   - name: q-interior-web
     count: 1

@@ -8,6 +8,10 @@ spec:
       containers:
         - name: q-interior-api
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: neon-demo
+            - name: SPRING_APPLICATION_JSON
+              value: '{"saerom":{"demo-data":{"enabled":true}}}'
             - name: Q_INTERIOR_ATTACHMENTS_ENABLED
               value: "true"
             - name: SAEROM_CLAMAV_HOST

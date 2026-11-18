@@ -8,6 +8,8 @@ spec:
       containers:
         - name: q-interior-api
           env:
+            - name: Q_INTERIOR_ATTACHMENTS_ENABLED
+              value: "true"
             - name: SAEROM_CLAMAV_HOST
               value: q-interior-clamav.q-interior-api-dev.svc.cluster.local
             - name: SAEROM_CLAMAV_PORT

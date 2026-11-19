@@ -20,6 +20,7 @@ resources:
 patches:
   - path: attachment-security-patch.yaml
   - path: session-cookie-path.yaml
+  - path: server-port.yaml
 images:
   - name: ghcr.io/lime985340/q-interior-api
     newName: ghcr.io/lime985340/q-interior-api

@@ -27,4 +27,4 @@ patches:
 images:
   - name: ghcr.io/lime985340/atmo-api
     newName: ghcr.io/lime985340/atmo-api
-    newTag: oci-prod-v0.3.5
+    newTag: oci-prod-v0.3.6

@@ -18,4 +18,4 @@ resources:
 images:
 - name: ghcr.io/lime985340/atmo-api
   newName: ghcr.io/lime985340/atmo-api
-  newTag: v0.3.5
+  newTag: v0.3.6

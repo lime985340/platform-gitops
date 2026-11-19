@@ -4,6 +4,9 @@ metadata:
   name: q-interior-api
 spec:
   template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2026-11-19T09:00:00+09:00"
     spec:
       containers:
         - name: q-interior-api

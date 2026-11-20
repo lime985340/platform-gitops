@@ -24,7 +24,27 @@ patches:
       - op: add
         path: /spec/suspend
         value: false
+  - target:
+      version: v1
+      kind: ConfigMap
+      name: neople-game-analytics-api-config
+    patch: |-
+      - op: replace
+        path: /data/DNF_FAME_BAND_COUNT
+        value: "8"
+      - op: replace
+        path: /data/DNF_SAMPLE_LIMIT
+        value: "200"
+      - op: add
+        path: /data/DNF_DETAIL_LIMIT
+        value: "100"
+      - op: add
+        path: /data/CYPHERS_TOP_PLAYER_LIMIT
+        value: "100"
+      - op: replace
+        path: /data/CYPHERS_MATCH_DETAIL_LIMIT
+        value: "1000"
 images:
   - name: ghcr.io/lime985340/neople-game-analytics-api
     newName: ghcr.io/lime985340/neople-game-analytics-api
-    newTag: 0526f3da3830e6059c71865d5bfca6946f675fe4
+    newTag: b836887b2d2869a43a0557e93cccc6bd1ecb1260

@@ -20,4 +20,4 @@ patches:
 images:
   - name: ghcr.io/lime985340/neople-game-analytics-web
     newName: ghcr.io/lime985340/neople-game-analytics-web
-    newTag: oci-prod-v0.2.2
+    newTag: 47103afca1faf1eeb805a42805936c22929848b8

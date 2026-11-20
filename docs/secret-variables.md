@@ -313,8 +313,12 @@ DATABASE_URL=postgresql://<user>:<password>@<pooled-host>/<database>?sslmode=req
 
 다음 값은 Secret File 변수에 넣지 않습니다.
 
-- `DNF_SERVERS`, `DNF_FAME_BANDS`, `DNF_SAMPLE_LIMIT`, `DNF_AUCTION_ITEM_LIMIT`:
-  API ConfigMap의 수집 설정
+- `DNF_SERVERS`, `DNF_FAME_BAND_COUNT`, `DNF_FAME_BANDS`(선택적 구간 재정의),
+  `DNF_SAMPLE_LIMIT`, `DNF_AUCTION_ITEM_LIMIT`: API ConfigMap의 수집 설정
+
+기본적으로 Worker는 네오플 API의 현재 최고 명성을 조회해 최신 2,000점 구간
+세 개를 자동 수집합니다. 특정 구간으로 고정해야 할 때만
+`DNF_FAME_BANDS`를 직접 설정합니다.
 - `CYPHERS_*`, `PUBLIC_DASHBOARD_PATH`, `CORS_ALLOW_ORIGINS`: 비밀이 아닌
   애플리케이션 설정
 

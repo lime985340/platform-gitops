@@ -26,4 +26,4 @@ patches:
 images:
   - name: ghcr.io/lime985340/neople-game-analytics-api
     newName: ghcr.io/lime985340/neople-game-analytics-api
-    newTag: b3353703d628da788dd8bdcfbac352afb170fdfc
+    newTag: 0526f3da3830e6059c71865d5bfca6946f675fe4

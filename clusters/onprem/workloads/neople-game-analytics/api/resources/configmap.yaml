@@ -4,7 +4,7 @@ metadata:
   name: neople-game-analytics-api-config
 data:
   DNF_SERVERS: all
-  DNF_FAME_BANDS: 50000:52000,52000:54000,54000:56000
+  DNF_FAME_BAND_COUNT: "3"
   DNF_SAMPLE_LIMIT: "30"
   DNF_AUCTION_ITEM_LIMIT: "30"
   CYPHERS_RANKING_OFFSET: "0"

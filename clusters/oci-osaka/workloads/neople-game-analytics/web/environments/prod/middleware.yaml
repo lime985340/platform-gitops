@@ -13,6 +13,6 @@ metadata:
   name: neople-canonical-path
 spec:
   redirectRegex:
-    regex: '^(https?://[^/]+/neople)/(\?.*)?$'
-    replacement: '${1}${2}'
+    regex: '^https?://([^/]+)/neople/(\?.*)?$'
+    replacement: 'https://${1}/neople${2}'
     permanent: true

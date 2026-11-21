@@ -13,6 +13,6 @@ metadata:
   name: saerom-canonical-path
 spec:
   redirectRegex:
-    regex: '^(https?://[^/]+/saerom)/(\?.*)?$'
-    replacement: '${1}${2}'
+    regex: '^https?://([^/]+)/saerom/(\?.*)?$'
+    replacement: 'https://${1}/saerom${2}'
     permanent: true

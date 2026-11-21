@@ -13,6 +13,6 @@ metadata:
   name: atmo-canonical-path
 spec:
   redirectRegex:
-    regex: '^(https?://[^/]+/atmo)/(\?.*)?$'
-    replacement: '${1}${2}'
+    regex: '^https?://([^/]+)/atmo/(\?.*)?$'
+    replacement: 'https://${1}/atmo${2}'
     permanent: true

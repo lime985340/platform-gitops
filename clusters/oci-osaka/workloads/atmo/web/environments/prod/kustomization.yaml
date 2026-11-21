@@ -18,4 +18,4 @@ resources:
 images:
   - name: ghcr.io/lime985340/atmo-web
     newName: ghcr.io/lime985340/atmo-web
-    newTag: oci-prod-v0.2.3
+    newTag: oci-prod-favicon-895ee8c6b92b

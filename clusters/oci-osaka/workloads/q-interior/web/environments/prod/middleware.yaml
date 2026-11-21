@@ -6,3 +6,13 @@ spec:
   stripPrefix:
     prefixes:
       - /saerom
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: saerom-canonical-path
+spec:
+  redirectRegex:
+    regex: '^(https?://[^/]+/saerom)/(\?.*)?$'
+    replacement: '${1}${2}'
+    permanent: true

@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: q-interior-web-prod
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: q-interior-web-prod-q-interior-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: q-interior-web-prod-saerom-canonical-path@kubernetescrd,q-interior-web-prod-q-interior-strip-prefix@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:

@@ -6,3 +6,13 @@ spec:
   stripPrefix:
     prefixes:
       - /atmo
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: atmo-canonical-path
+spec:
+  redirectRegex:
+    regex: '^https?://([^/]+)/atmo/(\?.*)?$'
+    replacement: 'https://${1}/atmo${2}'
+    permanent: true

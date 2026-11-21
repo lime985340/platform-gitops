@@ -6,3 +6,13 @@ spec:
   stripPrefix:
     prefixes:
       - /neople
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: neople-canonical-path
+spec:
+  redirectRegex:
+    regex: '^https?://([^/]+)/neople/(\?.*)?$'
+    replacement: 'https://${1}/neople${2}'
+    permanent: true

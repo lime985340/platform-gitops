@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: q-interior-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: q-interior-api
+          env:
+            - name: SAEROM_DEMO_DATA_ENABLED
+              value: "true"

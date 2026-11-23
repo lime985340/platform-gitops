@@ -19,6 +19,7 @@ resources:
   - clamav.yaml
 patches:
   - path: attachment-security-patch.yaml
+  - path: demo-data-patch.yaml
   - path: session-cookie-path.yaml
   - path: server-port.yaml
 images:

@@ -16,10 +16,10 @@ jobs:
     container: alpine/k8s:1.31.4
     steps:
       - uses: actions/checkout@v4
-      - name: Render every workload Kustomize root
+      - name: Render every Kustomize root
         run: |
           set -eu
-          find clusters/onprem/workloads clusters/oci-osaka/workloads -name kustomization.yaml -exec sh -c '
+          find clusters/onprem/workloads clusters/oci-osaka/workloads clusters/onprem/platform clusters/oci-osaka/platform -name kustomization.yaml -exec sh -c '
             for file do
               directory="$(dirname "$file")"
               echo "Rendering $directory"
@@ -34,7 +34,7 @@ jobs:
       options: --entrypoint=""
     steps:
       - uses: actions/checkout@v4
-      - run: /kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.31.0 -summary clusters/onprem/platform clusters/onprem/argocd clusters/oci-osaka/argocd bootstrap
+      - run: /kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.31.0 -summary clusters/onprem/platform clusters/oci-osaka/platform clusters/onprem/argocd clusters/oci-osaka/argocd bootstrap
 
   validate-secret-contract:
     runs-on: ubuntu-latest

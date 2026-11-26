@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: forgejo
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: oci-platform
+  sources:
+    - repoURL: code.forgejo.org/forgejo-helm
+      chart: forgejo
+      targetRevision: 17.3.3
+      helm:
+        releaseName: forgejo
+        values: |
+          replicaCount: 1
+
+          persistence:
+            enabled: true
+            storageClass: local-path
+            size: 5Gi
+            accessModes:
+              - ReadWriteOnce
+
+          service:
+            http:
+              type: ClusterIP
+              port: 3000
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+
+          gitea:
+            admin:
+              username: forgejo-admin
+              email: forgejo-admin@local.invalid
+              existingSecret: forgejo-admin
+              passwordMode: initialOnlyRequireReset
+            config:
+              server:
+                DOMAIN: forgejo.tail90ac67.ts.net
+                ROOT_URL: https://forgejo.tail90ac67.ts.net/
+                DISABLE_SSH: true
+              service:
+                DISABLE_REGISTRATION: true
+              repository:
+                DEFAULT_PRIVATE: private
+              actions:
+                ENABLED: true
+                DEFAULT_ACTIONS_URL: https://data.forgejo.org
+    - repoURL: https://github.com/lime985340/platform-gitops.git
+      targetRevision: refs/heads/main
+      path: clusters/oci-osaka/platform/forgejo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: forgejo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

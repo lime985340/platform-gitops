@@ -10,12 +10,15 @@ spec:
   sourceRepos:
     - https://github.com/lime985340/platform-gitops.git
     - https://maven.ontotext.com/repository/helm-public/
+    - code.forgejo.org/forgejo-helm
   destinations:
     - namespace: argocd
       server: https://kubernetes.default.svc
     - namespace: cloudflared
       server: https://kubernetes.default.svc
     - namespace: graphdb
+      server: https://kubernetes.default.svc
+    - namespace: forgejo
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ""

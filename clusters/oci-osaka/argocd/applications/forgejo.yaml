@@ -40,7 +40,6 @@ spec:
             admin:
               username: forgejo-admin
               email: forgejo-admin@local.invalid
-              existingSecret: forgejo-admin
               passwordMode: initialOnlyRequireReset
             config:
               server:
